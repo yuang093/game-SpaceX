@@ -1793,7 +1793,12 @@ function updatePhysics() {
         rocket.vx -= Math.sin(rocket.angle) * thrust;
         rocket.vy -= Math.cos(rocket.angle) * thrust;
 
-        rocket.fuel -= PHYSICS.FUEL_CONSUMPTION;
+        // 燃料消耗：外太空無重力阻力，燃料效率更高
+        // 高度越高，消耗越低（最低 30% 基礎消耗）
+        const altitude = GROUND_Y - rocket.y; // 世界高度
+        const spaceEfficiency = 0.3 + 0.7 / (1 + altitude / 3000);
+        const adjustedFuelConsumption = PHYSICS.FUEL_CONSUMPTION * spaceEfficiency;
+        rocket.fuel -= adjustedFuelConsumption;
         if (rocket.fuel < 0) rocket.fuel = 0;
     }
 
@@ -1801,6 +1806,11 @@ function updatePhysics() {
     if (rocket.thrustingSide !== 0) {
         rocket.angularVelocity += rocket.thrustingSide * PHYSICS.ROTATION_SPEED;
         rocket.vx += rocket.thrustingSide * PHYSICS.SIDE_THRUST;
+        // 側向推力也消耗燃料（但較少）
+        const altitude = GROUND_Y - rocket.y;
+        const spaceEfficiency = 0.3 + 0.7 / (1 + altitude / 3000);
+        rocket.fuel -= PHYSICS.FUEL_CONSUMPTION * 0.3 * spaceEfficiency;
+        if (rocket.fuel < 0) rocket.fuel = 0;
     }
 
     // 阻尼

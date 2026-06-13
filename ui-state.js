@@ -281,6 +281,7 @@ const CONFIG = {
     stations: [
         {
             id: 'leo', name: '近地軌道站 LEO', altitude: 400, targetAltitude: 2200, difficulty: 1,
+            fuelRequired: 30,  // 燃料需求（真實比例：400km 只需要很少燃料）
             needs: ['食物', '水', '醫療物資'], supply: ['太陽能板', '零件'],
             reward: { base: 1000, multiplier: 1.0 },
             unlockReputation: 0,
@@ -290,6 +291,7 @@ const CONFIG = {
         },
         {
             id: 'polar', name: '極地觀測站', altitude: 600, targetAltitude: 2800, difficulty: 2,
+            fuelRequired: 35,
             needs: ['科研設備', '食物'], supply: ['觀測數據'],
             reward: { base: 1500, multiplier: 1.3 },
             unlockReputation: 50,
@@ -299,6 +301,7 @@ const CONFIG = {
         },
         {
             id: 'solar_satellite', name: '太陽能衛星矩陣', altitude: 1500000, targetAltitude: 3600, difficulty: 4,
+            fuelRequired: 60,
             needs: ['太陽能板', '維修零件', '通訊設備'], supply: ['清潔能源', '軌道數據'],
             reward: { base: 5000, multiplier: 3.5 },
             unlockReputation: 150,
@@ -308,6 +311,7 @@ const CONFIG = {
         },
         {
             id: 'gateway', name: '月球門戶 Gateway', altitude: 384000, targetAltitude: 4500, difficulty: 6,
+            fuelRequired: 150,
             needs: ['科研設備', '太陽能板', '氧氣', '食物'], supply: ['中繼數據', '軌道科研'],
             reward: { base: 8000, multiplier: 4.0 },
             unlockReputation: 300,
@@ -317,6 +321,7 @@ const CONFIG = {
         },
         {
             id: 'moon', name: '月球前哨站', altitude: 384000, targetAltitude: 5200, difficulty: 5,
+            fuelRequired: 150,  // 月球 38.4 萬公里，所需燃料約 LEO 的 5 倍
             needs: ['重型設備', '食物', '人員'], supply: ['月岩樣本', '氦-3'],
             reward: { base: 5000, multiplier: 3.0 },
             unlockReputation: 200,
@@ -326,6 +331,7 @@ const CONFIG = {
         },
         {
             id: 'lagrange', name: '拉格朗日點站', altitude: 1500000, targetAltitude: 5800, difficulty: 7,
+            fuelRequired: 70,
             needs: ['科研設備', '太陽能板', '食物'], supply: ['稀有元素'],
             reward: { base: 12000, multiplier: 5.5 },
             unlockReputation: 500,
@@ -335,6 +341,7 @@ const CONFIG = {
         },
         {
             id: 'phobos', name: '火衛一中繼站 Phobos', altitude: 230000000, targetAltitude: 6500, difficulty: 8,
+            fuelRequired: 260,  // 火星軌道前哨
             needs: ['通訊設備', '燃料', '食物'], supply: ['火星中繼數據', '礦石樣本'],
             reward: { base: 15000, multiplier: 6.5 },
             unlockReputation: 800,
@@ -344,6 +351,7 @@ const CONFIG = {
         },
         {
             id: 'mars', name: '火星基地', altitude: 225000000, targetAltitude: 7200, difficulty: 10,
+            fuelRequired: 280,  // 火星 2.25 億公里，需要 Falcon 等大型火箭
             needs: ['重型設備', '食物', '人員', '醫療物資'], supply: ['土壤樣本', '水冰'],
             reward: { base: 25000, multiplier: 10.0 },
             unlockReputation: 1000,
@@ -353,6 +361,7 @@ const CONFIG = {
         },
         {
             id: 'asteroid', name: '小行星採礦站', altitude: 450000000, targetAltitude: 7800, difficulty: 12,
+            fuelRequired: 300,  // 小行星帶
             needs: ['採礦設備', '食物', '燃料'], supply: ['稀有金屬', '貴金屬'],
             reward: { base: 50000, multiplier: 18.0 },
             unlockReputation: 2000,
@@ -362,6 +371,7 @@ const CONFIG = {
         },
         {
             id: 'europa', name: '歐羅巴冰下基地', altitude: 628000000, targetAltitude: 8200, difficulty: 11,
+            fuelRequired: 340,  // 木星衛星
             needs: ['核燃料', '高級科研設備', '潛水器'], supply: ['冰下樣本', '外星微生物證據'],
             reward: { base: 35000, multiplier: 12.0 },
             unlockReputation: 1500,
@@ -371,6 +381,7 @@ const CONFIG = {
         },
         {
             id: 'saturn_ring', name: '土星環採礦站', altitude: 1400000000, targetAltitude: 8600, difficulty: 13,
+            fuelRequired: 400,  // 土星 14 億公里
             needs: ['採礦設備', '燃料', '食物', '零件'], supply: ['稀有金屬', '水冰', '貴金屬'],
             reward: { base: 60000, multiplier: 22.0 },
             unlockReputation: 3000,
@@ -380,6 +391,7 @@ const CONFIG = {
         },
         {
             id: 'jupiter', name: '木星軌道基地', altitude: 2200000000, targetAltitude: 9000, difficulty: 15,
+            fuelRequired: 420,  // 木星 22 億公里
             needs: ['核燃料', '高級設備', '人員'], supply: ['氦-3', '科研數據'],
             reward: { base: 100000, multiplier: 35.0 },
             unlockReputation: 5000,
@@ -390,6 +402,7 @@ const CONFIG = {
         // 特殊目標：彗星（無固定太空站，動態出現）
         {
             id: 'comet', name: '哈雷彗星', altitude: 0, targetAltitude: 6800, difficulty: 9,
+            fuelRequired: 180,  // 動態距離，平均火星軌道級別
             needs: ['採樣設備'], supply: ['彗星樣本', '冰晶'],
             reward: { base: 30000, multiplier: 8.0 },
             unlockReputation: 600,
@@ -400,6 +413,7 @@ const CONFIG = {
         // v2.2 新增深空站點
         {
             id: 'titan', name: '土衛六泰坦基地', altitude: 1400000000, targetAltitude: 8400, difficulty: 14,
+            fuelRequired: 395,  // 土星系統
             needs: ['甲烷燃料', '低溫防護', '科研設備'], supply: ['甲烷冰晶', '碳氫化合物'],
             reward: { base: 80000, multiplier: 22.0 },
             unlockReputation: 2500,
@@ -409,6 +423,7 @@ const CONFIG = {
         },
         {
             id: 'enceladus', name: '土衛二噴泉觀測站', altitude: 1400000000, targetAltitude: 8800, difficulty: 15,
+            fuelRequired: 397,
             needs: ['深海探測器', '低溫設備', '樣本密封器'], supply: ['冰下海洋樣本', '微生物化石'],
             reward: { base: 120000, multiplier: 28.0 },
             unlockReputation: 3500,
@@ -418,6 +433,7 @@ const CONFIG = {
         },
         {
             id: 'kuiper_belt', name: '古柏帶探測點', altitude: 6000000000, targetAltitude: 9500, difficulty: 18,
+            fuelRequired: 500,  // 古柏帶 60 億公里
             needs: ['核能電池', '長程通訊', '冷凍樣本艙'], supply: ['原始星塵', '未知礦物'],
             reward: { base: 250000, multiplier: 45.0 },
             unlockReputation: 6000,
@@ -428,6 +444,7 @@ const CONFIG = {
         // v2.5 新增太陽系站點
         {
             id: 'venus', name: '金星軌道研究站', altitude: 110000000, targetAltitude: 7500, difficulty: 11,
+            fuelRequired: 230,  // 金星 1.1 億公里
             needs: ['耐腐蝕材料', '散熱系統', '科研設備'], supply: ['大氣數據', '地質樣本'],
             reward: { base: 40000, multiplier: 14.0 },
             unlockReputation: 1800,
@@ -437,6 +454,7 @@ const CONFIG = {
         },
         {
             id: 'mercury', name: '水星前哨站', altitude: 58000000, targetAltitude: 7000, difficulty: 12,
+            fuelRequired: 210,  // 水星 5800 萬公里
             needs: ['高溫隔熱', '太陽能板', '散熱器'], supply: ['稀有金屬', '太陽風數據'],
             reward: { base: 55000, multiplier: 16.0 },
             unlockReputation: 2200,
@@ -446,6 +464,7 @@ const CONFIG = {
         },
         {
             id: 'neptune', name: '海王星深空基地', altitude: 4500000000, targetAltitude: 9800, difficulty: 20,
+            fuelRequired: 550,  // 海王星 45 億公里
             needs: ['核能電池', '長程通訊', '極端低溫設備'], supply: ['冰巨星數據', '未知化合物'],
             reward: { base: 500000, multiplier: 60.0 },
             unlockReputation: 10000,
@@ -455,6 +474,7 @@ const CONFIG = {
         },
         {
             id: 'pluto', name: '冥王星探測站', altitude: 7500000000, targetAltitude: 9600, difficulty: 17,
+            fuelRequired: 520,  // 冥王星 75 億公里
             needs: ['核能電池', '低溫樣本艙', '遠距操控'], supply: ['冰氮樣本', '古老化學數據'],
             reward: { base: 180000, multiplier: 38.0 },
             unlockReputation: 7000,
@@ -464,6 +484,7 @@ const CONFIG = {
         },
         {
             id: 'ceres', name: '穀神星採礦殖民地', altitude: 415000000, targetAltitude: 8000, difficulty: 10,
+            fuelRequired: 310,  // 小行星帶 4.15 億公里
             needs: ['採礦設備', '冶煉工廠', '太陽能板'], supply: ['鐵鎳礦石', '水冰', '稀有金屬'],
             reward: { base: 30000, multiplier: 9.0 },
             unlockReputation: 1200,
@@ -756,7 +777,7 @@ function generateSingleMission() {
         difficulty: difficulty,
         cargo: cargo,
         reward: baseReward,
-        requirements: getMissionRequirements(type, difficulty)
+        requirements: getMissionRequirements(type, station, difficulty)
     };
 }
 
@@ -781,10 +802,13 @@ function generateCargo(type, station, difficulty) {
     return { items, capacity };
 }
 
-function getMissionRequirements(type, difficulty) {
+function getMissionRequirements(type, station, difficulty) {
+    // 燃料需求 = 站點真實燃料需求 + 安全邊際 20%
+    const fuelRequired = Math.ceil((station.fuelRequired || 30) * 1.2);
     return {
         minEngine: Math.ceil(difficulty / 3),
-        minFuel: Math.ceil(difficulty / 3),
+        minFuelLevel: Math.ceil(difficulty / 3),  // 等級需求（決定可攜帶多少燃料）
+        minFuelCapacity: fuelRequired,           // 燃料容量需求（實際燃料單位）
         minShield: Math.ceil(difficulty / 4),
         minCargo: Math.ceil(difficulty / 2),
         needsLifeSupport: type === 'crew',
@@ -1344,8 +1368,16 @@ const UI = {
             const reached = rocket.targetReached || rocket.y <= targetY;
             const progress = Math.min(100, Math.round((rocket.y / targetY) * 100));
 
+            // 真實距離（公里）
+            const realDistKm = station.altitude; // altitude 本身是 km
+            const realDistDisplay = realDistKm >= 1000000
+                ? (realDistKm / 1000000).toFixed(1) + 'M km'
+                : realDistKm >= 1000
+                    ? (realDistKm / 1000).toFixed(0) + 'k km'
+                    : realDistKm.toFixed(0) + ' km';
+
             if (rocket.y < targetY * 0.5) {
-                DOM.missionObjective.innerHTML = `📍 前往 <strong>${station.name}</strong><br><small>目標 ${targetAlt}m (${progress}%)</small>`;
+                DOM.missionObjective.innerHTML = `📍 前往 <strong>${station.name}</strong><br><small>距離 ${realDistDisplay} | 進度 ${progress}%</small>`;
             } else if (reached) {
                 DOM.missionObjective.innerHTML = `✅ 已達標！返回基地<br><small>${station.name}</small>`;
             } else {
@@ -1583,16 +1615,31 @@ function showMissionDetails(index) {
     let canAccept = true;
     let reasons = [];
     if (rocket.engine < reqs.minEngine) { canAccept = false; reasons.push(`引擎 Lv.${reqs.minEngine}`); }
-    if (rocket.fuel < reqs.minFuel) { canAccept = false; reasons.push(`燃料 Lv.${reqs.minFuel}`); }
+    if (rocket.fuel < reqs.minFuelLevel) { canAccept = false; reasons.push(`燃料 Lv.${reqs.minFuelLevel}`); }
     if (rocket.shield < reqs.minShield) { canAccept = false; reasons.push(`隔熱 Lv.${reqs.minShield}`); }
     if (rocket.cargo < reqs.minCargo) { canAccept = false; reasons.push(`貨艙 Lv.${reqs.minCargo}`); }
     if (reqs.needsLifeSupport && !rocket.hasLifeSupport) { canAccept = false; reasons.push('需要生命維持'); }
     if (reqs.minCrew > GameState.crew.length) { canAccept = false; reasons.push(`需要 ${reqs.minCrew} 名太空人`); }
 
+    // 燃料容量檢查（顯示需要的燃料量 vs 火箭容量）
+    const fuelCapacity = rocket.maxFuel; // 火箭最大燃料容量
+    const needFuel = reqs.minFuelCapacity;
+    const fuelOk = fuelCapacity >= needFuel;
+    if (!fuelOk) { canAccept = false; }
+
+    // 計算真實距離顯示（altitude 單位為 km）
+    const distKm = mission.station.altitude; // altitude 本身是 km
+    const distDisplay = distKm >= 1000000
+        ? (distKm / 1000000).toFixed(1) + 'M km'
+        : distKm >= 1000
+            ? (distKm / 1000).toFixed(0) + 'k km'
+            : distKm.toFixed(0) + ' km';
+
     DOM.missionInfo.innerHTML = `
         <p><strong>類型:</strong> <span style="color:${typeInfo.color}">${typeInfo.icon} ${typeInfo.name}</span></p>
         <p><strong>目的地:</strong> ${mission.station.name}</p>
-        <p><strong>高度:</strong> ${(mission.station.altitude / 1000).toFixed(0)}k km</p>
+        <p><strong>距離:</strong> ${distDisplay}</p>
+        <p><strong>燃料需求:</strong> ${needFuel} 單位 <span style="color:${fuelOk ? '#00ff88' : '#ff4466'}">${fuelOk ? '✅' : '⚠️ 需要 ' + fuelCapacity + '+'}</span></p>
         <p><strong>難度:</strong> ${'⭐'.repeat(mission.difficulty)}</p>
         <p><strong>獎勵:</strong> <span style="color:#00ff88">$${mission.reward.toLocaleString()}</span></p>
         <p><strong>貨物:</strong> ${mission.cargo.items.map(i => `${i.name} x${i.quantity}`).join(', ') || '無'}</p>
