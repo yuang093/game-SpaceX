@@ -1772,62 +1772,74 @@ const SaveSystem = {
 const StockSystem = {
     // 設定：SPCX 真實股票代碼
     REAL_SYMBOL: 'SPCX',
-    CORS_PROXY: 'https://corsproxy.io/?url=',
+    // 多組 CORS 代理（快速優先，allorigins 備用）
+    PROXY_LIST: [
+        'https://corsproxy.io/?url=',
+        'https://api.allorigins.win/raw?url='
+    ],
     YAHOO_URL: 'https://query1.finance.yahoo.com/v8/finance/chart/',
     CACHE_MS: 5 * 60 * 1000,   // 5 分鐘快取
-    SIM_VOLATILITY: 0.03,        // 模擬模式波動率 ±3%
+    SIM_VOLATILITY: 0.005,        // 模擬模式：微幅波動 ±0.5%（更穩定）
     HISTORY_MAX: 30,             // 保留 30 筆歷史
 
     /**
-     * 抓取即時股票價格（從 Yahoo Finance via CORS proxy）
-     * 失敗時自動 fallback 為模擬隨機波動
+     * 抓取即時股票價格（嘗試多個 CORS 代理）
+     * 全部失敗時保留上次成功價格，不再隨機變動
      */
     async fetchPrice() {
         const now = Date.now();
         const stock = GameState.stocks.SPCX;
-        // 5 分鐘內不重抓
+        // 5 分鐘內不重抓（使用快取）
         if (stock.lastFetch && (now - stock.lastFetch) < this.CACHE_MS && stock.currentPrice > 0) {
+            console.log(`[SPCX] 使用快取: $${stock.currentPrice.toFixed(2)}`);
             return stock.currentPrice;
         }
 
-        const url = `${this.CORS_PROXY}${encodeURIComponent(this.YAHOO_URL + this.REAL_SYMBOL + '?interval=1d&range=5d')}`;
-        try {
-            const ctrl = new AbortController();
-            const tid = setTimeout(() => ctrl.abort(), 8000);  // 8 秒逾時
-            const res = await fetch(url, { signal: ctrl.signal });
-            clearTimeout(tid);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            const meta = json?.chart?.result?.[0]?.meta;
-            if (!meta) throw new Error('No meta');
-            const price = meta.regularMarketPrice || meta.previousClose || 0;
-            if (!price) throw new Error('No price');
-            // 抓取 5 日收盤價作為歷史
-            const closes = json.chart.result[0].indicators.quote[0].close.filter(v => v != null);
+        // 依序嘗試每個代理
+        let lastError = null;
+        for (const proxy of this.PROXY_LIST) {
+            const targetUrl = `${this.YAHOO_URL}${this.REAL_SYMBOL}?interval=1d&range=5d`;
+            const url = `${proxy}${encodeURIComponent(targetUrl)}`;
+            try {
+                const ctrl = new AbortController();
+                const tid = setTimeout(() => ctrl.abort(), 10000);  // 10 秒逾時
+                const res = await fetch(url, { signal: ctrl.signal });
+                clearTimeout(tid);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                const meta = json?.chart?.result?.[0]?.meta;
+                if (!meta) throw new Error('No meta');
+                const price = meta.regularMarketPrice || meta.previousClose || 0;
+                if (!price) throw new Error('No price');
 
-            stock.currentPrice = price;
-            stock.lastFetch = now;
-            stock.lastRealSymbol = this.REAL_SYMBOL;
-            stock.source = 'real';
-            // 把歷史換成實際收盤價（最後一個是最新的）
-            if (closes.length) {
-                stock.history = closes.slice(-this.HISTORY_MAX);
+                stock.currentPrice = price;
+                stock.lastFetch = now;
+                stock.lastRealSymbol = this.REAL_SYMBOL;
+                stock.source = 'real';
+                const closes = json.chart.result[0].indicators.quote[0].close.filter(v => v != null);
+                if (closes.length) {
+                    stock.history = closes.slice(-this.HISTORY_MAX);
+                }
+                console.log(`[SPCX] 抓取成功 $${price.toFixed(2)} via ${proxy.slice(0, 30)}...`);
+                return price;
+            } catch (err) {
+                lastError = err;
+                console.warn(`[SPCX] ${proxy.slice(0, 30)}... 失敗: ${err.message}`);
             }
-            console.log(`[SPCX] 抓取 ${this.REAL_SYMBOL} 成功: $${price.toFixed(2)}`);
-            return price;
-        } catch (err) {
-            console.warn(`[SPCX] 抓取 ${this.REAL_SYMBOL} 失敗，使用模擬:`, err.message);
-            // Fallback：模擬隨機波動（基於當前價格 ±3%）
-            if (!stock.currentPrice) stock.currentPrice = 25.0;  // 起始模擬價
-            const change = (Math.random() - 0.5) * 2 * this.SIM_VOLATILITY;
-            stock.currentPrice = Math.max(0.01, stock.currentPrice * (1 + change));
-            stock.lastFetch = now;
-            stock.source = 'sim';
-            stock.lastRealSymbol = `${this.REAL_SYMBOL} (模擬)`;
-            stock.history.push(stock.currentPrice);
-            if (stock.history.length > this.HISTORY_MAX) stock.history.shift();
+        }
+
+        // 所有代理都失敗：保留上次價格，不隨機變動
+        console.warn(`[SPCX] 全部代理失敗，保留上次價格 $${stock.currentPrice.toFixed(2)}`);
+        stock.lastFetch = now;
+        stock.source = 'cached';
+        stock.lastRealSymbol = `${this.REAL_SYMBOL} (快取)`;
+        if (stock.currentPrice > 0) {
             return stock.currentPrice;
         }
+        // 真的完全沒有價格：使用合理起始價 $160
+        stock.currentPrice = 160.0;
+        stock.source = 'default';
+        return stock.currentPrice;
     },
 
     /**
