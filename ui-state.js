@@ -263,79 +263,126 @@ const CONFIG = {
     },
 
     // 太空站
+    // targetAltitude 是世界座標高度（玩家必須飛到的 y 座標）
+    // 使用對數刻度：近的低、遠的高
     stations: [
         {
-            id: 'leo', name: '近地軌道站 LEO', altitude: 400, difficulty: 1,
+            id: 'leo', name: '近地軌道站 LEO', altitude: 400, targetAltitude: 2200, difficulty: 1,
             needs: ['食物', '水', '醫療物資'], supply: ['太陽能板', '零件'],
             reward: { base: 1000, multiplier: 1.0 },
-            unlockReputation: 0
+            unlockReputation: 0,
+            type: 'space_station',
+            color: '#00d4ff',
+            size: 1.0
         },
         {
-            id: 'polar', name: '極地觀測站', altitude: 600, difficulty: 2,
+            id: 'polar', name: '極地觀測站', altitude: 600, targetAltitude: 2800, difficulty: 2,
             needs: ['科研設備', '食物'], supply: ['觀測數據'],
             reward: { base: 1500, multiplier: 1.3 },
-            unlockReputation: 50
+            unlockReputation: 50,
+            type: 'space_station',
+            color: '#88ddff',
+            size: 0.9
         },
         {
-            id: 'moon', name: '月球前哨站', altitude: 384000, difficulty: 5,
-            needs: ['重型設備', '食物', '人員'], supply: ['月岩樣本', '氦-3'],
-            reward: { base: 5000, multiplier: 3.0 },
-            unlockReputation: 200
-        },
-        {
-            id: 'lagrange', name: '拉格朗日點站', altitude: 1500000, difficulty: 7,
-            needs: ['科研設備', '太陽能板', '食物'], supply: ['稀有元素'],
-            reward: { base: 12000, multiplier: 5.5 },
-            unlockReputation: 500
-        },
-        {
-            id: 'mars', name: '火星基地', altitude: 225000000, difficulty: 10,
-            needs: ['重型設備', '食物', '人員', '醫療物資'], supply: ['土壤樣本', '水冰'],
-            reward: { base: 25000, multiplier: 10.0 },
-            unlockReputation: 1000
-        },
-        {
-            id: 'asteroid', name: '小行星採礦站', altitude: 450000000, difficulty: 12,
-            needs: ['採礦設備', '食物', '燃料'], supply: ['稀有金屬', '貴金屬'],
-            reward: { base: 50000, multiplier: 18.0 },
-            unlockReputation: 2000
-        },
-        {
-            id: 'jupiter', name: '木星軌道基地', altitude: 2200000000, difficulty: 15,
-            needs: ['核燃料', '高級設備', '人員'], supply: ['氦-3', '科研數據'],
-            reward: { base: 100000, multiplier: 35.0 },
-            unlockReputation: 5000
-        },
-        // v2.0 新增太空站
-        {
-            id: 'gateway', name: '月球門戶 Gateway', altitude: 384000, difficulty: 6,
-            needs: ['科研設備', '太陽能板', '氧氣', '食物'], supply: ['中繼數據', '軌道科研'],
-            reward: { base: 8000, multiplier: 4.0 },
-            unlockReputation: 300
-        },
-        {
-            id: 'phobos', name: '火衛一中繼站 Phobos', altitude: 230000000, difficulty: 8,
-            needs: ['通訊設備', '燃料', '食物'], supply: ['火星中繼數據', '礦石樣本'],
-            reward: { base: 15000, multiplier: 6.5 },
-            unlockReputation: 800
-        },
-        {
-            id: 'europa', name: '歐羅巴冰下基地', altitude: 628000000, difficulty: 11,
-            needs: ['核燃料', '高級科研設備', '潛水器'], supply: ['冰下樣本', '外星微生物證據'],
-            reward: { base: 35000, multiplier: 12.0 },
-            unlockReputation: 1500
-        },
-        {
-            id: 'saturn_ring', name: '土星環採礦站', altitude: 1400000000, difficulty: 13,
-            needs: ['採礦設備', '燃料', '食物', '零件'], supply: ['稀有金屬', '水冰', '貴金屬'],
-            reward: { base: 60000, multiplier: 22.0 },
-            unlockReputation: 3000
-        },
-        {
-            id: 'solar_satellite', name: '太陽能衛星矩陣', altitude: 1500000, difficulty: 4,
+            id: 'solar_satellite', name: '太陽能衛星矩陣', altitude: 1500000, targetAltitude: 3600, difficulty: 4,
             needs: ['太陽能板', '維修零件', '通訊設備'], supply: ['清潔能源', '軌道數據'],
             reward: { base: 5000, multiplier: 3.5 },
-            unlockReputation: 150
+            unlockReputation: 150,
+            type: 'solar_array',
+            color: '#ffcc00',
+            size: 1.2
+        },
+        {
+            id: 'gateway', name: '月球門戶 Gateway', altitude: 384000, targetAltitude: 4500, difficulty: 6,
+            needs: ['科研設備', '太陽能板', '氧氣', '食物'], supply: ['中繼數據', '軌道科研'],
+            reward: { base: 8000, multiplier: 4.0 },
+            unlockReputation: 300,
+            type: 'space_station',
+            color: '#aaddff',
+            size: 1.4
+        },
+        {
+            id: 'moon', name: '月球前哨站', altitude: 384000, targetAltitude: 5200, difficulty: 5,
+            needs: ['重型設備', '食物', '人員'], supply: ['月岩樣本', '氦-3'],
+            reward: { base: 5000, multiplier: 3.0 },
+            unlockReputation: 200,
+            type: 'moon_base',
+            color: '#ffaa00',
+            size: 1.0
+        },
+        {
+            id: 'lagrange', name: '拉格朗日點站', altitude: 1500000, targetAltitude: 5800, difficulty: 7,
+            needs: ['科研設備', '太陽能板', '食物'], supply: ['稀有元素'],
+            reward: { base: 12000, multiplier: 5.5 },
+            unlockReputation: 500,
+            type: 'lagrange_point',
+            color: '#ff88cc',
+            size: 1.1
+        },
+        {
+            id: 'phobos', name: '火衛一中繼站 Phobos', altitude: 230000000, targetAltitude: 6500, difficulty: 8,
+            needs: ['通訊設備', '燃料', '食物'], supply: ['火星中繼數據', '礦石樣本'],
+            reward: { base: 15000, multiplier: 6.5 },
+            unlockReputation: 800,
+            type: 'phobos_station',
+            color: '#cc6644',
+            size: 0.8
+        },
+        {
+            id: 'mars', name: '火星基地', altitude: 225000000, targetAltitude: 7200, difficulty: 10,
+            needs: ['重型設備', '食物', '人員', '醫療物資'], supply: ['土壤樣本', '水冰'],
+            reward: { base: 25000, multiplier: 10.0 },
+            unlockReputation: 1000,
+            type: 'mars_base',
+            color: '#ff4466',
+            size: 1.3
+        },
+        {
+            id: 'asteroid', name: '小行星採礦站', altitude: 450000000, targetAltitude: 7800, difficulty: 12,
+            needs: ['採礦設備', '食物', '燃料'], supply: ['稀有金屬', '貴金屬'],
+            reward: { base: 50000, multiplier: 18.0 },
+            unlockReputation: 2000,
+            type: 'asteroid',
+            color: '#aa8866',
+            size: 1.5
+        },
+        {
+            id: 'europa', name: '歐羅巴冰下基地', altitude: 628000000, targetAltitude: 8200, difficulty: 11,
+            needs: ['核燃料', '高級科研設備', '潛水器'], supply: ['冰下樣本', '外星微生物證據'],
+            reward: { base: 35000, multiplier: 12.0 },
+            unlockReputation: 1500,
+            type: 'europa_base',
+            color: '#aaddff',
+            size: 1.0
+        },
+        {
+            id: 'saturn_ring', name: '土星環採礦站', altitude: 1400000000, targetAltitude: 8600, difficulty: 13,
+            needs: ['採礦設備', '燃料', '食物', '零件'], supply: ['稀有金屬', '水冰', '貴金屬'],
+            reward: { base: 60000, multiplier: 22.0 },
+            unlockReputation: 3000,
+            type: 'saturn_station',
+            color: '#ffddaa',
+            size: 1.2
+        },
+        {
+            id: 'jupiter', name: '木星軌道基地', altitude: 2200000000, targetAltitude: 9000, difficulty: 15,
+            needs: ['核燃料', '高級設備', '人員'], supply: ['氦-3', '科研數據'],
+            reward: { base: 100000, multiplier: 35.0 },
+            unlockReputation: 5000,
+            type: 'jupiter_station',
+            color: '#ddaa66',
+            size: 1.4
+        },
+        // 特殊目標：彗星（無固定太空站，動態出現）
+        {
+            id: 'comet', name: '哈雷彗星', altitude: 0, targetAltitude: 6800, difficulty: 9,
+            needs: ['採樣設備'], supply: ['彗星樣本', '冰晶'],
+            reward: { base: 30000, multiplier: 8.0 },
+            unlockReputation: 600,
+            type: 'comet',
+            color: '#aaeeff',
+            size: 1.0
         }
     ],
 
@@ -582,11 +629,19 @@ function generateSingleMission() {
         availableStations.push(GameState.stations[0]);
     }
 
-    const station = availableStations[Math.floor(Math.random() * availableStations.length)];
-
-    // 選擇任務類型
+    // 選擇任務類型（特定類型對應特定太空站）
     const typeKeys = Object.keys(CONFIG.missionTypes);
-    const type = typeKeys[Math.floor(Math.random() * typeKeys.length)];
+    let type = typeKeys[Math.floor(Math.random() * typeKeys.length)];
+    let station;
+
+    // 彗星採樣任務固定以彗星為目標
+    if (type === 'comet_sample') {
+        const cometStation = availableStations.find(s => s.id === 'comet');
+        station = cometStation || availableStations[Math.floor(Math.random() * availableStations.length)];
+    } else {
+        station = availableStations[Math.floor(Math.random() * availableStations.length)];
+    }
+
     const typeInfo = CONFIG.missionTypes[type];
 
     // 計算難度
@@ -972,13 +1027,18 @@ const UI = {
         if (altitude > GameState.maxAltitude) GameState.maxAltitude = altitude;
 
         if (GameState.currentMission) {
-            const target = GameState.currentMission.station.altitude / 10;
-            if (altitude < target * 0.8) {
-                DOM.missionObjective.textContent = `📍 前往 ${GameState.currentMission.station.name}`;
-            } else if (altitude >= target * 0.8 && altitude <= target * 1.2) {
-                DOM.missionObjective.textContent = `🎯 到達目標高度`;
+            const station = GameState.currentMission.station;
+            const targetY = station.targetAltitude;
+            const targetAlt = Math.round(targetY / 10);
+            const reached = rocket.targetReached || rocket.y <= targetY;
+            const progress = Math.min(100, Math.round((rocket.y / targetY) * 100));
+
+            if (rocket.y < targetY * 0.5) {
+                DOM.missionObjective.innerHTML = `📍 前往 <strong>${station.name}</strong><br><small>目標 ${targetAlt}m (${progress}%)</small>`;
+            } else if (reached) {
+                DOM.missionObjective.innerHTML = `✅ 已達標！返回基地<br><small>${station.name}</small>`;
             } else {
-                DOM.missionObjective.textContent = `🏠 準備著陸`;
+                DOM.missionObjective.innerHTML = `🎯 即將抵達<br><small>${station.name} (${progress}%)</small>`;
             }
         }
     },
