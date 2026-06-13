@@ -788,13 +788,18 @@ function cacheDOM() {
 // UI 更新函式
 // ================================================
 const UI = {
+    // 自動收合旗標（區分手動 vs 自動，避免污染 localStorage 使用者偏好）
+    _autoCollapsed: false,
+
     /**
-     * 切換側邊欄收合/展開狀態
+     * 切換側邊欄收合/展開狀態（手動觸發，會寫入 localStorage）
      */
     toggleSidebar() {
         const isCollapsed = DOM.sidebar.classList.toggle('collapsed');
         DOM.btnToggleSidebar.textContent = isCollapsed ? '▶' : '◀';
         DOM.btnToggleSidebar.setAttribute('aria-label', isCollapsed ? '展開側邊欄' : '收合側邊欄');
+        // 手動操作清除自動旗標
+        this._autoCollapsed = false;
         try {
             localStorage.setItem('spacex_sidebar_collapsed', isCollapsed ? '1' : '0');
         } catch (_) { /* 隱私模式可能拋錯，忽略 */ }
@@ -817,6 +822,49 @@ const UI = {
             DOM.btnToggleSidebar.textContent = '▶';
             DOM.btnToggleSidebar.setAttribute('aria-label', '展開側邊欄');
         }
+    },
+
+    /**
+     * 自動收合（發射時呼叫，給玩家最大遊戲畫面）
+     * - 若已是收合狀態（手動或先前自動）→ 不動視覺，但也不標記為自動（避免覆蓋使用者偏好）
+     * - 若之前是展開狀態 → 收合並標記為自動，任務結束會自動展開
+     */
+    collapseSidebarAuto() {
+        if (!DOM.sidebar) return;
+        const wasCollapsed = DOM.sidebar.classList.contains('collapsed');
+        if (!wasCollapsed) {
+            DOM.sidebar.classList.add('collapsed');
+            if (DOM.btnToggleSidebar) {
+                DOM.btnToggleSidebar.textContent = '▶';
+                DOM.btnToggleSidebar.setAttribute('aria-label', '展開側邊欄');
+            }
+            // 收合時主動重整 canvas（不寫 localStorage，使用者下次重新整理會恢復偏好）
+            if (typeof Physics !== 'undefined' && Physics.resizeCanvas) {
+                setTimeout(() => Physics.resizeCanvas(), 300);
+            }
+            this._autoCollapsed = true;  // 本次任務是自動收合的
+        }
+        // 已是收合狀態：可能是手動收合或先前自動收合，不要覆蓋旗標
+    },
+
+    /**
+     * 自動展開（任務結束回到 PREP 呼叫，僅還原本次自動收合的狀態）
+     * 若使用者是手動收合的（旗標為 false），則不動作，保留使用者偏好
+     */
+    expandSidebarAuto() {
+        if (!this._autoCollapsed) return;
+        if (!DOM.sidebar) return;
+        if (DOM.sidebar.classList.contains('collapsed')) {
+            DOM.sidebar.classList.remove('collapsed');
+            if (DOM.btnToggleSidebar) {
+                DOM.btnToggleSidebar.textContent = '◀';
+                DOM.btnToggleSidebar.setAttribute('aria-label', '收合側邊欄');
+            }
+            if (typeof Physics !== 'undefined' && Physics.resizeCanvas) {
+                setTimeout(() => Physics.resizeCanvas(), 300);
+            }
+        }
+        this._autoCollapsed = false;
     },
 
     updateAll() {
@@ -1488,6 +1536,7 @@ const StateMachine = {
 
     enterPrep() {
         UI.setPrepUI();
+        UI.expandSidebarAuto();  // 任務結束自動展開（若為自動收合狀態）
         GameState.maxAltitude = 0;
         GameState.currentMission = null;
         Physics.stopLoop();
@@ -1496,6 +1545,7 @@ const StateMachine = {
 
     enterLaunch() {
         UI.setGameUI();
+        UI.collapseSidebarAuto();  // 發射時自動收合，給玩家最大遊戲畫面
         GameState.stats.launches++;
         UI.showOverlay('🚀', '3', 800).then(() =>
             UI.showOverlay('🚀', '2', 800).then(() =>
