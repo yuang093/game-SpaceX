@@ -22,7 +22,7 @@ const GROUND_Y = WORLD_HEIGHT - 50;
 const LANDING_PAD = {
     x: WORLD_WIDTH / 2,
     y: GROUND_Y,
-    width: 200,
+    width: 320,    // 加大著陸平台（200→320，便於瞄準）
     height: 20
 };
 
@@ -65,15 +65,16 @@ const rocket = {
 // ================================================
 const PHYSICS = {
     GRAVITY: 0.06,
-    MAX_SAFE_SPEED: 2.5,
-    MAX_SAFE_ANGLE: 20,
+    MAX_SAFE_SPEED: 3.5,        // 放寬安全速度（2.5→3.5）
+    MAX_SAFE_ANGLE: 25,         // 放寬安全角度（20→25）
     ROTATION_SPEED: 0.05,
     THROTTLE: 0.18,
     SIDE_THRUST: 0.04,
     FUEL_CONSUMPTION: 0.12,
     HEAT_RATE: 0.02,
     HEAT_SPEED_THRESHOLD: 10,
-    BRAKE_FORCE: 0.15
+    BRAKE_FORCE: 0.18,          // 加強制動（0.15→0.18）
+    LANDING_TOLERANCE: 15       // 新增：著陸容差（px）
 };
 
 // ================================================
@@ -421,7 +422,7 @@ function drawLandingPad() {
 
     if (padY < -50 || padY > canvasHeight + 50) return;
 
-    // 著陸台
+    // 著陸台（底座）
     ctx.fillStyle = '#3a3a5e';
     ctx.fillRect(padX - 10, padY, LANDING_PAD.width + 20, LANDING_PAD.height);
 
@@ -431,12 +432,57 @@ function drawLandingPad() {
 
     // H 標記
     ctx.fillStyle = '#00d4ff';
-    ctx.fillRect(LANDING_PAD.x - 40, padY - 3, 80, 3);
+    ctx.fillRect(LANDING_PAD.x - 50, padY - 3, 100, 3);
 
     ctx.fillStyle = '#00d4ff';
-    ctx.font = 'bold 28px Arial';
+    ctx.font = 'bold 32px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('H', LANDING_PAD.x, padY - 10);
+
+    // 安全進場引導錐（從天而降的虛線錐）
+    drawApproachGuide(padX, padY);
+}
+
+/**
+ * 安全進場引導（虛線錐狀）
+ */
+function drawApproachGuide(padX, padY) {
+    const guideTop = -100; // 從螢幕頂部開始
+    const guideHeight = canvasHeight;
+    const cx = LANDING_PAD.x;
+    const guideWidth = LANDING_PAD.width + 100; // 略寬於平台
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 8]);
+
+    // 左引導線
+    ctx.beginPath();
+    ctx.moveTo(cx - guideWidth / 2, guideTop);
+    ctx.lineTo(cx - LANDING_PAD.width / 2 - 5, padY);
+    ctx.stroke();
+
+    // 右引導線
+    ctx.beginPath();
+    ctx.moveTo(cx + guideWidth / 2, guideTop);
+    ctx.lineTo(cx + LANDING_PAD.width / 2 + 5, padY);
+    ctx.stroke();
+
+    // 中線
+    ctx.beginPath();
+    ctx.moveTo(cx, guideTop);
+    ctx.lineTo(cx, padY);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // 中央「SAFE ZONE」標籤
+    ctx.fillStyle = 'rgba(0, 255, 136, 0.4)';
+    ctx.font = 'bold 10px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('▼ 安全進場區 ▼', cx, padY - 60);
 }
 
 // ================================================
@@ -466,24 +512,7 @@ function drawDestination() {
 }
 
 function drawFreeFlightHint() {
-    // 自由飛行：顯示地球在底部
-    const earthY = GROUND_Y - 200 - cameraY;
-    if (earthY > canvasHeight + 500 || !isFinite(earthY)) return;
-
-    const gradient = ctx.createRadialGradient(
-        WORLD_WIDTH / 2, Math.max(-500, earthY + 300),
-        200,
-        WORLD_WIDTH / 2, Math.max(-500, earthY + 300),
-        800
-    );
-    gradient.addColorStop(0, '#4488ff');
-    gradient.addColorStop(0.5, '#2266cc');
-    gradient.addColorStop(1, '#113388');
-
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(WORLD_WIDTH / 2, Math.max(-500, earthY + 500), 800, 0, Math.PI * 2);
-    ctx.fill();
+    // 自由飛行：不需額外繪製（地球由 drawEarth 處理，pad 由 drawLandingPad 處理）
 }
 
 /**
@@ -1057,7 +1086,7 @@ function checkCollisions() {
     const padRight = LANDING_PAD.x + LANDING_PAD.width / 2;
     const padTop = LANDING_PAD.y;
 
-    if (rocket.x >= padLeft && rocket.x <= padRight && rocketBottom >= padTop - 5) {
+    if (rocket.x >= padLeft && rocket.x <= padRight && rocketBottom >= padTop - PHYSICS.LANDING_TOLERANCE) {
         handleLanding(padTop, true);
         return;
     }
@@ -1210,10 +1239,10 @@ function gameLoop(timestamp) {
 
         drawStars();
         drawEarth();
+        drawDestination();
         drawGround();
         drawLaunchTower();
         drawLandingPad();
-        drawDestination();
 
         updatePhysics();
 
@@ -1284,10 +1313,10 @@ const Physics = {
 
         drawStars();
         drawEarth();
+        drawDestination();
         drawGround();
         drawLaunchTower();
         drawLandingPad();
-        drawDestination();
     },
 
     initRocket() {
