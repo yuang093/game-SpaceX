@@ -1700,30 +1700,53 @@ function drawFreeFlightHint() {
 
 /**
  * 繪製天體背景（行星、月球等）
+ * 可選參數 opts：{ xOffset, yOffset, sizeScale, omitLabel }
+ *   - xOffset/yOffset：相對於 cx 的世界座標偏移（衛星擺動用）
+ *   - sizeScale：縮放倍率（中途天體用較小尺寸）
+ *   - omitLabel：不繪製底部標籤（避免與太空站標籤重疊）
  */
-function drawCelestialBody(station, worldY) {
+function drawCelestialBody(station, worldY, opts = {}) {
+    const xOffset = opts.xOffset || 0;
+    const yOffset = opts.yOffset || 0;
+    const sizeScale = opts.sizeScale || 1;
+    const omitLabel = opts.omitLabel || false;
     const screenY = worldY - cameraY;
-    const cx = WORLD_WIDTH / 2;
-    const size = (station.size || 1) * 100;
+    const cx = WORLD_WIDTH / 2 + xOffset;
+    const size = (station.size || 1) * 100 * sizeScale;
 
+    if (sizeScale !== 1 || xOffset !== 0 || yOffset !== 0) {
+        ctx.save();
+        ctx.translate(xOffset, yOffset);
+        drawCelestialBodyInner(station, worldY, screenY, cx, size, omitLabel);
+        ctx.restore();
+    } else {
+        drawCelestialBodyInner(station, worldY, screenY, cx, size, omitLabel);
+    }
+}
+
+function drawCelestialBodyInner(station, worldY, screenY, cx, size, omitLabel) {
     switch (station.type) {
         case 'moon_base':
             // 月球（真實衛星紋理 + 縮放）
             drawMoon(worldY, (station.size || 1) * 1.2);
             // 標籤
-            ctx.fillStyle = '#ffee88';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('🌙 月球基地', cx, screenY + (station.size || 1) * 240 + 20);
+            if (!omitLabel) {
+                ctx.fillStyle = '#ffee88';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🌙 月球基地', cx, screenY + (station.size || 1) * 240 + 20);
+            }
             break;
         case 'mars_base':
             // 火星（真實衛星紋理 + 縮放）
             drawMars(worldY, (station.size || 1) * 1.1);
             // 標籤
-            ctx.fillStyle = '#ff8866';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('🔴 火星基地', cx, screenY + (station.size || 1) * 200 + 20);
+            if (!omitLabel) {
+                ctx.fillStyle = '#ff8866';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🔴 火星基地', cx, screenY + (station.size || 1) * 200 + 20);
+            }
             break;
         case 'europa_base':
             // 歐羅巴（冰藍色）
@@ -1746,7 +1769,7 @@ function drawCelestialBody(station, worldY) {
                 ctx.stroke();
             }
             ctx.fillStyle = '#fff';
-            ctx.fillText('🧊 歐羅巴', cx + 150, screenY + size + 15);
+            if (!omitLabel) ctx.fillText('🧊 歐羅巴', cx + 150, screenY + size + 15);
             break;
         case 'jupiter_station':
             // 木星（巨大條紋）
@@ -1770,7 +1793,7 @@ function drawCelestialBody(station, worldY) {
             ctx.ellipse(cx + 200 + size * 0.5, screenY + size * 0.3, size * 0.2, size * 0.1, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#fff';
-            ctx.fillText('🪐 木星', cx + 200, screenY + size * 1.4 + 15);
+            if (!omitLabel) ctx.fillText('🪐 木星', cx + 200, screenY + size * 1.4 + 15);
             break;
         case 'saturn_station':
             // 土星（環）
@@ -1794,7 +1817,7 @@ function drawCelestialBody(station, worldY) {
             ctx.arc(cx + 150, screenY, size, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#fff';
-            ctx.fillText('🪐 土星', cx + 150, screenY + size + 25);
+            if (!omitLabel) ctx.fillText('🪐 土星', cx + 150, screenY + size + 25);
             break;
         case 'asteroid':
             // 小行星（不規則岩石）
@@ -1818,7 +1841,7 @@ function drawCelestialBody(station, worldY) {
             ctx.arc(cx + 145, screenY + 20, 5, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#fff';
-            ctx.fillText('☄️ 小行星', cx + 130, screenY + 70);
+            if (!omitLabel) ctx.fillText('☄️ 小行星', cx + 130, screenY + 70);
             break;
         case 'comet':
             // 彗星（核心 + 尾巴）
@@ -1845,7 +1868,7 @@ function drawCelestialBody(station, worldY) {
             ctx.arc(cx, screenY, 12, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#fff';
-            ctx.fillText('☄️ 彗星', cx, screenY + 40);
+            if (!omitLabel) ctx.fillText('☄️ 彗星', cx, screenY + 40);
             break;
         case 'venus_base':
             // 金星基地（厚重雲層行星）
@@ -1853,7 +1876,7 @@ function drawCelestialBody(station, worldY) {
             ctx.fillStyle = '#ffcc88';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('🌼 金星基地', cx, screenY + 180);
+            if (!omitLabel) ctx.fillText('🌼 金星基地', cx, screenY + 180);
             break;
         case 'mercury_base':
             // 水星基地（隕石坑行星）
@@ -1861,7 +1884,7 @@ function drawCelestialBody(station, worldY) {
             ctx.fillStyle = '#cccccc';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('☿ 水星基地', cx, screenY + 160);
+            if (!omitLabel) ctx.fillText('☿ 水星基地', cx, screenY + 160);
             break;
         case 'neptune_station':
             // 海王星軌道站（冰巨星）
@@ -1869,7 +1892,7 @@ function drawCelestialBody(station, worldY) {
             ctx.fillStyle = '#88aaff';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('🔵 海王星基地', cx, screenY + 350);
+            if (!omitLabel) ctx.fillText('🔵 海王星基地', cx, screenY + 350);
             break;
         case 'pluto_station':
             // 冥王星基地（冰矮星）
@@ -1877,7 +1900,7 @@ function drawCelestialBody(station, worldY) {
             ctx.fillStyle = '#ccaa88';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('🪐 冥王星基地', cx, screenY + 120);
+            if (!omitLabel) ctx.fillText('🪐 冥王星基地', cx, screenY + 120);
             break;
         case 'ceres_station':
             // 穀神星採礦站（小行星帶）
@@ -1885,7 +1908,7 @@ function drawCelestialBody(station, worldY) {
             ctx.fillStyle = '#aaaaaa';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('⛏️ 穀神星礦區', cx, screenY + 140);
+            if (!omitLabel) ctx.fillText('⛏️ 穀神星礦區', cx, screenY + 140);
             break;
     }
 }
@@ -2232,6 +2255,16 @@ function updatePhysics() {
     if (GameState.phase === 'PREP' || GameState.phase === 'SUCCESS' || GameState.phase === 'CRASH') return;
     if (rocket.phase === 'LANDED' || rocket.phase === 'EXPLODED' || rocket.phase === 'DOCKED') return;
 
+    // v3.3 重力助推：飛越大天體時燃料效率暫時提升
+    let boostFactor = 1;
+    if (rocket.fuelEfficiencyBoost) {
+        if (Date.now() < rocket.fuelEfficiencyBoost.expiresAt) {
+            boostFactor = rocket.fuelEfficiencyBoost.factor; // 0.5 = 50% 燃料
+        } else {
+            rocket.fuelEfficiencyBoost = null;
+        }
+    }
+
     // 重力
     rocket.vy += PHYSICS.GRAVITY;
 
@@ -2253,7 +2286,7 @@ function updatePhysics() {
         // 高度越高，消耗越低（最低 30% 基礎消耗）
         const altitude = GROUND_Y - rocket.y; // 世界高度
         const spaceEfficiency = 0.3 + 0.7 / (1 + altitude / 3000);
-        const adjustedFuelConsumption = PHYSICS.FUEL_CONSUMPTION * spaceEfficiency;
+        const adjustedFuelConsumption = PHYSICS.FUEL_CONSUMPTION * spaceEfficiency * boostFactor;
         rocket.fuel -= adjustedFuelConsumption;
         if (rocket.fuel < 0) rocket.fuel = 0;
     }
@@ -2265,7 +2298,7 @@ function updatePhysics() {
         // 側向推力也消耗燃料（但較少）
         const altitude = GROUND_Y - rocket.y;
         const spaceEfficiency = 0.3 + 0.7 / (1 + altitude / 3000);
-        rocket.fuel -= PHYSICS.FUEL_CONSUMPTION * 0.3 * spaceEfficiency;
+        rocket.fuel -= PHYSICS.FUEL_CONSUMPTION * 0.3 * spaceEfficiency * boostFactor;
         if (rocket.fuel < 0) rocket.fuel = 0;
     }
 
@@ -2360,6 +2393,38 @@ function checkCollisions() {
             return;
         }
         rocket.lastY = rocket.y;
+    }
+
+    // v3.3 飛越中途天體偵測（火箭由下往上爬升經過 y 較小的 waypoint）
+    if (GameState.currentMission?.waypoints && rocket.phase !== 'EXPLODED') {
+        if (!rocket._passedWaypoints) rocket._passedWaypoints = new Set();
+        if (!rocket._nearestWaypoint) rocket._nearestWaypoint = null;
+        let nearest = null;
+        let nearestDist = Infinity;
+        for (const wp of GameState.currentMission.waypoints) {
+            const distY = rocket.y - wp.y; // 火箭 y - waypoint y（火箭還在 waypoint 下方時為正）
+            if (distY > -100 && distY < nearestDist) {
+                nearestDist = distY;
+                nearest = wp;
+            }
+        }
+        // 穿越偵測：上一幀在 waypoint 下方，這幀已到或過了
+        if (rocket.lastY !== undefined) {
+            for (const wp of GameState.currentMission.waypoints) {
+                if (rocket._passedWaypoints.has(wp.id)) continue;
+                if (rocket.lastY > wp.y && rocket.y <= wp.y + 60) {
+                    rocket._passedWaypoints.add(wp.id);
+                    onWaypointPass(wp);
+                }
+            }
+        }
+        // 更新 HUD 路線指示為「目前最接近的 waypoint」
+        if (nearest !== rocket._nearestWaypoint) {
+            rocket._nearestWaypoint = nearest;
+            if (typeof UI !== 'undefined' && UI.updateRouteIndicator) {
+                UI.updateRouteIndicator(nearest, GameState.currentMission?.station?.name);
+            }
+        }
     }
 
     // 轉換為下降階段
@@ -2484,6 +2549,60 @@ function applyCameraShake() {
 }
 
 // ================================================
+// v3.3 任務中途天體渲染
+// 火箭飛行時，自動顯示位於起點與終點之間的所有天體
+// 衛星（Phobos, Europa, Titan, Enceladus, Moon, Gateway）會輕微軌道擺動
+// ================================================
+function drawAllCelestialBodies() {
+    if (!GameState.currentMission || !CONFIG || !CONFIG.stationsMap) return;
+    const originId = GameState.currentMission.originStation;
+    const targetId = GameState.currentMission.station.id;
+    const originStation = originId === 'earth' ? null : CONFIG.stationsMap[originId];
+    const originY = originStation ? originStation.targetAltitude : GROUND_Y;
+    const targetY = GameState.currentMission.station.targetAltitude;
+    const lo = Math.min(originY, targetY);
+    const hi = Math.max(originY, targetY);
+    const margin = 1400; // 預先繪製範圍
+
+    for (const s of CONFIG.stations) {
+        if (s.id === originId || s.id === targetId) continue; // 起點終點另畫
+        if (s.realDistance === 0) continue;
+        const y = s.targetAltitude;
+        if (y < lo - margin || y > hi + margin) continue;
+        const screenY = y - cameraY;
+        if (screenY < -400 || screenY > canvasHeight + 400) continue;
+
+        // 衛星：相對母體擺動
+        if (s.parentBody && CONFIG.stationsMap[s.parentBody]) {
+            const t = Date.now() / 3000;
+            const phase = (s.id.charCodeAt(0) || 1) * 0.5;
+            const radius = s.orbitalRadius || 80;
+            const dx = Math.cos(t + phase) * radius;
+            const dy = Math.sin(t + phase) * 25;
+            drawCelestialBody(s, y, { xOffset: dx, yOffset: dy, sizeScale: 0.5, omitLabel: true });
+        } else {
+            // 一般行星：天體用較小尺寸當背景
+            drawCelestialBody(s, y, { sizeScale: 0.55, omitLabel: true });
+        }
+    }
+}
+
+/**
+ * v3.3 飛越中途天體觸發：
+ * 1. 顯示 toast「飛越 XXX！」
+ * 2. 若該天體有助推資格（boostEligible），套用 5 秒燃料效率加成（-50% 燃料消耗）
+ */
+function onWaypointPass(wp) {
+    if (typeof UI !== 'undefined') {
+        if (UI.toast) UI.toast(`🌌 飛越 ${wp.name}！`, 'info', 2500);
+        if (wp.boostEligible) {
+            rocket.fuelEfficiencyBoost = { factor: 0.5, expiresAt: Date.now() + 5000 };
+            if (UI.toast) UI.toast('✨ 重力助推！燃料效率 +50%（5 秒）', 'success', 2500);
+        }
+    }
+}
+
+// ================================================
 // 粒子更新
 // ================================================
 function updateAndDrawParticles() {
@@ -2516,6 +2635,7 @@ function gameLoop(timestamp) {
 
         drawStars();
         drawStartingBody();
+        drawAllCelestialBodies();
         drawDestination();
         drawGround();
         drawLaunchTower();
@@ -2614,6 +2734,7 @@ const Physics = {
 
         drawStars();
         drawStartingBody();
+        drawAllCelestialBodies();
         drawDestination();
         drawGround();
         drawLaunchTower();

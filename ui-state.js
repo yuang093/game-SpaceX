@@ -846,6 +846,133 @@ function getReputationLevel(reputation) {
 }
 
 // ================================================
+// v3.3 真實距離座標系統
+// 為 21 個太空站附加 realDistance（百萬公里）+ parentBody（衛星母體）+ orbitalRadius（軌道擺動半徑）
+// 自動從 realDistance 計算 targetAltitude（世界座標 Y）
+// ================================================
+
+const STATION_REAL_DATA = {
+    earth:      { realDistance: 0,      parentBody: null,    orbitalRadius: 0 },
+    leo:        { realDistance: 0.0004, parentBody: 'earth', orbitalRadius: 30 },
+    polar:      { realDistance: 0.0006, parentBody: 'earth', orbitalRadius: 30 },
+    moon:       { realDistance: 0.384,  parentBody: 'earth', orbitalRadius: 100 },
+    gateway:    { realDistance: 0.384,  parentBody: 'earth', orbitalRadius: 100 },
+    solar_satellite: { realDistance: 150, parentBody: null, orbitalRadius: 0 },
+    lagrange:   { realDistance: 150,    parentBody: null,    orbitalRadius: 0 },
+    venus:      { realDistance: 41,     parentBody: null,    orbitalRadius: 0 },
+    mercury:    { realDistance: 92,     parentBody: null,    orbitalRadius: 0 },
+    mars:       { realDistance: 78,     parentBody: null,    orbitalRadius: 0 },
+    phobos:     { realDistance: 78,     parentBody: 'mars',  orbitalRadius: 80 },
+    ceres:      { realDistance: 414,    parentBody: null,    orbitalRadius: 0 },
+    asteroid:   { realDistance: 400,    parentBody: null,    orbitalRadius: 0 },
+    europa:     { realDistance: 628,    parentBody: 'jupiter', orbitalRadius: 90 },
+    jupiter:    { realDistance: 628,    parentBody: null,    orbitalRadius: 0 },
+    saturn_ring:{ realDistance: 1275,   parentBody: null,    orbitalRadius: 0 },
+    titan:      { realDistance: 1275,   parentBody: 'saturn_ring', orbitalRadius: 100 },
+    enceladus:  { realDistance: 1275,   parentBody: 'saturn_ring', orbitalRadius: 100 },
+    neptune:    { realDistance: 4350,   parentBody: null,    orbitalRadius: 0 },
+    pluto:      { realDistance: 5760,   parentBody: null,    orbitalRadius: 0 },
+    kuiper_belt:{ realDistance: 6000,   parentBody: null,    orbitalRadius: 0 },
+    comet:      { realDistance: 5000,   parentBody: null,    orbitalRadius: 0 }
+};
+
+// 將真實距離（百萬公里）映射到世界座標 Y（9950 地面 → 100 頂端）
+// LEO 區用線性（避免 log10 過度擠壓），其他用對數+線性混合
+function distanceToTargetY(distanceMk) {
+    if (distanceMk < 0.001) {
+        // LEO 區：0.0001 km → 9900，0.0008 km → 9650（仍在月球下方）
+        return Math.round(9950 - distanceMk * 3750000);
+    }
+    // 對數映射：log10(0.384)=-0.42, log10(6000)=3.78
+    const logD = Math.log10(distanceMk);
+    const t = (logD + 0.42) / (3.78 + 0.42); // 0~1
+    return Math.round(9700 - t * 9500);
+}
+
+// 重力助推資格：飛越大天體時可獲得燃料效率加成
+const BOOST_STATIONS = new Set(['moon', 'gateway', 'mars', 'jupiter', 'saturn_ring', 'neptune', 'pluto']);
+
+// 為所有太空站附加真實距離資料 + 自動計算 targetAltitude
+// 同時建立 stationsMap（id → station）方便 O(1) 查詢
+function enrichStationsWithRealData() {
+    CONFIG.stationsMap = {};
+    for (const s of CONFIG.stations) {
+        const data = STATION_REAL_DATA[s.id];
+        if (data) {
+            s.realDistance = data.realDistance;
+            s.parentBody = data.parentBody;
+            s.orbitalRadius = data.orbitalRadius;
+        } else {
+            // 預設值（防呆）
+            s.realDistance = s.altitude ? s.altitude / 1e6 : 1;
+            s.parentBody = null;
+            s.orbitalRadius = 0;
+        }
+        s.targetAltitude = distanceToTargetY(s.realDistance);
+        s.boostEligible = BOOST_STATIONS.has(s.id);
+        CONFIG.stationsMap[s.id] = s;
+    }
+}
+enrichStationsWithRealData();
+
+// 太空站類型對應 emoji（用於 HUD 路線指示 / 任務卡小圖）
+const STATION_TYPE_ICONS = {
+    space_station: '🛰️',
+    solar_array: '☀️',
+    moon_base: '🌕',
+    lagrange_point: '✨',
+    phobos_station: '🪐',
+    mars_base: '🔴',
+    asteroid: '☄️',
+    europa_base: '🧊',
+    saturn_station: '🪐',
+    jupiter_station: '🪐',
+    comet: '☄️',
+    titan_base: '🌫️',
+    enceladus_station: '💧',
+    kuiper_station: '🌌',
+    venus_base: '♀️',
+    mercury_base: '☿️',
+    neptune_station: '♆',
+    pluto_station: '♇',
+    ceres_station: '⚫'
+};
+
+function stationTypeIcon(type) {
+    return STATION_TYPE_ICONS[type] || '🪐';
+}
+
+function originIconOf(originId) {
+    if (originId === 'earth') return '🌍';
+    return stationTypeIcon(CONFIG.stationsMap[originId]?.type);
+}
+
+/**
+ * 計算任務中途會經過的太空站（依真實距離排序）
+ * 排除起點與終點本身
+ */
+function computeWaypoints(originId, targetId) {
+    const origin = CONFIG.stationsMap[originId];
+    const target = CONFIG.stationsMap[targetId];
+    if (!target) return [];
+    const originDist = origin?.realDistance ?? 0;
+    const targetDist = target.realDistance;
+    const lo = Math.min(originDist, targetDist);
+    const hi = Math.max(originDist, targetDist);
+    return CONFIG.stations
+        .filter(s => s.realDistance > lo && s.realDistance < hi)
+        .sort((a, b) => a.realDistance - b.realDistance)
+        .map(s => ({
+            id: s.id,
+            name: s.name,
+            icon: stationTypeIcon(s.type),
+            y: s.targetAltitude,
+            dist: s.realDistance,
+            boostEligible: s.boostEligible
+        }));
+}
+
+// ================================================
 // 生成任務（v3.0：單一起點、限制數量 10 個）
 // ================================================
 
@@ -1562,6 +1689,40 @@ const UI = {
         }
     },
 
+    // v3.3 任務卡路線小圖
+    renderMissionRoute(mission) {
+        const track = document.getElementById('mission-route-track');
+        if (!track || !mission) return;
+        const originIcon = originIconOf(mission.originStation);
+        const targetIcon = stationTypeIcon(mission.station.type);
+        const wpDots = (mission.waypoints || []).map(wp =>
+            `<span class="route-dot wp${wp.boostEligible ? ' boost' : ''}" title="${wp.name}（${wp.dist.toFixed(2)} 百萬 km）${wp.boostEligible ? ' ✨可助推' : ''}">${wp.icon}</span>`
+        ).join('<span class="route-line"></span>');
+        const wpSection = wpDots ? `<span class="route-line"></span>${wpDots}` : '';
+        track.innerHTML = `
+            <span class="route-dot origin" title="起點">${originIcon}</span>
+            <span class="route-line"></span>
+            ${wpSection}
+            <span class="route-line"></span>
+            <span class="route-dot target" title="終點">${targetIcon}</span>
+        `;
+    },
+
+    // v3.3 HUD 路線指示更新
+    updateRouteIndicator(currentWaypoint, targetName) {
+        const el = document.getElementById('hud-route-indicator');
+        if (!el) return;
+        if (currentWaypoint) {
+            el.innerHTML = `🌌 飛越中：${currentWaypoint.icon} ${currentWaypoint.name}`;
+            el.classList.add('active');
+        } else if (targetName) {
+            el.innerHTML = `🎯 目標：${targetName}`;
+            el.classList.add('active');
+        } else {
+            el.classList.remove('active');
+        }
+    },
+
     // 太空站列表
     updateStationList() {
         DOM.stationsList.innerHTML = '';
@@ -2063,7 +2224,15 @@ function showMissionDetails(index) {
     `;
 
     DOM.missionDetails.classList.remove('hidden');
-    DOM.btnAcceptMission.onclick = () => { GameState.currentMission = mission; GameState.availableMissions.splice(index, 1); DOM.missionDetails.classList.add('hidden'); UI.updateMissionList(); UI.updateMissionInfo(); };
+    DOM.btnAcceptMission.onclick = () => {
+        mission.waypoints = computeWaypoints(mission.originStation, mission.station.id);
+        GameState.currentMission = mission;
+        GameState.availableMissions.splice(index, 1);
+        DOM.missionDetails.classList.add('hidden');
+        UI.updateMissionList();
+        UI.updateMissionInfo();
+        UI.renderMissionRoute(mission);
+    };
     DOM.btnCancelMission.onclick = () => { DOM.missionDetails.classList.add('hidden'); document.querySelectorAll('.mission-card').forEach(c => c.classList.remove('selected')); };
 }
 

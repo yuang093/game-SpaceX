@@ -89,6 +89,10 @@
                 <div id="mission-details" class="hidden">
                     <h3>任務詳情</h3>
                     <div id="mission-info"></div>
+                    <div class="mission-route">
+                        <div class="route-label">🗺️ 航線</div>
+                        <div class="route-track" id="mission-route-track"></div>
+                    </div>
                     <button id="btn-accept-mission" class="btn-primary">接受任務</button>
                     <button id="btn-cancel-mission" class="btn-secondary">取消</button>
                 </div>
@@ -209,6 +213,7 @@
                 </div>
                 <div class="hud-center">
                     <div id="mission-objective">待命中</div>
+                    <div id="hud-route-indicator"></div>
                 </div>
                 <div class="hud-right">
                     <div class="hud-item"><span>姿態</span><span id="hud-angle">0</span>°</div>
