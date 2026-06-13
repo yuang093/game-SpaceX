@@ -88,6 +88,44 @@ const PHYSICS = {
 const particles = [];
 const MAX_PARTICLES = 300;
 
+// 火箭圖片快取（type → HTMLImageElement）
+const rocketImageCache = {};
+const ROCKET_IMAGE_BASE = 'assets/rockets/';
+
+/**
+ * 預先載入所有火箭 SVG 圖片
+ * 使用與 CONFIG.rocketImages 一致的 key（底線命名）
+ */
+function preloadRocketImages() {
+    // key 對應 GameState.rockets[].type，fileName 對應 SVG 檔名
+    const mapping = [
+        { key: 'scout', fileName: 'scout' },
+        { key: 'falcon', fileName: 'falcon-9' },
+        { key: 'dragon', fileName: 'dragon' },
+        { key: 'heavy', fileName: 'falcon-heavy' },
+        { key: 'starship', fileName: 'starship' },
+        { key: 'starship_v2', fileName: 'starship-v2' },
+        { key: 'super_heavy', fileName: 'super-heavy' },
+        { key: 'tanker', fileName: 'tanker' },
+        { key: 'lynx', fileName: 'lynx' }
+    ];
+    mapping.forEach(({ key, fileName }) => {
+        const img = new Image();
+        img.src = ROCKET_IMAGE_BASE + fileName + '.svg';
+        img.onerror = () => console.warn(`火箭圖片載入失敗: ${fileName}`);
+        rocketImageCache[key] = img;
+    });
+}
+
+/**
+ * 取得當前選擇火箭的圖片
+ */
+function getCurrentRocketImage() {
+    const rocketData = GameState.rockets[GameState.selectedRocketIndex];
+    if (!rocketData) return rocketImageCache['scout'];
+    return rocketImageCache[rocketData.type] || rocketImageCache['scout'];
+}
+
 class Particle {
     constructor(x, y, vx, vy, type = 'flame') {
         this.x = x;
@@ -467,78 +505,39 @@ function drawRocket() {
     const w = rocket.width;
     const h = rocket.height;
 
-    // 陰影
+    // 陰影（橢圓，在箭體下方）
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
     ctx.ellipse(3, h / 2 + 5, w / 2, 5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 箭體
-    ctx.fillStyle = '#e8e8e8';
-    ctx.beginPath();
-    ctx.moveTo(0, -h / 2);
-    ctx.lineTo(w / 2, -h / 4);
-    ctx.lineTo(w / 2, h / 3);
-    ctx.lineTo(-w / 2, h / 3);
-    ctx.lineTo(-w / 2, -h / 4);
-    ctx.closePath();
-    ctx.fill();
+    // 取得當前火箭圖片
+    const img = getCurrentRocketImage();
+    if (img && img.complete && img.naturalWidth > 0) {
+        // SVG 圖片：viewBox 200x400 或 300x400
+        // 火箭物理尺寸 24x70，計算縮放比例
+        // 以寬度為基準，確保圖片符合 rocket.width
+        const scale = (w * 1.5) / img.naturalWidth; // 1.5x 讓圖片更顯眼
+        const drawW = img.naturalWidth * scale;
+        const drawH = img.naturalHeight * scale;
+        // 繪製在 (-drawW/2, -drawH/2) 為左上角
+        ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+    } else {
+        // 圖片未載入完成，使用後備形狀
+        drawFallbackRocket(w, h);
+    }
 
-    // 箭體紋理
-    ctx.strokeStyle = '#cccccc';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(-w / 2 + 2, -h / 6);
-    ctx.lineTo(w / 2 - 2, -h / 6);
-    ctx.moveTo(-w / 2 + 2, 0);
-    ctx.lineTo(w / 2 - 2, 0);
-    ctx.stroke();
-
-    // 頭錐（紅色）
-    ctx.fillStyle = '#ff4466';
-    ctx.beginPath();
-    ctx.moveTo(0, -h / 2);
-    ctx.lineTo(w / 2 - 3, -h / 4);
-    ctx.lineTo(-w / 2 + 3, -h / 4);
-    ctx.closePath();
-    ctx.fill();
-
-    // SpaceX 標誌
-    ctx.fillStyle = '#00aaff';
-    ctx.fillRect(-w / 2 + 3, -h / 5, w - 6, 6);
-
-    // 引擎段
-    ctx.fillStyle = '#666666';
-    ctx.fillRect(-w / 3, h / 3, w * 2 / 3, 10);
-
-    // 鰭片
-    ctx.fillStyle = '#999999';
-    ctx.beginPath();
-    ctx.moveTo(-w / 2, h / 5);
-    ctx.lineTo(-w / 2 - 10, h / 2);
-    ctx.lineTo(-w / 2, h / 3);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(w / 2, h / 5);
-    ctx.lineTo(w / 2 + 10, h / 2);
-    ctx.lineTo(w / 2, h / 3);
-    ctx.closePath();
-    ctx.fill();
-
-    // 熱量效果
+    // 熱量效果（覆蓋在圖片上）
     if (rocket.heat > 0) {
         const heatRatio = Math.min(rocket.heat / rocket.maxHeat, 1);
         ctx.fillStyle = `rgba(255, ${Math.round(100 * (1 - heatRatio))}, 0, ${0.2 + heatRatio * 0.5})`;
-        ctx.fillRect(-w / 2, -h / 4, w, h * 0.6);
+        ctx.fillRect(-w / 2, -h / 2, w, h);
     }
 
     // 損傷效果
     if (rocket.hull < rocket.maxHull) {
         const damageRatio = 1 - rocket.hull / rocket.maxHull;
         ctx.fillStyle = `rgba(0, 0, 0, ${damageRatio * 0.5})`;
-        // 隨機損傷斑點
         const seed = Math.floor(rocket.y);
         for (let i = 0; i < 5; i++) {
             const dx = ((seed * (i + 1) * 7) % w) - w / 2;
@@ -551,7 +550,7 @@ function drawRocket() {
 
     ctx.restore();
 
-    // 引擎火焰
+    // 引擎火焰（從箭體底部）
     if (rocket.thrusting && rocket.fuel > 0 && rocket.phase !== 'LANDED' && rocket.phase !== 'DOCKED') {
         const flameX = screenX + Math.sin(rocket.angle) * (rocket.height / 2 + 8);
         const flameY = screenY + Math.cos(rocket.angle) * (rocket.height / 2 + 8);
@@ -577,6 +576,39 @@ function drawRocket() {
     if (rocket.phase === 'ORBIT' || rocket.phase === 'DESCENDING') {
         emitExhaustParticles(screenX, screenY + rocket.height / 2);
     }
+}
+
+/**
+ * 後備火箭繪製（圖片未載入時使用）
+ */
+function drawFallbackRocket(w, h) {
+    // 箭體
+    ctx.fillStyle = '#e8e8e8';
+    ctx.beginPath();
+    ctx.moveTo(0, -h / 2);
+    ctx.lineTo(w / 2, -h / 4);
+    ctx.lineTo(w / 2, h / 3);
+    ctx.lineTo(-w / 2, h / 3);
+    ctx.lineTo(-w / 2, -h / 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // 頭錐（紅色）
+    ctx.fillStyle = '#ff4466';
+    ctx.beginPath();
+    ctx.moveTo(0, -h / 2);
+    ctx.lineTo(w / 2 - 3, -h / 4);
+    ctx.lineTo(-w / 2 + 3, -h / 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // SpaceX 標誌
+    ctx.fillStyle = '#00aaff';
+    ctx.fillRect(-w / 2 + 3, -h / 5, w - 6, 6);
+
+    // 引擎段
+    ctx.fillStyle = '#666666';
+    ctx.fillRect(-w / 3, h / 3, w * 2 / 3, 10);
 }
 
 // ================================================
@@ -855,6 +887,7 @@ const Physics = {
             requestAnimationFrame(() => {
                 resizeCanvas();
                 generateStars();
+                preloadRocketImages();
                 this.setupControls();
                 this.drawInitialScene();
             });
