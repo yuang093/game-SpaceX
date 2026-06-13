@@ -700,19 +700,19 @@ const CONFIG = {
         { id: 'ariane',         name: '🚀 Ariane 5',          rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_ariane.svg',   desc: '歐洲主力運載火箭' },
         { id: 'electron',       name: '🚀 Electron',          rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_electron.svg', desc: 'Rocket Lab 小型發射服務' },
 
-        // 星球/天體 (12 張)
-        { id: 'sun',            name: '☀️ 太陽',               rarity: 'SSR', category: 'planet',   image: 'assets/cards/planet_sun.svg',      desc: '太陽系中心，地球的能量源' },
-        { id: 'mercury',        name: '☿️ 水星',              rarity: 'R',   category: 'planet',   image: 'assets/cards/planet_mercury.svg',  desc: '離太陽最近的行星' },
-        { id: 'venus',          name: '♀️ 金星',              rarity: 'R',   category: 'planet',   image: 'assets/cards/planet_venus.svg',    desc: '太陽系最熱的行星' },
-        { id: 'earth',          name: '🌍 地球',              rarity: 'SSR', category: 'planet',   image: 'assets/cards/planet_earth.svg',    desc: '人類的家園' },
-        { id: 'moon',           name: '🌕 月球',              rarity: 'SR',  category: 'planet',   image: 'assets/cards/planet_moon.svg',     desc: '地球唯一天然衛星' },
-        { id: 'mars',           name: '🔴 火星',              rarity: 'SSR', category: 'planet',   image: 'assets/cards/planet_mars.svg',     desc: '人類下一個登陸目標' },
-        { id: 'jupiter',        name: '♃ 木星',              rarity: 'SR',  category: 'planet',   image: 'assets/cards/planet_jupiter.svg',  desc: '太陽系最大行星' },
-        { id: 'saturn',         name: '🪐 土星',              rarity: 'SR',  category: 'planet',   image: 'assets/cards/planet_saturn.svg',   desc: '以壯麗光環聞名' },
+        // 星球/天體 (12 張) — v3.5 階段 0：複用 assets/planets/ 真實照片（天王星暫保留 SVG，待後續抓圖）
+        { id: 'sun',            name: '☀️ 太陽',               rarity: 'SSR', category: 'planet',   image: 'assets/planets/sun_real.png',      desc: '太陽系中心，地球的能量源' },
+        { id: 'mercury',        name: '☿️ 水星',              rarity: 'R',   category: 'planet',   image: 'assets/planets/mercury_real.png',  desc: '離太陽最近的行星' },
+        { id: 'venus',          name: '♀️ 金星',              rarity: 'R',   category: 'planet',   image: 'assets/planets/venus_real.png',    desc: '太陽系最熱的行星' },
+        { id: 'earth',          name: '🌍 地球',              rarity: 'SSR', category: 'planet',   image: 'assets/planets/earth_real.jpg',    desc: '人類的家園' },
+        { id: 'moon',           name: '🌕 月球',              rarity: 'SR',  category: 'planet',   image: 'assets/planets/moon_real.jpg',     desc: '地球唯一天然衛星' },
+        { id: 'mars',           name: '🔴 火星',              rarity: 'SSR', category: 'planet',   image: 'assets/planets/mars_real.jpg',     desc: '人類下一個登陸目標' },
+        { id: 'jupiter',        name: '♃ 木星',              rarity: 'SR',  category: 'planet',   image: 'assets/planets/jupiter_real.png',  desc: '太陽系最大行星' },
+        { id: 'saturn',         name: '🪐 土星',              rarity: 'SR',  category: 'planet',   image: 'assets/planets/saturn_real.png',   desc: '以壯麗光環聞名' },
         { id: 'uranus',         name: '⛢ 天王星',            rarity: 'N',   category: 'planet',   image: 'assets/cards/planet_uranus.svg',   desc: '側躺旋轉的冰巨星' },
-        { id: 'neptune',        name: '♆ 海王星',            rarity: 'R',   category: 'planet',   image: 'assets/cards/planet_neptune.svg',  desc: '風速最快的行星' },
-        { id: 'pluto',          name: '♇ 冥王星',            rarity: 'N',   category: 'planet',   image: 'assets/cards/planet_pluto.svg',    desc: '矮行星，神秘的古柏帶' },
-        { id: 'titan',          name: '🌫 土衛六 Titan',      rarity: 'N',   category: 'planet',   image: 'assets/cards/planet_titan.svg',    desc: '土星最大衛星，有甲烷湖' },
+        { id: 'neptune',        name: '♆ 海王星',            rarity: 'R',   category: 'planet',   image: 'assets/planets/neptune_real.png',  desc: '風速最快的行星' },
+        { id: 'pluto',          name: '♇ 冥王星',            rarity: 'N',   category: 'planet',   image: 'assets/planets/pluto_real.png',    desc: '矮行星，神秘的古柏帶' },
+        { id: 'titan',          name: '🌫 土衛六 Titan',      rarity: 'N',   category: 'planet',   image: 'assets/planets/titan_real.png',    desc: '土星最大衛星，有甲烷湖' },
 
         // 星系/天體 (4 張)
         { id: 'milky_way',      name: '🌌 銀河系',            rarity: 'SSR', category: 'galaxy',   image: 'assets/cards/galaxy_mw.svg',       desc: '我們所在的棒旋星系' },
