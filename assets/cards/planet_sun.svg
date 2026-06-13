@@ -1,13 +1,22 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-planet_sun" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
-    </linearGradient>
+    <radialGradient id="sun-g" cx="40%" cy="40%">
+      <stop offset="0%" stop-color="#FFFF80"/>
+      <stop offset="50%" stop-color="#FFA020"/>
+      <stop offset="100%" stop-color="#C84000"/>
+    </radialGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-planet_sun)"/>
-  <circle cx="120" cy="135" r="70" fill="#FF4400" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#FFD700" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#FFD700" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#FF4400" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">SUN</text>
+  <rect width="240" height="320" fill="#0A0A1A"/>
+  <circle cx="120" cy="135" r="75" fill="url(#sun-g)"/>
+  <!-- 表面活動（黑子 + 火焰舌）-->
+  <ellipse cx="100" cy="120" rx="8" ry="5" fill="#5A2000" opacity="0.6"/>
+  <ellipse cx="135" cy="150" rx="6" ry="4" fill="#5A2000" opacity="0.5"/>
+  <!-- 日冕（外焰） -->
+  <ellipse cx="80" cy="60" rx="10" ry="20" fill="#FFA020" opacity="0.6"/>
+  <ellipse cx="160" cy="70" rx="12" ry="22" fill="#FF6020" opacity="0.5"/>
+  <ellipse cx="70" cy="180" rx="10" ry="18" fill="#FFA020" opacity="0.5"/>
+  <ellipse cx="170" cy="190" rx="14" ry="20" fill="#FF6020" opacity="0.6"/>
+  <ellipse cx="190" cy="135" rx="8" ry="14" fill="#FFA020" opacity="0.5"/>
+  <ellipse cx="50" cy="135" rx="8" ry="14" fill="#FFA020" opacity="0.5"/>
+  <text x="120" y="295" text-anchor="middle" fill="#FFFF80" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">SUN</text>
 </svg>

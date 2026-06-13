@@ -1,13 +1,33 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-neuralink" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#9D4EDD"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#0a0a1a"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-neuralink)"/>
-  <circle cx="120" cy="135" r="70" fill="#FFFFFF" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#9D4EDD" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#9D4EDD" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">NEURALINK</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 頭部輪廓 -->
+  <path d="M 120 70 Q 70 70 70 140 Q 65 200 120 220 Q 175 200 170 140 Q 170 70 120 70 Z" fill="#2a3a5a" opacity="0.5"/>
+  <!-- 晶片（Neuralink 風格，圓形）-->
+  <circle cx="120" cy="135" r="22" fill="#1a1a1a" stroke="#88CCFF" stroke-width="2"/>
+  <circle cx="120" cy="135" r="14" fill="#88CCFF" opacity="0.3"/>
+  <text x="120" y="140" text-anchor="middle" fill="#88CCFF" font-size="11" font-weight="bold">N</text>
+  <!-- 線從晶片向外延伸（神經介面）-->
+  <line x1="100" y1="120" x2="80" y2="105" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="100" y1="135" x2="75" y2="135" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="100" y1="150" x2="80" y2="170" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="140" y1="120" x2="160" y2="105" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="140" y1="135" x2="165" y2="135" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="140" y1="150" x2="160" y2="170" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="120" y1="113" x2="120" y2="95" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="120" y1="157" x2="120" y2="180" stroke="#88CCFF" stroke-width="1.5" opacity="0.7"/>
+  <!-- 線末端小點 -->
+  <circle cx="80" cy="105" r="2" fill="#88CCFF"/>
+  <circle cx="75" cy="135" r="2" fill="#88CCFF"/>
+  <circle cx="80" cy="170" r="2" fill="#88CCFF"/>
+  <circle cx="160" cy="105" r="2" fill="#88CCFF"/>
+  <circle cx="165" cy="135" r="2" fill="#88CCFF"/>
+  <circle cx="160" cy="170" r="2" fill="#88CCFF"/>
+  <circle cx="120" cy="95" r="2" fill="#88CCFF"/>
+  <circle cx="120" cy="180" r="2" fill="#88CCFF"/>
+  <text x="120" y="295" text-anchor="middle" fill="#88CCFF" font-size="16" font-weight="bold" font-family="sans-serif" letter-spacing="1">NEURALINK</text>
 </svg>

@@ -1,13 +1,35 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-cassini" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#D4A574"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a2a"/><stop offset="100%" stop-color="#000010"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-cassini)"/>
-  <circle cx="120" cy="135" r="70" fill="#3A1A00" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#D4A574" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#D4A574" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#3A1A00" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">CASSINI</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 高增益天線（白色大圓）-->
+  <ellipse cx="120" cy="80" rx="70" ry="22" fill="#F0F0F0" stroke="#888"/>
+  <ellipse cx="120" cy="80" rx="60" ry="16" fill="none" stroke="#888"/>
+  <!-- 支柱 -->
+  <line x1="120" y1="100" x2="120" y2="115" stroke="#888" stroke-width="2"/>
+  <!-- 主體（梯形）-->
+  <polygon points="95,115 145,115 155,170 85,170" fill="#E0C870" stroke="#666"/>
+  <!-- 儀器視窗 -->
+  <rect x="100" y="125" width="40" height="3" fill="#1a1a1a"/>
+  <rect x="100" y="135" width="40" height="3" fill="#1a1a1a"/>
+  <rect x="100" y="145" width="40" height="3" fill="#1a1a1a"/>
+  <!-- 兩側儀器臂 -->
+  <line x1="95" y1="140" x2="70" y2="160" stroke="#888" stroke-width="2"/>
+  <line x1="145" y1="140" x2="170" y2="160" stroke="#888" stroke-width="2"/>
+  <circle cx="70" cy="160" r="3" fill="#FF8800"/>
+  <circle cx="170" cy="160" r="3" fill="#FF8800"/>
+  <!-- RTG（同位素）3 根支柱 + 棒 -->
+  <line x1="95" y1="170" x2="80" y2="210" stroke="#888" stroke-width="2"/>
+  <line x1="120" y1="170" x2="120" y2="220" stroke="#888" stroke-width="2"/>
+  <line x1="145" y1="170" x2="160" y2="210" stroke="#888" stroke-width="2"/>
+  <rect x="76" y="210" width="8" height="20" fill="#1a1a1a"/>
+  <rect x="116" y="220" width="8" height="20" fill="#1a1a1a"/>
+  <rect x="156" y="210" width="8" height="20" fill="#1a1a1a"/>
+  <!-- 土星（背景） -->
+  <circle cx="195" cy="100" r="14" fill="#F4D58A"/>
+  <ellipse cx="195" cy="100" rx="22" ry="4" fill="none" stroke="#C4A05A" stroke-width="1.5"/>
+  <text x="120" y="295" text-anchor="middle" fill="#F0F0F0" font-size="18" font-weight="bold" font-family="sans-serif" letter-spacing="2">CASSINI</text>
 </svg>

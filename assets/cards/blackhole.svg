@@ -1,17 +1,31 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="bh-accretion" cx="50%" cy="50%">
-      <stop offset="40%" stop-color="#000"/>
-      <stop offset="55%" stop-color="#FF8800" stop-opacity="0.9"/>
-      <stop offset="80%" stop-color="#FFD700" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#FF4400" stop-opacity="0"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a0a2a"/><stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <radialGradient id="disc">
+      <stop offset="0%" stop-color="#FFA040" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#FF6020" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FFA040" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="240" height="320" fill="#0A0A1A"/>
-  <ellipse cx="120" cy="150" rx="90" ry="20" fill="url(#bh-accretion)" transform="rotate(-20 120 150)"/>
-  <circle cx="120" cy="150" r="35" fill="#000"/>
-  <circle cx="120" cy="150" r="35" fill="none" stroke="#000" stroke-width="2"/>
-  <circle cx="100" cy="100" r="1" fill="#FFF" opacity="0.8"/>
-  <circle cx="190" cy="200" r="1" fill="#FFF" opacity="0.7"/>
-  <text x="120" y="290" text-anchor="middle" fill="#FF8800" font-size="18" font-weight="bold" font-family="sans-serif">BLACK HOLE</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 背景星 -->
+  <circle cx="40" cy="50" r="1" fill="#FFFFFF"/>
+  <circle cx="200" cy="40" r="1" fill="#FFFFFF"/>
+  <circle cx="30" cy="220" r="1.5" fill="#FFFFFF"/>
+  <circle cx="210" cy="200" r="1" fill="#FFFFFF"/>
+  <circle cx="50" cy="100" r="0.5" fill="#FFFFFF"/>
+  <circle cx="190" cy="100" r="0.5" fill="#FFFFFF"/>
+  <!-- 吸積盤（外層傾斜橢圓）-->
+  <ellipse cx="120" cy="150" rx="90" ry="30" fill="url(#disc)" transform="rotate(-15 120 150)"/>
+  <ellipse cx="120" cy="150" rx="70" ry="22" fill="url(#disc)" transform="rotate(-15 120 150)"/>
+  <!-- 光子球（亮環）-->
+  <circle cx="120" cy="150" r="35" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.8"/>
+  <!-- 黑洞（黑色圓）-->
+  <circle cx="120" cy="150" r="25" fill="#000000"/>
+  <!-- 重力透鏡效應（背景星被彎曲成弧）-->
+  <path d="M 60 80 Q 100 150 60 220" fill="none" stroke="#FFFFFF" stroke-width="0.5" opacity="0.3"/>
+  <path d="M 180 80 Q 140 150 180 220" fill="none" stroke="#FFFFFF" stroke-width="0.5" opacity="0.3"/>
+  <text x="120" y="295" text-anchor="middle" fill="#FFA040" font-size="18" font-weight="bold" font-family="sans-serif" letter-spacing="2">BLACK HOLE</text>
 </svg>

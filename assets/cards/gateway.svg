@@ -1,13 +1,31 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-gateway" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a3a"/><stop offset="100%" stop-color="#000018"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-gateway)"/>
-  <circle cx="120" cy="135" r="70" fill="#0A0A1A" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#FFD700" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#FFD700" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#0A0A1A" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">GATEWAY</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 月球（背景） -->
+  <circle cx="50" cy="220" r="30" fill="#999"/>
+  <circle cx="42" cy="215" r="3" fill="#666"/>
+  <circle cx="55" cy="225" r="2" fill="#666"/>
+  <circle cx="60" cy="210" r="1.5" fill="#666"/>
+  <circle cx="40" cy="230" r="2" fill="#666"/>
+  <!-- 太陽能板（巨型單一對）-->
+  <rect x="20" y="100" width="50" height="80" fill="#1a2a6a" stroke="#4488FF"/>
+  <line x1="45" y1="100" x2="45" y2="180" stroke="#4488FF"/>
+  <line x1="20" y1="125" x2="70" y2="125" stroke="#4488FF"/>
+  <line x1="20" y1="150" x2="70" y2="150" stroke="#4488FF"/>
+  <rect x="170" y="100" width="50" height="80" fill="#1a2a6a" stroke="#4488FF"/>
+  <line x1="195" y1="100" x2="195" y2="180" stroke="#4488FF"/>
+  <line x1="170" y1="125" x2="220" y2="125" stroke="#4488FF"/>
+  <line x1="170" y1="150" x2="220" y2="150" stroke="#4488FF"/>
+  <!-- 中央 HALO 棲息艙 -->
+  <rect x="100" y="130" width="40" height="25" fill="#E0E0E0" stroke="#666"/>
+  <!-- PPE 動力元件 -->
+  <rect x="95" y="100" width="50" height="20" fill="#FFC832" stroke="#666"/>
+  <line x1="95" y1="110" x2="145" y2="110" stroke="#666"/>
+  <!-- 國際介面 -->
+  <rect x="115" y="155" width="10" height="15" fill="#CCC" stroke="#666"/>
+  <text x="120" y="295" text-anchor="middle" fill="#FFC832" font-size="14" font-weight="bold" font-family="sans-serif" letter-spacing="1">GATEWAY</text>
 </svg>

@@ -1,13 +1,20 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-spacex" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#0a0a1a"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-spacex)"/>
-  <circle cx="120" cy="135" r="70" fill="#0A0A1A" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#FFFFFF" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#0A0A1A" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">SPACE X</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 太空船細長主體 -->
+  <path d="M 110 60 L 110 200 L 100 220 L 100 230 L 140 230 L 140 220 L 130 200 L 130 60 Q 120 50 110 60 Z" fill="#E0E0E0"/>
+  <!-- 翼 -->
+  <polygon points="110,140 80,160 110,165" fill="#E0E0E0"/>
+  <polygon points="130,140 160,160 130,165" fill="#E0E0E0"/>
+  <!-- 窗 -->
+  <circle cx="120" cy="80" r="4" fill="#1a3a6a"/>
+  <circle cx="120" cy="100" r="4" fill="#1a3a6a"/>
+  <!-- 火焰 -->
+  <ellipse cx="120" cy="245" rx="15" ry="20" fill="#FF8800" opacity="0.8"/>
+  <ellipse cx="120" cy="248" rx="8" ry="14" fill="#FFD700"/>
+  <text x="120" y="295" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">SPACEX</text>
 </svg>

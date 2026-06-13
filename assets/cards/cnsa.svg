@@ -1,13 +1,25 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-cnsa" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#DE2910"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a0000"/><stop offset="100%" stop-color="#1a0000"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-cnsa)"/>
-  <circle cx="120" cy="135" r="70" fill="#FFD700" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#DE2910" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#DE2910" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">CNSA</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 大五角星 -->
+  <polygon points="60,55 65,75 86,75 69,87 75,107 60,95 45,107 51,87 34,75 55,75" fill="#FFD700"/>
+  <!-- 小五角星 1 -->
+  <polygon points="100,40 103,52 115,52 105,60 109,72 100,65 91,72 95,60 85,52 97,52" fill="#FFD700" transform="scale(0.5) translate(120 50)"/>
+  <!-- 火箭（長征系列） -->
+  <path d="M 110 130 Q 120 115 130 130 L 130 195 L 110 195 Z" fill="#FFFFFF"/>
+  <rect x="110" y="195" width="20" height="20" fill="#C8323C"/>
+  <rect x="113" y="215" width="14" height="10" fill="#222"/>
+  <!-- 兩側助推器 -->
+  <rect x="98" y="150" width="8" height="40" fill="#FFFFFF"/>
+  <rect x="134" y="150" width="8" height="40" fill="#FFFFFF"/>
+  <!-- 火焰 -->
+  <ellipse cx="120" cy="235" rx="14" ry="15" fill="#FF8800"/>
+  <ellipse cx="120" cy="240" rx="7" ry="10" fill="#FFD700"/>
+  <!-- CNSA 文字 -->
+  <text x="120" y="180" text-anchor="middle" fill="#C8323C" font-size="11" font-weight="bold" font-family="sans-serif">CNSA</text>
+  <text x="120" y="295" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="3">CNSA</text>
 </svg>

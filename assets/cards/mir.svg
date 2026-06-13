@@ -1,13 +1,27 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-mir" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#888888"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1a3a"/><stop offset="100%" stop-color="#000010"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-mir)"/>
-  <circle cx="120" cy="135" r="70" fill="#0A0A1A" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#888888" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#888888" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#0A0A1A" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">MIR</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 6 個模組 + 太陽能板 -->
+  <rect x="60" y="130" width="120" height="20" fill="#E0E0E0" stroke="#666"/>
+  <line x1="100" y1="130" x2="100" y2="150" stroke="#666" stroke-width="2"/>
+  <line x1="140" y1="130" x2="140" y2="150" stroke="#666" stroke-width="2"/>
+  <!-- 4 個對接艙（上下左右）-->
+  <rect x="115" y="90" width="10" height="40" fill="#CCC" stroke="#666"/>
+  <rect x="115" y="150" width="10" height="40" fill="#CCC" stroke="#666"/>
+  <rect x="40" y="135" width="20" height="10" fill="#CCC" stroke="#666"/>
+  <rect x="180" y="135" width="20" height="10" fill="#CCC" stroke="#666"/>
+  <!-- 太陽能板（兩端各 2 片）-->
+  <rect x="10" y="110" width="30" height="60" fill="#1a2a6a" stroke="#666"/>
+  <line x1="25" y1="110" x2="25" y2="170" stroke="#666"/>
+  <line x1="10" y1="140" x2="40" y2="140" stroke="#666"/>
+  <rect x="200" y="110" width="30" height="60" fill="#1a2a6a" stroke="#666"/>
+  <line x1="215" y1="110" x2="215" y2="170" stroke="#666"/>
+  <line x1="200" y1="140" x2="230" y2="140" stroke="#666"/>
+  <!-- 地球弧 -->
+  <ellipse cx="120" cy="280" rx="200" ry="40" fill="#1a4488" opacity="0.4"/>
+  <text x="120" y="295" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="bold" font-family="sans-serif" letter-spacing="2">MIR</text>
 </svg>

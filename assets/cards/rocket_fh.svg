@@ -1,13 +1,30 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-rocket_fh" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#4488FF"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#0a0a1a"/>
+    </linearGradient>
+    <linearGradient id="rb" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#666"/><stop offset="50%" stop-color="#E8E8E8"/><stop offset="100%" stop-color="#666"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-rocket_fh)"/>
-  <circle cx="120" cy="135" r="70" fill="#0A0A1A" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#4488FF" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#4488FF" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#0A0A1A" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">FALCON HVY</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 左側助推器 -->
+  <rect x="60" y="80" width="14" height="110" fill="url(#rb)"/>
+  <path d="M 60 80 Q 67 65 74 80 Z" fill="#E8E8E8"/>
+  <polygon points="60,180 50,200 60,195" fill="#888"/>
+  <polygon points="74,180 84,200 74,195" fill="#888"/>
+  <ellipse cx="67" cy="220" rx="8" ry="20" fill="#FF8800" opacity="0.8"/>
+  <!-- 中央主芯 -->
+  <rect x="113" y="50" width="14" height="140" fill="url(#rb)"/>
+  <path d="M 113 50 Q 120 30 127 50 Z" fill="#E8E8E8"/>
+  <polygon points="113,180 103,205 113,200" fill="#888"/>
+  <polygon points="127,180 137,205 127,200" fill="#888"/>
+  <ellipse cx="120" cy="225" rx="9" ry="22" fill="#FF8800" opacity="0.8"/>
+  <!-- 右側助推器 -->
+  <rect x="166" y="80" width="14" height="110" fill="url(#rb)"/>
+  <path d="M 166 80 Q 173 65 180 80 Z" fill="#E8E8E8"/>
+  <polygon points="166,180 156,200 166,195" fill="#888"/>
+  <polygon points="180,180 190,200 180,195" fill="#888"/>
+  <ellipse cx="173" cy="220" rx="8" ry="20" fill="#FF8800" opacity="0.8"/>
+  <text x="120" y="295" text-anchor="middle" fill="#E8E8E8" font-size="14" font-weight="bold" font-family="sans-serif" letter-spacing="1">FALCON HEAVY</text>
 </svg>

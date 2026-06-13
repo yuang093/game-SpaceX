@@ -1,13 +1,31 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-rocket_falcon1" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C0C0C0"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0a0a1a"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-rocket_falcon1)"/>
-  <circle cx="120" cy="135" r="70" fill="#0A0A1A" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#C0C0C0" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#C0C0C0" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#0A0A1A" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">FALCON 1</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <defs><linearGradient id="rb" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#666"/>
+      <stop offset="50%" stop-color="#E8E8E8"/>
+      <stop offset="100%" stop-color="#666"/>
+    </linearGradient></defs>
+    <!-- 整流罩 -->
+    <path d="M 110 60 Q 120 40 130 60 L 130 75 L 110 75 Z" fill="#E8E8E8"/>
+    <!-- 本體 -->
+    <rect x="110" y="75" width="20" height="115" fill="url(#rb)"/>
+    <!-- 細節條 -->
+    <line x1="110" y1="105" x2="130" y2="105" stroke="#666" stroke-width="1.5"/>
+    <line x1="110" y1="140" x2="130" y2="140" stroke="#666" stroke-width="1.5"/>
+    <!-- 引擎 -->
+    <rect x="113" y="190" width="14" height="14" fill="#333"/>
+    <!-- 翅膀/fins -->
+    <polygon points="105,180 90,210 105,205" fill="#888"/>
+                    <polygon points="135,180 150,210 135,205" fill="#888"/>
+    <!-- 火焰 -->
+    <ellipse cx="120" cy="220" rx="20" ry="30" fill="#FF8800" opacity="0.8"/>
+    <ellipse cx="120" cy="225" rx="12" ry="22" fill="#FFD700" opacity="0.9"/>
+    <ellipse cx="120" cy="230" rx="6" ry="14" fill="#FFFFFF"/>
+  <text x="120" y="295" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="bold" font-family="sans-serif" letter-spacing="1">FALCON 1</text>
 </svg>

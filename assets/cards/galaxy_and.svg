@@ -1,13 +1,25 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-galaxy_and" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#A86FC8"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a2a"/><stop offset="100%" stop-color="#000010"/>
     </linearGradient>
+    <radialGradient id="ag" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="30%" stop-color="#A8C8E8" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#1a3a6a" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-galaxy_and)"/>
-  <circle cx="120" cy="135" r="70" fill="#0A0A1A" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#A86FC8" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#A86FC8" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#0A0A1A" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">ANDROMEDA</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 旋臂（4 條）-->
+  <ellipse cx="120" cy="135" rx="105" ry="40" fill="url(#ag)" transform="rotate(30 120 135)"/>
+  <ellipse cx="120" cy="135" rx="90" ry="32" fill="url(#ag)" transform="rotate(30 120 135)"/>
+  <!-- 核心 -->
+  <circle cx="120" cy="135" r="14" fill="#FFE8A8" opacity="0.95"/>
+  <circle cx="120" cy="135" r="8" fill="#FFFFFF" opacity="0.8"/>
+  <!-- 散落亮星 -->
+  <circle cx="60" cy="60" r="1.5" fill="#FFFFFF"/>
+  <circle cx="180" cy="50" r="1" fill="#FFFFFF"/>
+  <circle cx="200" cy="200" r="1" fill="#FFFFFF"/>
+  <circle cx="40" cy="220" r="1" fill="#FFFFFF"/>
+  <text x="120" y="295" text-anchor="middle" fill="#A8C8E8" font-size="16" font-weight="bold" font-family="sans-serif" letter-spacing="1">ANDROMEDA</text>
 </svg>

@@ -1,13 +1,25 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-tiangong" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#DE2910"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1a3a"/><stop offset="100%" stop-color="#000010"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-tiangong)"/>
-  <circle cx="120" cy="135" r="70" fill="#FFD700" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#DE2910" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#DE2910" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">TIANGONG</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 太陽能板（單一橫向大板）-->
+  <rect x="30" y="125" width="180" height="22" fill="#1a2a6a" stroke="#C8323C" stroke-width="1"/>
+  <line x1="60" y1="125" x2="60" y2="147" stroke="#C8323C"/>
+  <line x1="90" y1="125" x2="90" y2="147" stroke="#C8323C"/>
+  <line x1="120" y1="125" x2="120" y2="147" stroke="#C8323C"/>
+  <line x1="150" y1="125" x2="150" y2="147" stroke="#C8323C"/>
+  <line x1="180" y1="125" x2="180" y2="147" stroke="#C8323C"/>
+  <line x1="30" y1="136" x2="210" y2="136" stroke="#C8323C"/>
+  <!-- 中央模組 -->
+  <rect x="100" y="80" width="40" height="40" fill="#E0E0E0" stroke="#666"/>
+  <rect x="90" y="90" width="60" height="20" fill="#E0E0E0" stroke="#666"/>
+  <!-- 對接端口 -->
+  <circle cx="120" cy="100" r="3" fill="#1a3a6a"/>
+  <line x1="120" y1="147" x2="120" y2="160" stroke="#666" stroke-width="3"/>
+  <!-- 地球弧 -->
+  <ellipse cx="120" cy="290" rx="200" ry="35" fill="#1a4488" opacity="0.4"/>
+  <text x="120" y="295" text-anchor="middle" fill="#C8323C" font-size="18" font-weight="bold" font-family="sans-serif" letter-spacing="2">天宮</text>
 </svg>

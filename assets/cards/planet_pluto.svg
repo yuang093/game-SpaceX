@@ -1,13 +1,16 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-planet_pluto" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C9B8A8"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
-    </linearGradient>
+    <radialGradient id="pl-g" cx="35%" cy="35%">
+      <stop offset="0%" stop-color="#C89878"/>
+      <stop offset="100%" stop-color="#4A2818"/>
+    </radialGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-planet_pluto)"/>
-  <circle cx="120" cy="135" r="70" fill="#3A2A1A" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#C9B8A8" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#C9B8A8" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#3A2A1A" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">PLUTO</text>
+  <rect width="240" height="320" fill="#0A0A1A"/>
+  <circle cx="120" cy="135" r="55" fill="url(#pl-g)"/>
+  <!-- 心形 Tombaugh Reggio（白）-->
+  <path d="M 100 130 Q 100 120 110 120 Q 120 120 120 130 Q 120 120 130 120 Q 140 120 140 130 Q 140 145 120 155 Q 100 145 100 130 Z" fill="#F0F0F0" opacity="0.85"/>
+  <!-- 暗斑 -->
+  <ellipse cx="90" cy="120" rx="6" ry="4" fill="#3A1A08" opacity="0.6"/>
+  <ellipse cx="145" cy="115" rx="5" ry="3" fill="#3A1A08" opacity="0.6"/>
+  <text x="120" y="295" text-anchor="middle" fill="#C89878" font-size="18" font-weight="bold" font-family="sans-serif" letter-spacing="2">PLUTO</text>
 </svg>

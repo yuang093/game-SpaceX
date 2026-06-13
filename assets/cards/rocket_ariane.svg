@@ -1,13 +1,29 @@
 <svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g-rocket_ariane" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1E3A8A"/>
-      <stop offset="100%" stop-color="#0A0A1A"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#0a0a1a"/>
+    </linearGradient>
+    <linearGradient id="ar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a3a8a"/><stop offset="50%" stop-color="#4488DD"/><stop offset="100%" stop-color="#1a3a8a"/>
     </linearGradient>
   </defs>
-  <rect width="240" height="320" fill="url(#g-rocket_ariane)"/>
-  <circle cx="120" cy="135" r="70" fill="#FFD700" opacity="0.85"/>
-  <circle cx="120" cy="135" r="70" fill="none" stroke="#1E3A8A" stroke-width="3" opacity="0.6"/>
-  <circle cx="100" cy="115" r="20" fill="#1E3A8A" opacity="0.3"/>
-  <text x="120" y="290" text-anchor="middle" fill="#FFD700" font-size="20" font-weight="bold" font-family="sans-serif" letter-spacing="2">ARIANE 5</text>
+  <rect width="240" height="320" fill="url(#bg)"/>
+  <!-- 整流罩（白色錐）-->
+  <path d="M 108 50 Q 120 30 132 50 L 132 90 L 108 90 Z" fill="#F0F0F0"/>
+  <!-- 主芯藍白 -->
+  <rect x="108" y="90" width="24" height="120" fill="url(#ar)"/>
+  <rect x="108" y="140" width="24" height="50" fill="#F0F0F0"/>
+  <!-- 兩側助推器 -->
+  <rect x="78" y="100" width="20" height="105" fill="url(#ar)"/>
+  <path d="M 78 100 Q 88 85 98 100 Z" fill="#1a3a8a"/>
+  <rect x="142" y="100" width="20" height="105" fill="url(#ar)"/>
+  <path d="M 142 100 Q 152 85 162 100 Z" fill="#1a3a8a"/>
+  <!-- 文字（假 ESA） -->
+  <text x="120" y="125" text-anchor="middle" fill="#FFFFFF" font-size="8" font-weight="bold">esa</text>
+  <!-- 引擎 -->
+  <rect x="113" y="210" width="14" height="12" fill="#333"/>
+  <!-- 火焰 -->
+  <ellipse cx="120" cy="240" rx="22" ry="25" fill="#FF8800" opacity="0.7"/>
+  <ellipse cx="120" cy="245" rx="13" ry="18" fill="#FFD700"/>
+  <text x="120" y="295" text-anchor="middle" fill="#4488DD" font-size="16" font-weight="bold" font-family="sans-serif" letter-spacing="1">ARIANE 5</text>
 </svg>
