@@ -52,7 +52,7 @@ const GameState = {
             totalCost: 0,         // 總成本（用於計算平均成本）
             history: [],          // 價格歷史（最近 30 筆）
             lastFetch: 0,         // 上次抓取時間
-            currentPrice: 0,      // 當前 SPCX 價格（鏡像 RKLB）
+            currentPrice: 0,      // 當前 SPCX 價格（對標 RKLB 參考）
             lastRealSymbol: '',   // 上次抓取的對標股票
             source: 'init'        // 'real' = 抓取成功, 'sim' = 模擬
         }
@@ -1766,14 +1766,14 @@ const SaveSystem = {
 
 // ================================================
 // SPCX 股票系統
-// 鏡像真實股票（SPCE Virgin Galactic，太空旅遊主題最契合）
+// SPCX 是遊戲自有品牌股票（虛擬公司）
+// 行情對標 RKLB 真實股價（作為參考基準）
 // 透過 CORS 代理抓取 Yahoo Finance 行情
 // ================================================
 const StockSystem = {
-    // 設定：SPCX 對標的真實股票（SpaceX 是私人公司，無法直接抓取）
-    // SPCE = Virgin Galactic 太空旅遊 / RKLB = Rocket Lab 衛星發射
-    // 可改為 SPCE / RKLB / ASTS / LUNR / PL 任一太空股
-    REAL_SYMBOL: 'SPCE',
+    // 設定：SPCX 對標的真實股票（用於抓取即時行情作為參考）
+    // SPCX = 遊戲自有品牌 / RKLB = Rocket Lab 公開報價
+    REAL_SYMBOL: 'RKLB',
     CORS_PROXY: 'https://corsproxy.io/?url=',
     YAHOO_URL: 'https://query1.finance.yahoo.com/v8/finance/chart/',
     CACHE_MS: 5 * 60 * 1000,   // 5 分鐘快取
