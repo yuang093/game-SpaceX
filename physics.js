@@ -548,6 +548,180 @@ function drawEarth() {
 }
 
 /**
+ * 繪製起點天體（依 GameState.currentLocation 切換）
+ * 取代原本無條件呼叫 drawEarth()，讓玩家在 moon/mars/jupiter 起飛時看到對應天體
+ */
+function drawStartingBody() {
+    const loc = (typeof GameState !== 'undefined' && GameState.currentLocation) || 'earth';
+    const cx = WORLD_WIDTH / 2;
+    // 起點天體顯示位置（火箭起飛處 GROUND_Y 上方 200）
+    const displayY = GROUND_Y - 200;
+
+    // === 地球 / 地球軌道太空站（顯示地球）===
+    if (loc === 'earth' || loc === 'leo' || loc === 'polar' ||
+        loc === 'solar_satellite' || loc === 'lagrange') {
+        drawEarth();
+        return;
+    }
+
+    // === 月球（顯示月球）===
+    if (loc === 'moon' || loc === 'gateway') {
+        drawMoon(displayY, 1.5);
+        return;
+    }
+
+    // === 火星（顯示火星）===
+    if (loc === 'mars' || loc === 'phobos') {
+        drawMars(displayY, 1.3);
+        return;
+    }
+
+    // === 金星 ===
+    if (loc === 'venus') {
+        drawVenus(displayY, 1.3);
+        return;
+    }
+
+    // === 水星 ===
+    if (loc === 'mercury') {
+        drawMercury(displayY, 1.2);
+        return;
+    }
+
+    // === 木星（巨大條紋行星）===
+    if (loc === 'jupiter') {
+        const screenY = displayY - cameraY;
+        const radius = 220;
+        const jupGrad = ctx.createRadialGradient(cx - 50, screenY - 30, 30, cx, screenY, radius);
+        jupGrad.addColorStop(0, '#ffcc88');
+        jupGrad.addColorStop(0.6, '#cc8855');
+        jupGrad.addColorStop(1, '#664422');
+        ctx.fillStyle = jupGrad;
+        ctx.beginPath();
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+        ctx.fill();
+        // 條紋
+        ctx.fillStyle = 'rgba(100,60,30,0.4)';
+        for (let i = 0; i < 7; i++) {
+            const y = screenY - radius + (i + 1) * (radius * 2 / 8);
+            ctx.fillRect(cx - radius, y, radius * 2, 6);
+        }
+        // 大紅斑
+        ctx.fillStyle = 'rgba(200,100,50,0.7)';
+        ctx.beginPath();
+        ctx.ellipse(cx + radius * 0.4, screenY + radius * 0.2, radius * 0.15, radius * 0.08, 0, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+    }
+
+    // === 土星（環）===
+    if (loc === 'saturn_ring' || loc === 'titan' || loc === 'enceladus') {
+        const screenY = displayY - cameraY;
+        const radius = 180;
+        // 環
+        ctx.strokeStyle = '#ddaa77';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.ellipse(cx, screenY, radius * 1.5, radius * 0.3, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#bb8855';
+        ctx.beginPath();
+        ctx.ellipse(cx, screenY, radius * 1.7, radius * 0.35, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        // 本體
+        const satGrad = ctx.createRadialGradient(cx - 20, screenY - 20, 20, cx, screenY, radius);
+        satGrad.addColorStop(0, '#ffeebb');
+        satGrad.addColorStop(1, '#aa8855');
+        ctx.fillStyle = satGrad;
+        ctx.beginPath();
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+    }
+
+    // === 歐羅巴（冰藍色）===
+    if (loc === 'europa') {
+        const screenY = displayY - cameraY;
+        const radius = 160;
+        const grad = ctx.createRadialGradient(cx - 30, screenY - 30, 20, cx + 150, screenY, radius);
+        grad.addColorStop(0, '#ccddee');
+        grad.addColorStop(0.7, '#88aacc');
+        grad.addColorStop(1, '#446688');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+        ctx.fill();
+        // 冰裂紋
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 8; i++) {
+            ctx.beginPath();
+            ctx.moveTo(cx, screenY);
+            const angle = (i / 8) * Math.PI * 2;
+            ctx.lineTo(cx + Math.cos(angle) * radius * 0.8, screenY + Math.sin(angle) * radius * 0.8);
+            ctx.stroke();
+        }
+        return;
+    }
+
+    // === 海王星（冰藍巨星）===
+    if (loc === 'neptune') {
+        drawNeptune(displayY, 1.5);
+        return;
+    }
+
+    // === 冥王星 ===
+    if (loc === 'pluto') {
+        drawPluto(displayY, 1.3);
+        return;
+    }
+
+    // === 穀神星 / 小行星帶 ===
+    if (loc === 'ceres' || loc === 'asteroid') {
+        drawCeres(displayY, 1.3);
+        return;
+    }
+
+    // === 彗星 ===
+    if (loc === 'comet') {
+        const screenY = displayY - cameraY;
+        // 尾巴
+        const tailLen = 250;
+        const tailGrad = ctx.createLinearGradient(cx, screenY, cx - tailLen, screenY - 50);
+        tailGrad.addColorStop(0, 'rgba(170,238,255,0.7)');
+        tailGrad.addColorStop(0.5, 'rgba(170,238,255,0.3)');
+        tailGrad.addColorStop(1, 'rgba(170,238,255,0)');
+        ctx.fillStyle = tailGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx, screenY);
+        ctx.lineTo(cx - tailLen, screenY - 60);
+        ctx.lineTo(cx - tailLen, screenY + 60);
+        ctx.closePath();
+        ctx.fill();
+        // 核心
+        ctx.fillStyle = '#ddffff';
+        ctx.beginPath();
+        ctx.arc(cx, screenY, 30, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx, screenY, 18, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+    }
+
+    // === 古柏帶（冰封岩石 + 星光）===
+    if (loc === 'kuiper_belt') {
+        drawKuiper(displayY, 1.6);
+        return;
+    }
+
+    // === 預設（未知太空站顯示地球）===
+    drawEarth();
+}
+
+/**
  * 繪製月球（真實衛星紋理）
  * @param {number} worldY - 月球中心的世界座標 Y
  * @param {number} scale - 縮放比例（預設 1）
@@ -2289,7 +2463,7 @@ function gameLoop(timestamp) {
         applyCameraShake();
 
         drawStars();
-        drawEarth();
+        drawStartingBody();
         drawDestination();
         drawGround();
         drawLaunchTower();
@@ -2387,7 +2561,7 @@ const Physics = {
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
         drawStars();
-        drawEarth();
+        drawStartingBody();
         drawDestination();
         drawGround();
         drawLaunchTower();
