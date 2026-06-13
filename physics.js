@@ -1035,7 +1035,11 @@ function drawGround() {
 }
 
 /**
- * 繪製真實發射塔（肯尼迪航天中心 39A 風格）
+ * 繪製真實發射塔（依 GameState.currentLocation 切換風格）
+ * - earth  : 肯尼迪 39A 風格（深灰金屬 + 4 層平台 + 服務臂）
+ * - moon   : 輕量鋁合金支架 + 月岩基座（無大服務臂）
+ * - mars   : 紅色隔熱金屬 + 圓頂觀察艙
+ * - 其他   : 通用太空站精簡發射架
  */
 function drawLaunchTower() {
     const towerX = LAUNCH_TOWER.x - LAUNCH_TOWER.width / 2;
@@ -1044,96 +1048,287 @@ function drawLaunchTower() {
 
     if (towerBottom < -50 || towerTop > canvasHeight + 50) return;
 
-    // === 發射塔主結構 ===
-    // 塔架本體（深灰色金屬）
-    ctx.fillStyle = '#3a3a50';
-    ctx.fillRect(towerX, towerTop, LAUNCH_TOWER.width, LAUNCH_TOWER.height);
+    // 取得玩家當前位置（預設地球）
+    const loc = (typeof GameState !== 'undefined' && GameState.currentLocation) || 'earth';
 
-    // 塔架垂直支撐（X 型斜撐）
-    ctx.strokeStyle = '#5a5a70';
-    ctx.lineWidth = 3;
-    // 左斜撐
-    ctx.beginPath();
-    ctx.moveTo(towerX, towerTop);
-    ctx.lineTo(towerX + LAUNCH_TOWER.width, towerTop + LAUNCH_TOWER.height);
-    ctx.stroke();
-    // 右斜撐
-    ctx.beginPath();
-    ctx.moveTo(towerX + LAUNCH_TOWER.width, towerTop);
-    ctx.lineTo(towerX, towerTop + LAUNCH_TOWER.height);
-    ctx.stroke();
+    // === 地球（預設 39A 風格）===
+    if (loc === 'earth' || loc === 'leo' || loc === 'polar' || loc === 'solar_satellite' || loc === 'lagrange') {
+        // 塔架本體（深灰色金屬）
+        ctx.fillStyle = '#3a3a50';
+        ctx.fillRect(towerX, towerTop, LAUNCH_TOWER.width, LAUNCH_TOWER.height);
 
-    // 水平平台（4 層）
-    const numPlatforms = 4;
-    for (let i = 0; i < numPlatforms; i++) {
-        const py = towerTop + (LAUNCH_TOWER.height / numPlatforms) * (i + 0.5);
-        ctx.fillStyle = '#4a4a65';
-        ctx.fillRect(towerX - 30, py - 4, LAUNCH_TOWER.width + 60, 8);
-        // 平台柵格
-        ctx.strokeStyle = '#5a5a78';
-        ctx.lineWidth = 1;
-        for (let j = 0; j < 8; j++) {
-            const px = towerX - 30 + j * ((LAUNCH_TOWER.width + 60) / 8);
-            ctx.beginPath();
-            ctx.moveTo(px, py - 4);
-            ctx.lineTo(px, py + 4);
-            ctx.stroke();
-        }
-    }
-
-    // 爬梯軌道（塔架兩側）
-    ctx.strokeStyle = '#6a6a85';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(towerX + 3, towerTop);
-    ctx.lineTo(towerX + 3, towerBottom);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(towerX + LAUNCH_TOWER.width - 3, towerTop);
-    ctx.lineTo(towerX + LAUNCH_TOWER.width - 3, towerBottom);
-    ctx.stroke();
-
-    // === 頂部旋臂（服務臂）===
-    const armY = towerTop + 20;
-    ctx.fillStyle = '#5a5a70';
-    ctx.fillRect(towerX - 40, armY, LAUNCH_TOWER.width + 80, 10);
-    // 旋臂關節
-    ctx.fillStyle = '#707088';
-    ctx.beginPath();
-    ctx.arc(towerX - 40, armY + 5, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(towerX + LAUNCH_TOWER.width + 40, armY + 5, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // === 警示燈（頂部紅燈）===
-    const blink = Math.sin(Date.now() * 0.005) > 0;
-    ctx.fillStyle = blink ? '#ff3344' : '#661122';
-    ctx.beginPath();
-    ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 5, 0, Math.PI * 2);
-    ctx.fill();
-    if (blink) {
-        ctx.save();
-        ctx.globalAlpha = 0.3;
-        const glowR = ctx.createRadialGradient(LAUNCH_TOWER.x, towerTop + 5, 0, LAUNCH_TOWER.x, towerTop + 5, 20);
-        glowR.addColorStop(0, '#ff3344');
-        glowR.addColorStop(1, 'rgba(255,50,68,0)');
-        ctx.fillStyle = glowR;
+        // X 型斜撐
+        ctx.strokeStyle = '#5a5a70';
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 20, 0, Math.PI * 2);
+        ctx.moveTo(towerX, towerTop);
+        ctx.lineTo(towerX + LAUNCH_TOWER.width, towerTop + LAUNCH_TOWER.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(towerX + LAUNCH_TOWER.width, towerTop);
+        ctx.lineTo(towerX, towerTop + LAUNCH_TOWER.height);
+        ctx.stroke();
+
+        // 4 層水平平台
+        const numPlatforms = 4;
+        for (let i = 0; i < numPlatforms; i++) {
+            const py = towerTop + (LAUNCH_TOWER.height / numPlatforms) * (i + 0.5);
+            ctx.fillStyle = '#4a4a65';
+            ctx.fillRect(towerX - 30, py - 4, LAUNCH_TOWER.width + 60, 8);
+            ctx.strokeStyle = '#5a5a78';
+            ctx.lineWidth = 1;
+            for (let j = 0; j < 8; j++) {
+                const px = towerX - 30 + j * ((LAUNCH_TOWER.width + 60) / 8);
+                ctx.beginPath();
+                ctx.moveTo(px, py - 4);
+                ctx.lineTo(px, py + 4);
+                ctx.stroke();
+            }
+        }
+
+        // 爬梯軌道
+        ctx.strokeStyle = '#6a6a85';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(towerX + 3, towerTop);
+        ctx.lineTo(towerX + 3, towerBottom);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(towerX + LAUNCH_TOWER.width - 3, towerTop);
+        ctx.lineTo(towerX + LAUNCH_TOWER.width - 3, towerBottom);
+        ctx.stroke();
+
+        // 頂部服務臂
+        const armY = towerTop + 20;
+        ctx.fillStyle = '#5a5a70';
+        ctx.fillRect(towerX - 40, armY, LAUNCH_TOWER.width + 80, 10);
+        ctx.fillStyle = '#707088';
+        ctx.beginPath();
+        ctx.arc(towerX - 40, armY + 5, 5, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
+        ctx.beginPath();
+        ctx.arc(towerX + LAUNCH_TOWER.width + 40, armY + 5, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 警示燈
+        const blink = Math.sin(Date.now() * 0.005) > 0;
+        ctx.fillStyle = blink ? '#ff3344' : '#661122';
+        ctx.beginPath();
+        ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 5, 0, Math.PI * 2);
+        ctx.fill();
+        if (blink) {
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            const glowR = ctx.createRadialGradient(LAUNCH_TOWER.x, towerTop + 5, 0, LAUNCH_TOWER.x, towerTop + 5, 20);
+            glowR.addColorStop(0, '#ff3344');
+            glowR.addColorStop(1, 'rgba(255,50,68,0)');
+            ctx.fillStyle = glowR;
+            ctx.beginPath();
+            ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // 地面基座
+        ctx.fillStyle = '#2a2a40';
+        ctx.fillRect(LANDING_PAD.x - 80, towerBottom - 8, 160, 12);
+        ctx.fillStyle = '#3a3a55';
+        ctx.fillRect(LANDING_PAD.x - 75, towerBottom - 5, 150, 6);
+        ctx.fillStyle = '#1a1a30';
+        ctx.fillRect(LANDING_PAD.x - 40, towerBottom + 4, 80, 15);
+    }
+    // === 月球（輕量鋁合金支架 + 月岩基座）===
+    else if (loc === 'moon' || loc === 'gateway') {
+        // 銀白色鋁合金塔架
+        ctx.fillStyle = '#b8b8c8';
+        ctx.fillRect(towerX, towerTop, LAUNCH_TOWER.width, LAUNCH_TOWER.height);
+
+        // 細 X 型斜撐
+        ctx.strokeStyle = '#d8d8e8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(towerX, towerTop);
+        ctx.lineTo(towerX + LAUNCH_TOWER.width, towerTop + LAUNCH_TOWER.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(towerX + LAUNCH_TOWER.width, towerTop);
+        ctx.lineTo(towerX, towerTop + LAUNCH_TOWER.height);
+        ctx.stroke();
+
+        // 3 層精簡平台
+        const numPlatforms = 3;
+        for (let i = 0; i < numPlatforms; i++) {
+            const py = towerTop + (LAUNCH_TOWER.height / numPlatforms) * (i + 0.5);
+            ctx.fillStyle = '#c8c8d8';
+            ctx.fillRect(towerX - 20, py - 3, LAUNCH_TOWER.width + 40, 6);
+        }
+
+        // 月岩基座（灰色岩石）
+        ctx.fillStyle = '#6a6a78';
+        ctx.beginPath();
+        ctx.moveTo(LANDING_PAD.x - 90, towerBottom - 4);
+        ctx.lineTo(LANDING_PAD.x - 75, towerBottom - 18);
+        ctx.lineTo(LANDING_PAD.x - 40, towerBottom - 22);
+        ctx.lineTo(LANDING_PAD.x, towerBottom - 25);
+        ctx.lineTo(LANDING_PAD.x + 40, towerBottom - 22);
+        ctx.lineTo(LANDING_PAD.x + 75, towerBottom - 18);
+        ctx.lineTo(LANDING_PAD.x + 90, towerBottom - 4);
+        ctx.closePath();
+        ctx.fill();
+        // 岩石陰影
+        ctx.fillStyle = '#4a4a58';
+        ctx.beginPath();
+        ctx.moveTo(LANDING_PAD.x - 60, towerBottom - 8);
+        ctx.lineTo(LANDING_PAD.x - 30, towerBottom - 18);
+        ctx.lineTo(LANDING_PAD.x + 20, towerBottom - 16);
+        ctx.lineTo(LANDING_PAD.x + 50, towerBottom - 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // 小型警示燈（藍色，因為月球沒有空氣折射）
+        const blink = Math.sin(Date.now() * 0.005) > 0;
+        ctx.fillStyle = blink ? '#44aaff' : '#224466';
+        ctx.beginPath();
+        ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // === 火星（紅色隔熱金屬 + 圓頂觀察艙）===
+    else if (loc === 'mars' || loc === 'phobos' || loc === 'venus' || loc === 'mercury') {
+        // 紅色金屬塔架
+        ctx.fillStyle = '#8a3a30';
+        ctx.fillRect(towerX, towerTop, LAUNCH_TOWER.width, LAUNCH_TOWER.height);
+
+        // 暗紅色 X 型斜撐
+        ctx.strokeStyle = '#aa5544';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(towerX, towerTop);
+        ctx.lineTo(towerX + LAUNCH_TOWER.width, towerTop + LAUNCH_TOWER.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(towerX + LAUNCH_TOWER.width, towerTop);
+        ctx.lineTo(towerX, towerTop + LAUNCH_TOWER.height);
+        ctx.stroke();
+
+        // 3 層平台
+        const numPlatforms = 3;
+        for (let i = 0; i < numPlatforms; i++) {
+            const py = towerTop + (LAUNCH_TOWER.height / numPlatforms) * (i + 0.5);
+            ctx.fillStyle = '#a04840';
+            ctx.fillRect(towerX - 25, py - 4, LAUNCH_TOWER.width + 50, 8);
+        }
+
+        // 圓頂觀察艙（頂部）
+        const domeY = towerTop + 12;
+        ctx.fillStyle = '#cc6655';
+        ctx.beginPath();
+        ctx.arc(LAUNCH_TOWER.x, domeY, 18, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#dd7766';
+        ctx.beginPath();
+        ctx.arc(LAUNCH_TOWER.x - 6, domeY - 4, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 火星地表基座（紅色岩石）
+        ctx.fillStyle = '#6a2a20';
+        ctx.fillRect(LANDING_PAD.x - 85, towerBottom - 8, 170, 12);
+        ctx.fillStyle = '#8a3a30';
+        ctx.fillRect(LANDING_PAD.x - 80, towerBottom - 5, 160, 6);
+
+        // 警示燈（橘紅）
+        const blink = Math.sin(Date.now() * 0.005) > 0;
+        ctx.fillStyle = blink ? '#ff8844' : '#883322';
+        ctx.beginPath();
+        ctx.arc(LAUNCH_TOWER.x, domeY - 8, 4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // === 通用太空站（精簡發射架）===
+    else {
+        // 太空站精簡塔架（較矮、輕量）
+        const shortHeight = LAUNCH_TOWER.height * 0.5;
+        const shortTop = towerBottom - shortHeight;
+
+        ctx.fillStyle = '#5588aa';
+        ctx.fillRect(towerX, shortTop, LAUNCH_TOWER.width, shortHeight);
+
+        // 細 X 型斜撐
+        ctx.strokeStyle = '#77aacc';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(towerX, shortTop);
+        ctx.lineTo(towerX + LAUNCH_TOWER.width, shortTop + shortHeight);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(towerX + LAUNCH_TOWER.width, shortTop);
+        ctx.lineTo(towerX, shortTop + shortHeight);
+        ctx.stroke();
+
+        // 2 層精簡平台
+        for (let i = 0; i < 2; i++) {
+            const py = shortTop + (shortHeight / 2) * (i + 0.5);
+            ctx.fillStyle = '#6699bb';
+            ctx.fillRect(towerX - 15, py - 3, LAUNCH_TOWER.width + 30, 6);
+        }
+
+        // 太空站金屬甲板基座
+        ctx.fillStyle = '#446688';
+        ctx.fillRect(LANDING_PAD.x - 70, towerBottom - 6, 140, 10);
+        ctx.fillStyle = '#5588aa';
+        ctx.fillRect(LANDING_PAD.x - 65, towerBottom - 3, 130, 5);
+
+        // 小型綠色警示燈
+        const blink = Math.sin(Date.now() * 0.005) > 0;
+        ctx.fillStyle = blink ? '#44ff88' : '#226644';
+        ctx.beginPath();
+        ctx.arc(LAUNCH_TOWER.x, shortTop + 5, 4, 0, Math.PI * 2);
+        ctx.fill();
     }
 
-    // === 地面發射台基座 ===
-    ctx.fillStyle = '#2a2a40';
-    ctx.fillRect(LANDING_PAD.x - 80, towerBottom - 8, 160, 12);
-    ctx.fillStyle = '#3a3a55';
-    ctx.fillRect(LANDING_PAD.x - 75, towerBottom - 5, 150, 6);
+    // === 位置標籤（每個塔都畫）===
+    // 取得對應的圖示與文字
+    const locInfo = {
+        earth:           { icon: '🌍', name: '地球 KSC 39A',          color: '#88ddff' },
+        leo:             { icon: '🛰', name: '近地軌道站',            color: '#88ddff' },
+        polar:           { icon: '🧊', name: '極地觀測站',            color: '#aaddff' },
+        solar_satellite: { icon: '☀️', name: '太陽能衛星矩陣',         color: '#ffcc00' },
+        gateway:         { icon: '🌙', name: '月球門戶 Gateway',       color: '#aaddff' },
+        moon:            { icon: '🌕', name: '月球前哨站',            color: '#ffaa00' },
+        lagrange:        { icon: '⚖️', name: '拉格朗日點站',           color: '#ff88cc' },
+        comet:           { icon: '☄️', name: '哈雷彗星追蹤站',         color: '#aaeeff' },
+        phobos:          { icon: '🛰', name: '火衛一中繼站',           color: '#cc6644' },
+        mars:            { icon: '🔴', name: '火星基地',              color: '#ff4466' },
+        asteroid:        { icon: '☄️', name: '小行星採礦站',           color: '#aa8866' },
+        ceres:           { icon: '⚫', name: '穀神星殖民地',           color: '#aaaaaa' },
+        venus:           { icon: '♀️', name: '金星軌道研究站',         color: '#ffcc88' },
+        mercury:         { icon: '☿️', name: '水星前哨站',             color: '#bbbbbb' },
+        europa:          { icon: '🧊', name: '歐羅巴冰下基地',         color: '#aaddff' },
+        titan:           { icon: '🌫', name: '土衛六泰坦基地',         color: '#cc9944' },
+        enceladus:       { icon: '💧', name: '土衛二噴泉觀測站',       color: '#88ccff' },
+        saturn_ring:     { icon: '🪐', name: '土星環採礦站',           color: '#ffddaa' },
+        jupiter:         { icon: '♃', name: '木星軌道基地',           color: '#ddaa66' },
+        kuiper_belt:     { icon: '🌌', name: '古柏帶探測點',           color: '#9966ff' },
+        pluto:           { icon: '♇', name: '冥王星探測站',           color: '#ccaa88' },
+        neptune:         { icon: '♆', name: '海王星深空基地',         color: '#5577ff' }
+    };
+    const info = locInfo[loc] || { icon: '🚀', name: '太空站', color: '#88ddff' };
 
-    // 排焰槽（火箭尾焰通道）
-    ctx.fillStyle = '#1a1a30';
-    ctx.fillRect(LANDING_PAD.x - 40, towerBottom + 4, 80, 15);
+    // 標籤背景框
+    const labelText = `${info.icon} ${info.name}`;
+    ctx.font = 'bold 14px "Segoe UI", sans-serif';
+    const textW = ctx.measureText(labelText).width;
+    const labelX = LANDING_PAD.x + 100;
+    const labelY = towerTop - 8;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(labelX - 6, labelY - 16, textW + 12, 22);
+    ctx.strokeStyle = info.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(labelX - 6, labelY - 16, textW + 12, 22);
+
+    ctx.fillStyle = info.color;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(labelText, labelX, labelY - 5);
 }
 
 /**
