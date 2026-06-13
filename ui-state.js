@@ -1201,8 +1201,12 @@ const UI = {
 
     // 解散太空人
     deleteCrew(crewId) {
-        const idx = GameState.crew.findIndex(c => c.id === crewId);
-        if (idx < 0) return;
+        // dataset 會把值轉成字串，c.id 是數字，用 String() 統一比較
+        const idx = GameState.crew.findIndex(c => String(c.id) === String(crewId));
+        if (idx < 0) {
+            console.warn('deleteCrew: 找不到 crew', crewId, '現有 ids:', GameState.crew.map(c => c.id));
+            return;
+        }
         const member = GameState.crew[idx];
         if (!confirm(`確定要解散太空人「${member.name}」嗎？\n此操作無法復原。`)) return;
 
