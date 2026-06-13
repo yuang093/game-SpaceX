@@ -45,6 +45,19 @@ const GameState = {
     // 已解鎖的科技
     unlockedTech: ['basic_engine', 'basic_fuel', 'basic_shield'],
 
+    // SPCX 股票持股（任務成功獎勵）
+    stocks: {
+        SPCX: {
+            shares: 0,            // 持有股數
+            totalCost: 0,         // 總成本（用於計算平均成本）
+            history: [],          // 價格歷史（最近 30 筆）
+            lastFetch: 0,         // 上次抓取時間
+            currentPrice: 0,      // 當前 SPCX 價格（鏡像 RKLB）
+            lastRealSymbol: '',   // 上次抓取的對標股票
+            source: 'init'        // 'real' = 抓取成功, 'sim' = 模擬
+        }
+    },
+
     // 裝備槽位
     equipment: {
         engine: null,
@@ -383,6 +396,34 @@ const CONFIG = {
             type: 'comet',
             color: '#aaeeff',
             size: 1.0
+        },
+        // v2.2 新增深空站點
+        {
+            id: 'titan', name: '土衛六泰坦基地', altitude: 1400000000, targetAltitude: 8400, difficulty: 14,
+            needs: ['甲烷燃料', '低溫防護', '科研設備'], supply: ['甲烷冰晶', '碳氫化合物'],
+            reward: { base: 80000, multiplier: 22.0 },
+            unlockReputation: 2500,
+            type: 'titan_base',
+            color: '#cc9944',
+            size: 1.6
+        },
+        {
+            id: 'enceladus', name: '土衛二噴泉觀測站', altitude: 1400000000, targetAltitude: 8800, difficulty: 15,
+            needs: ['深海探測器', '低溫設備', '樣本密封器'], supply: ['冰下海洋樣本', '微生物化石'],
+            reward: { base: 120000, multiplier: 28.0 },
+            unlockReputation: 3500,
+            type: 'enceladus_station',
+            color: '#88ccff',
+            size: 1.4
+        },
+        {
+            id: 'kuiper_belt', name: '古柏帶探測點', altitude: 6000000000, targetAltitude: 9500, difficulty: 18,
+            needs: ['核能電池', '長程通訊', '冷凍樣本艙'], supply: ['原始星塵', '未知礦物'],
+            reward: { base: 250000, multiplier: 45.0 },
+            unlockReputation: 6000,
+            type: 'kuiper_station',
+            color: '#9966ff',
+            size: 1.8
         }
     ],
 
@@ -400,7 +441,11 @@ const CONFIG = {
         satellite_deploy: { name: '衛星部署', icon: '🛰️', color: '#88ddff', baseReward: 1.3 },
         space_tourism: { name: '太空旅遊', icon: '🎒', color: '#ff88cc', baseReward: 1.6 },
         repair: { name: '太空維修', icon: '🔧', color: '#ffcc66', baseReward: 1.4 },
-        comet_sample: { name: '彗星採樣', icon: '☄️', color: '#cc88ff', baseReward: 3.5 }
+        comet_sample: { name: '彗星採樣', icon: '☄️', color: '#cc88ff', baseReward: 3.5 },
+        // v2.2 新增任務
+        asteroid_mining: { name: '小行星採礦', icon: '⛏️', color: '#ccaa66', baseReward: 4.0 },
+        quantum_experiment: { name: '量子實驗', icon: '⚛️', color: '#66ffcc', baseReward: 3.2 },
+        alien_signal: { name: '外星訊號追蹤', icon: '👽', color: '#66ff66', baseReward: 5.0 }
     },
 
     // 乘員職銜
@@ -743,6 +788,19 @@ function cacheDOM() {
     // 乘員
     DOM.crewList = document.getElementById('crew-list');
 
+    // 股票
+    DOM.stockPrice = document.getElementById('stock-price');
+    DOM.stockChange = document.getElementById('stock-change');
+    DOM.stockSource = document.getElementById('stock-source');
+    DOM.stockChart = document.getElementById('stock-chart');
+    DOM.pfShares = document.getElementById('pf-shares');
+    DOM.pfAvgCost = document.getElementById('pf-avg-cost');
+    DOM.pfCost = document.getElementById('pf-cost');
+    DOM.pfValue = document.getElementById('pf-value');
+    DOM.pfProfit = document.getElementById('pf-profit');
+    DOM.btnRefreshStock = document.getElementById('btn-refresh-stock');
+    DOM.mirrorSymbol = document.getElementById('mirror-symbol');
+
     // 統計
     DOM.statLaunches = document.getElementById('stat-launches');
     DOM.statSuccess = document.getElementById('stat-success');
@@ -877,6 +935,7 @@ const UI = {
         this.updateStationList();
         this.updateCrewList();
         this.updateMissionInfo();
+        this.updateStockPanel();
     },
 
     updateCurrency() {
@@ -1091,6 +1150,124 @@ const UI = {
         });
     },
 
+    /**
+     * 更新股票面板：當前價、漲跌、投資組合、價格曲線
+     */
+    updateStockPanel() {
+        if (!DOM.stockPrice) return;
+        const pf = StockSystem.getPortfolio();
+        const stock = GameState.stocks.SPCX;
+
+        // 當前價格
+        DOM.stockPrice.textContent = '$' + pf.price.toFixed(2);
+
+        // 漲跌（與前一筆歷史比）
+        const hist = stock.history;
+        if (hist.length >= 2) {
+            const prev = hist[hist.length - 2];
+            const diff = pf.price - prev;
+            const pct = prev ? (diff / prev * 100) : 0;
+            const sign = diff >= 0 ? '+' : '';
+            DOM.stockChange.textContent = `${sign}${diff.toFixed(2)} (${sign}${pct.toFixed(2)}%)`;
+            DOM.stockChange.className = 'stock-change ' + (diff >= 0 ? 'up' : 'down');
+        } else {
+            DOM.stockChange.textContent = '—';
+            DOM.stockChange.className = 'stock-change';
+        }
+
+        // 來源說明
+        const srcText = stock.source === 'real'
+            ? `即時行情 (鏡像 ${stock.lastRealSymbol}) · ${new Date(stock.lastFetch).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`
+            : `離線模擬 ±3% · ${new Date(stock.lastFetch).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`;
+        DOM.stockSource.textContent = srcText;
+
+        // 投資組合
+        DOM.pfShares.textContent = pf.shares.toLocaleString();
+        DOM.pfAvgCost.textContent = '$' + pf.avgCost.toFixed(2);
+        DOM.pfCost.textContent = '$' + Math.round(pf.costBasis).toLocaleString();
+        DOM.pfValue.textContent = '$' + Math.round(pf.marketValue).toLocaleString();
+        const profitSign = pf.profit >= 0 ? '+' : '';
+        const profitClass = pf.profit >= 0 ? 'profit-up' : 'profit-down';
+        DOM.pfProfit.textContent = `${profitSign}$${Math.round(pf.profit).toLocaleString()} (${profitSign}${pf.profitPct.toFixed(1)}%)`;
+        DOM.pfProfit.className = profitClass;
+
+        // 對標股票說明
+        if (DOM.mirrorSymbol) DOM.mirrorSymbol.textContent = StockSystem.REAL_SYMBOL;
+
+        // 繪製價格曲線
+        this.drawStockChart();
+    },
+
+    /**
+     * 繪製股票價格折線圖
+     */
+    drawStockChart() {
+        if (!DOM.stockChart) return;
+        const ctx = DOM.stockChart.getContext('2d');
+        const w = DOM.stockChart.width;
+        const h = DOM.stockChart.height;
+        const hist = GameState.stocks.SPCX.history;
+
+        ctx.clearRect(0, 0, w, h);
+
+        if (hist.length < 2) {
+            // 無資料時顯示提示文字
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('點「重新整理股價」載入歷史', w / 2, h / 2);
+            return;
+        }
+
+        // 找最大最小值
+        const min = Math.min(...hist);
+        const max = Math.max(...hist);
+        const range = max - min || 1;
+        const pad = 8;
+        const chartH = h - pad * 2;
+        const chartW = w - pad * 2;
+        const stepX = chartW / (hist.length - 1);
+
+        // 判斷漲跌顏色（與第一筆比較）
+        const isUp = hist[hist.length - 1] >= hist[0];
+        const color = isUp ? '#00ff88' : '#ff4466';
+        const fillColor = isUp ? 'rgba(0,255,136,0.15)' : 'rgba(255,68,102,0.15)';
+
+        // 繪製填充區
+        ctx.beginPath();
+        ctx.moveTo(pad, h - pad);
+        hist.forEach((v, i) => {
+            const x = pad + i * stepX;
+            const y = pad + (1 - (v - min) / range) * chartH;
+            if (i === 0) ctx.lineTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.lineTo(pad + (hist.length - 1) * stepX, h - pad);
+        ctx.closePath();
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+
+        // 繪製折線
+        ctx.beginPath();
+        hist.forEach((v, i) => {
+            const x = pad + i * stepX;
+            const y = pad + (1 - (v - min) / range) * chartH;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 最後一點圓點
+        const lastX = pad + (hist.length - 1) * stepX;
+        const lastY = pad + (1 - (hist[hist.length - 1] - min) / range) * chartH;
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    },
+
     // HUD 更新
     updateHUD(rocket) {
         if (!rocket) return;
@@ -1189,6 +1366,12 @@ const UI = {
             GameState.stats.cargoDelivered += m?.cargo?.capacity || 0;
             GameState.stats.totalDistance += GameState.maxAltitude * 2;
 
+            // ===== SPCX 股票獎勵（任務成功）=====
+            const sharesAwarded = StockSystem.awardForMission(total);
+            const stockPrice = GameState.stocks.SPCX.currentPrice || 0;
+            const stockValue = sharesAwarded * stockPrice;
+            SaveSystem.save();
+
             // ===== 乘員升級（使用 rankUpXP 陣列）=====
             const crewLevelUps = [];
             GameState.crew.forEach(c => {
@@ -1233,6 +1416,10 @@ const UI = {
                 <div class="reward-row"><span>結構獎勵</span><span>+$${healthBonus.toLocaleString()}</span></div>
                 ${crewBonus > 0 ? `<div class="reward-row"><span>乘員加成</span><span>+$${crewBonus.toLocaleString()}</span></div>` : ''}
                 <div class="reward-row"><span>總獎勵</span><span>+$${total.toLocaleString()}</span></div>
+                <div class="reward-divider">📈 SPCX 股票獎勵</div>
+                <div class="reward-row"><span>獲得股數</span><span style="color:#00d4ff">+${sharesAwarded.toLocaleString()} 股</span></div>
+                <div class="reward-row"><span>當前股價</span><span>$${stockPrice.toFixed(2)}</span></div>
+                <div class="reward-row"><span>本次獎勵市值</span><span style="color:#00ff88">$${Math.round(stockValue).toLocaleString()}</span></div>
                 <div class="reward-divider">⭐ 聲譽獲得</div>
                 ${repHTML}
                 <div class="reward-row total"><span>聲譽總計</span><span>+${repGain} ⭐</span></div>
@@ -1264,7 +1451,20 @@ const UI = {
     showOverlay(title, message, duration = 1000) {
         return new Promise(resolve => {
             DOM.overlay.classList.remove('hidden');
-            DOM.overlayContent.innerHTML = `<div id="overlay-title">${title}</div><div id="overlay-message">${message}</div>`;
+            DOM.overlayContent.innerHTML = `
+                <div class="overlay-ready">READY TO LAUNCH</div>
+                <div id="overlay-title">${title}</div>
+                <div id="overlay-message">${message}</div>
+                <div class="overlay-bar"><div class="overlay-bar-fill"></div></div>
+            `;
+            // 觸發進度條動畫（用 inline style 設定 linear 計時）
+            requestAnimationFrame(() => {
+                const fill = DOM.overlayContent.querySelector('.overlay-bar-fill');
+                if (fill) {
+                    fill.style.transitionDuration = (duration - 50) + 'ms';
+                    fill.style.width = '100%';
+                }
+            });
             setTimeout(() => {
                 DOM.overlay.classList.add('hidden');
                 resolve();
@@ -1483,7 +1683,8 @@ const SaveSystem = {
             selectedRocketIndex: GameState.selectedRocketIndex,
             crew: GameState.crew,
             unlockedStations: GameState.unlockedStations,
-            completedMissions: GameState.stats.successfulLandings
+            completedMissions: GameState.stats.successfulLandings,
+            stocks: GameState.stocks
         };
         try { localStorage.setItem(this.SAVE_KEY, JSON.stringify(data)); } catch (e) {}
     },
@@ -1501,13 +1702,111 @@ const SaveSystem = {
                     rockets: data.rockets?.length ? data.rockets : [createRocket('scout')],
                     selectedRocketIndex: Math.min(data.selectedRocketIndex || 0, (data.rockets?.length || 1) - 1),
                     crew: data.crew ?? [],
-                    unlockedStations: data.unlockedStations ?? ['leo']
+                    unlockedStations: data.unlockedStations ?? ['leo'],
+                    stocks: data.stocks ?? GameState.stocks
                 });
                 console.log('存檔載入成功');
                 return true;
             }
         } catch (e) { console.warn('讀檔失敗'); }
         return false;
+    }
+};
+
+// ================================================
+// SPCX 股票系統
+// 鏡像真實股票（預設 RKLB Rocket Lab，最接近 SpaceX 的公開上市公司）
+// 透過 CORS 代理抓取 Yahoo Finance 行情
+// ================================================
+const StockSystem = {
+    // 設定：SPCX 對標的真實股票（SpaceX 是私人公司，無法直接抓取）
+    // 可改為 RKLB / SPCE / ASTS / LUNR / PL 任一太空股
+    REAL_SYMBOL: 'RKLB',
+    CORS_PROXY: 'https://corsproxy.io/?url=',
+    YAHOO_URL: 'https://query1.finance.yahoo.com/v8/finance/chart/',
+    CACHE_MS: 5 * 60 * 1000,   // 5 分鐘快取
+    SIM_VOLATILITY: 0.03,        // 模擬模式波動率 ±3%
+    HISTORY_MAX: 30,             // 保留 30 筆歷史
+
+    /**
+     * 抓取即時股票價格（從 Yahoo Finance via CORS proxy）
+     * 失敗時自動 fallback 為模擬隨機波動
+     */
+    async fetchPrice() {
+        const now = Date.now();
+        const stock = GameState.stocks.SPCX;
+        // 5 分鐘內不重抓
+        if (stock.lastFetch && (now - stock.lastFetch) < this.CACHE_MS && stock.currentPrice > 0) {
+            return stock.currentPrice;
+        }
+
+        const url = `${this.CORS_PROXY}${encodeURIComponent(this.YAHOO_URL + this.REAL_SYMBOL + '?interval=1d&range=5d')}`;
+        try {
+            const ctrl = new AbortController();
+            const tid = setTimeout(() => ctrl.abort(), 8000);  // 8 秒逾時
+            const res = await fetch(url, { signal: ctrl.signal });
+            clearTimeout(tid);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const json = await res.json();
+            const meta = json?.chart?.result?.[0]?.meta;
+            if (!meta) throw new Error('No meta');
+            const price = meta.regularMarketPrice || meta.previousClose || 0;
+            if (!price) throw new Error('No price');
+            // 抓取 5 日收盤價作為歷史
+            const closes = json.chart.result[0].indicators.quote[0].close.filter(v => v != null);
+
+            stock.currentPrice = price;
+            stock.lastFetch = now;
+            stock.lastRealSymbol = this.REAL_SYMBOL;
+            stock.source = 'real';
+            // 把歷史換成實際收盤價（最後一個是最新的）
+            if (closes.length) {
+                stock.history = closes.slice(-this.HISTORY_MAX);
+            }
+            console.log(`[SPCX] 抓取 ${this.REAL_SYMBOL} 成功: $${price.toFixed(2)}`);
+            return price;
+        } catch (err) {
+            console.warn(`[SPCX] 抓取 ${this.REAL_SYMBOL} 失敗，使用模擬:`, err.message);
+            // Fallback：模擬隨機波動（基於當前價格 ±3%）
+            if (!stock.currentPrice) stock.currentPrice = 25.0;  // 起始模擬價
+            const change = (Math.random() - 0.5) * 2 * this.SIM_VOLATILITY;
+            stock.currentPrice = Math.max(0.01, stock.currentPrice * (1 + change));
+            stock.lastFetch = now;
+            stock.source = 'sim';
+            stock.lastRealSymbol = `${this.REAL_SYMBOL} (模擬)`;
+            stock.history.push(stock.currentPrice);
+            if (stock.history.length > this.HISTORY_MAX) stock.history.shift();
+            return stock.currentPrice;
+        }
+    },
+
+    /**
+     * 任務成功時獎勵股票
+     * 獎勵股數 = 基礎股數 + 任務獎勵金額的 5% 換算為股數
+     */
+    awardForMission(reward) {
+        const stock = GameState.stocks.SPCX;
+        const price = stock.currentPrice || 25;
+        const baseShares = 50;  // 每次成功至少 50 股
+        const bonusShares = Math.floor((reward * 0.05) / Math.max(price, 0.01));
+        const total = baseShares + bonusShares;
+        stock.shares += total;
+        stock.totalCost += total * price;
+        return total;
+    },
+
+    /**
+     * 計算投資組合總值（依當前 SPCX 價格）
+     */
+    getPortfolio() {
+        const stock = GameState.stocks.SPCX;
+        const price = stock.currentPrice || 0;
+        const marketValue = stock.shares * price;
+        const costBasis = stock.totalCost;
+        const profit = marketValue - costBasis;
+        const profitPct = costBasis > 0 ? (profit / costBasis * 100) : 0;
+        const avgCost = stock.shares > 0 ? costBasis / stock.shares : 0;
+        return { shares: stock.shares, avgCost, price, marketValue, costBasis, profit, profitPct };
     }
 };
 
@@ -1600,6 +1899,26 @@ function setupEventListeners() {
         DOM.btnToggleSidebar.addEventListener('click', () => UI.toggleSidebar());
     }
 
+    // 股票重新整理
+    if (DOM.btnRefreshStock) {
+        DOM.btnRefreshStock.addEventListener('click', async () => {
+            DOM.btnRefreshStock.disabled = true;
+            DOM.btnRefreshStock.textContent = '⏳ 載入中…';
+            try {
+                // 強制重新抓取（忽略快取）
+                GameState.stocks.SPCX.lastFetch = 0;
+                await StockSystem.fetchPrice();
+                UI.updateStockPanel();
+                UI.toast('SPCX 股價已更新', 'success');
+            } catch (e) {
+                UI.toast('股價抓取失敗：' + e.message, 'danger');
+            } finally {
+                DOM.btnRefreshStock.disabled = false;
+                DOM.btnRefreshStock.textContent = '🔄 重新整理股價';
+            }
+        });
+    }
+
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             if (GameState.phase !== 'PREP' && confirm('放棄任務？')) StateMachine.transition('PREP');
@@ -1621,6 +1940,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initGame();
     UI.restoreSidebarState();
     Physics.init();
+    // 啟動時非同步抓取股價（不阻塞 UI）
+    StockSystem.fetchPrice().then(() => UI.updateStockPanel());
 });
 
 window.GameState = GameState;

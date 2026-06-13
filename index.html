@@ -55,6 +55,7 @@
                 <button class="tab-btn" data-tab="missions">📜 任務</button>
                 <button class="tab-btn" data-tab="stations">🏭 站點</button>
                 <button class="tab-btn" data-tab="crew">👥 乘員</button>
+                <button class="tab-btn" data-tab="stocks">📈 股票</button>
             </nav>
 
             <!-- 火箭面板 -->
@@ -99,6 +100,31 @@
                 <h2>太空人團隊</h2>
                 <div id="crew-list"></div>
                 <button id="btn-hire-crew" class="btn-secondary">👤 招募太空人</button>
+            </section>
+
+            <!-- 股票面板 -->
+            <section id="panel-stocks" class="tab-panel">
+                <h2>📈 SPCX 投資組合</h2>
+                <div id="stocks-header">
+                    <div class="stock-price-row">
+                        <span class="stock-symbol">SPCX</span>
+                        <span id="stock-price" class="stock-price">$0.00</span>
+                        <span id="stock-change" class="stock-change">—</span>
+                    </div>
+                    <p id="stock-source" class="stock-source">載入中…</p>
+                </div>
+                <div id="stock-chart-wrap">
+                    <canvas id="stock-chart" width="320" height="80"></canvas>
+                </div>
+                <div id="stocks-portfolio">
+                    <div class="portfolio-row"><span>持有股數</span><span id="pf-shares">0</span></div>
+                    <div class="portfolio-row"><span>平均成本</span><span id="pf-avg-cost">$0.00</span></div>
+                    <div class="portfolio-row"><span>總投入</span><span id="pf-cost">$0</span></div>
+                    <div class="portfolio-row highlight"><span>市值</span><span id="pf-value">$0</span></div>
+                    <div class="portfolio-row highlight"><span>損益</span><span id="pf-profit">$0 (0%)</span></div>
+                </div>
+                <button id="btn-refresh-stock" class="btn-secondary">🔄 重新整理股價</button>
+                <p class="stock-hint">任務成功可獲得 SPCX 股票獎勵。SPCX 對標現實股票 <span id="mirror-symbol">RKLB</span> (Rocket Lab)，可於 reuters.com / yahoo finance 查看真實行情。</p>
             </section>
 
             <!-- 發射 -->
