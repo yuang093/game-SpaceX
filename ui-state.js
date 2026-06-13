@@ -2113,14 +2113,14 @@ const EquipmentSystem = {
         const item = CONFIG.equipmentItems[itemId];
         if (!item) return false;
         if (GameState.credits < item.price) {
-            UI.showToast('💰 信用點不足', 'error');
+            if (typeof UI.toast === 'function') UI.toast('💰 信用點不足', 'warn');
             return false;
         }
         GameState.credits -= item.price;
         GameState.equipmentInventory[itemId] = (GameState.equipmentInventory[itemId] || 0) + 1;
         UI.updateAll();
         SaveSystem.save();
-        UI.showToast(`✅ 已購買 ${item.name}`, 'success');
+        if (typeof UI.toast === 'function') UI.toast(`✅ 已購買 ${item.name}`, 'success');
         return true;
     },
 
@@ -2132,19 +2132,19 @@ const EquipmentSystem = {
         if (!slot) return false;
         // 需要先買過
         if (!GameState.equipmentInventory[itemId]) {
-            UI.showToast('❌ 請先購買此裝備', 'error');
+            if (typeof UI.toast === 'function') UI.toast('❌ 請先購買此裝備', 'warn');
             return false;
         }
         // 檢查解鎖前置
         if (item.requires && !GameState.equipmentInventory[item.requires]) {
-            UI.showToast(`❌ 需先購買 ${CONFIG.equipmentItems[item.requires].name}`, 'error');
+            if (typeof UI.toast === 'function') UI.toast(`❌ 需先購買 ${CONFIG.equipmentItems[item.requires].name}`, 'warn');
             return false;
         }
         // 卸下舊裝備（不退回庫存，僅清空槽位）
         GameState.equipment[slot.key] = itemId;
         UI.updateAll();
         SaveSystem.save();
-        UI.showToast(`🔧 已裝備 ${item.name}`, 'success');
+        if (typeof UI.toast === 'function') UI.toast(`🔧 已裝備 ${item.name}`, 'success');
         return true;
     },
 
@@ -2155,7 +2155,7 @@ const EquipmentSystem = {
         GameState.equipment[slotKey] = null;
         UI.updateAll();
         SaveSystem.save();
-        UI.showToast(item ? `🔽 已卸下 ${item.name}` : '🔽 已卸下', 'info');
+        if (typeof UI.toast === 'function') UI.toast(item ? `🔽 已卸下 ${item.name}` : '🔽 已卸下', 'info');
         return true;
     }
 };
