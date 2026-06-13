@@ -702,6 +702,10 @@ function getMissionRequirements(type, difficulty) {
 const DOM = {};
 
 function cacheDOM() {
+    // 側邊欄
+    DOM.sidebar = document.getElementById('sidebar');
+    DOM.btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+
     // 貨幣
     DOM.credits = document.getElementById('credits-value');
     DOM.research = document.getElementById('research-value');
@@ -784,6 +788,37 @@ function cacheDOM() {
 // UI 更新函式
 // ================================================
 const UI = {
+    /**
+     * 切換側邊欄收合/展開狀態
+     */
+    toggleSidebar() {
+        const isCollapsed = DOM.sidebar.classList.toggle('collapsed');
+        DOM.btnToggleSidebar.textContent = isCollapsed ? '▶' : '◀';
+        DOM.btnToggleSidebar.setAttribute('aria-label', isCollapsed ? '展開側邊欄' : '收合側邊欄');
+        try {
+            localStorage.setItem('spacex_sidebar_collapsed', isCollapsed ? '1' : '0');
+        } catch (_) { /* 隱私模式可能拋錯，忽略 */ }
+        // 收合時重整 canvas 尺寸
+        if (typeof Physics !== 'undefined' && Physics.resizeCanvas) {
+            setTimeout(() => Physics.resizeCanvas(), 300);
+        }
+    },
+
+    /**
+     * 載入時恢復收合狀態
+     */
+    restoreSidebarState() {
+        let collapsed = false;
+        try {
+            collapsed = localStorage.getItem('spacex_sidebar_collapsed') === '1';
+        } catch (_) { /* 忽略 */ }
+        if (collapsed && DOM.sidebar && DOM.btnToggleSidebar) {
+            DOM.sidebar.classList.add('collapsed');
+            DOM.btnToggleSidebar.textContent = '▶';
+            DOM.btnToggleSidebar.setAttribute('aria-label', '展開側邊欄');
+        }
+    },
+
     updateAll() {
         this.updateCurrency();
         this.updateStats();
@@ -1510,6 +1545,11 @@ function setupEventListeners() {
     DOM.btnLaunch.addEventListener('click', () => { if (GameState.phase === 'PREP' && GameState.currentMission) StateMachine.transition('LAUNCH'); });
     DOM.btnContinue.addEventListener('click', () => StateMachine.transition('PREP'));
 
+    // 收合側邊欄
+    if (DOM.btnToggleSidebar) {
+        DOM.btnToggleSidebar.addEventListener('click', () => UI.toggleSidebar());
+    }
+
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             if (GameState.phase !== 'PREP' && confirm('放棄任務？')) StateMachine.transition('PREP');
@@ -1529,6 +1569,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cacheDOM();
     SaveSystem.load();
     initGame();
+    UI.restoreSidebarState();
     Physics.init();
 });
 

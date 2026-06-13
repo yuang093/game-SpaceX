@@ -1280,24 +1280,11 @@ const Physics = {
     init() {
         const gameArea = document.getElementById('game-area');
 
-        const resizeCanvas = () => {
-            const rect = gameArea.getBoundingClientRect();
-            canvasWidth = Math.max(100, Math.floor(rect.width));
-            canvasHeight = Math.max(100, Math.floor(rect.height));
-
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-            canvas.style.width = canvasWidth + 'px';
-            canvas.style.height = canvasHeight + 'px';
-
-            console.log(`Canvas: ${canvasWidth}x${canvasHeight}`);
-        };
-
         // 延遲到 DOM 完成 layout 後再初始化 canvas
         // 使用雙 rAF 確保 layout 完成
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                resizeCanvas();
+                this.resizeCanvas();
                 generateStars();
                 preloadRocketImages();
                 this.setupControls();
@@ -1306,17 +1293,51 @@ const Physics = {
         });
 
         // ResizeObserver 監聽 game-area 尺寸變化（含面板開合）
+        // 用 debounce 避免過渡動畫期間連環觸發（250ms 動畫內可能觸發 20+ 次）
         if (window.ResizeObserver) {
+            let resizeTimer = null;
             const ro = new ResizeObserver(() => {
-                resizeCanvas();
-                // 重繪以避免黑屏
-                if (GameState.phase === 'PREP') this.drawInitialScene();
+                if (resizeTimer) clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    this.resizeCanvas();
+                    if (GameState.phase === 'PREP') this.drawInitialScene();
+                }, 150);
             });
             ro.observe(gameArea);
         }
 
-        window.addEventListener('resize', () => setTimeout(resizeCanvas, 50));
-        window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
+        window.addEventListener('resize', () => setTimeout(() => this.resizeCanvas(), 50));
+        window.addEventListener('orientationchange', () => setTimeout(() => this.resizeCanvas(), 100));
+    },
+
+    /**
+     * 重新計算 canvas 尺寸（依 game-area 實際寬高）
+     * 公開方法，可由 UI 主動呼叫（例如側邊欄收合時）
+     */
+    resizeCanvas() {
+        const gameArea = document.getElementById('game-area');
+        if (!gameArea) return;
+        const canvas = document.getElementById('game-canvas');
+        if (!canvas) return;
+
+        const rect = gameArea.getBoundingClientRect();
+        canvasWidth = Math.max(100, Math.floor(rect.width));
+        canvasHeight = Math.max(100, Math.floor(rect.height));
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        canvas.style.width = canvasWidth + 'px';
+        canvas.style.height = canvasHeight + 'px';
+
+        // 重繪場景避免黑屏
+        if (GameState && GameState.phase === 'PREP') {
+            this.drawInitialScene();
+        } else if (GameState && GameState.phase === 'FLIGHT' && rocket) {
+            // 飛行中重置鏡頭以新尺寸重新繪製
+            cameraY = Math.max(0, Math.min(rocket.y - canvasHeight / 2, WORLD_HEIGHT - canvasHeight));
+        }
+
+        console.log(`Canvas resized: ${canvasWidth}x${canvasHeight}`);
     },
 
     drawInitialScene() {
