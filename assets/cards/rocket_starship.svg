@@ -1,0 +1,17 @@
+<svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ss-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8E8EC"/>
+      <stop offset="100%" stop-color="#5A5A66"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="320" fill="#0A0A1A"/>
+  <path d="M 110 50 Q 120 35 130 50 L 130 200 L 110 200 Z" fill="url(#ss-g)"/>
+  <rect x="110" y="80" width="20" height="100" fill="#222" opacity="0.3"/>
+  <polygon points="110,180 95,200 110,200" fill="#3A3A3A"/>
+  <polygon points="130,180 145,200 130,200" fill="#3A3A3A"/>
+  <polygon points="120,55 117,80 123,80" fill="#FFD700"/>
+  <rect x="113" y="200" width="14" height="35" fill="#222"/>
+  <ellipse cx="120" cy="245" rx="40" ry="6" fill="#FF6644" opacity="0.7"/>
+  <text x="120" y="290" text-anchor="middle" fill="#FFD700" font-size="18" font-weight="bold" font-family="sans-serif">STARSHIP</text>
+</svg>

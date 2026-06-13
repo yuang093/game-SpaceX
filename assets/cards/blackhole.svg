@@ -1,0 +1,17 @@
+<svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bh-accretion" cx="50%" cy="50%">
+      <stop offset="40%" stop-color="#000"/>
+      <stop offset="55%" stop-color="#FF8800" stop-opacity="0.9"/>
+      <stop offset="80%" stop-color="#FFD700" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FF4400" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="240" height="320" fill="#0A0A1A"/>
+  <ellipse cx="120" cy="150" rx="90" ry="20" fill="url(#bh-accretion)" transform="rotate(-20 120 150)"/>
+  <circle cx="120" cy="150" r="35" fill="#000"/>
+  <circle cx="120" cy="150" r="35" fill="none" stroke="#000" stroke-width="2"/>
+  <circle cx="100" cy="100" r="1" fill="#FFF" opacity="0.8"/>
+  <circle cx="190" cy="200" r="1" fill="#FFF" opacity="0.7"/>
+  <text x="120" y="290" text-anchor="middle" fill="#FF8800" font-size="18" font-weight="bold" font-family="sans-serif">BLACK HOLE</text>
+</svg>

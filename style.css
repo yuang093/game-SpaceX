@@ -1517,3 +1517,294 @@ button {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ================================================ */
+/* 抽卡系統樣式                                     */
+/* ================================================ */
+
+/* 抽卡動畫 Overlay */
+#card-draw-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+#card-draw-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+#card-draw-card {
+    perspective: 1000px;
+}
+.card-draw-frame {
+    width: 280px;
+    height: 380px;
+    background: linear-gradient(135deg, #1a1a2e, #0a0a1a);
+    border: 3px solid var(--rarity-color, #888);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 0 40px var(--rarity-color, #888);
+    transform-style: preserve-3d;
+}
+.card-draw-rarity {
+    color: var(--rarity-color, #888);
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--rarity-color, #888);
+    margin-bottom: 12px;
+}
+.card-draw-image {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    margin: 8px auto;
+    display: block;
+    border-radius: 8px;
+}
+.card-draw-name {
+    font-size: 20px;
+    color: #fff;
+    font-weight: bold;
+    margin-top: 12px;
+}
+.card-draw-desc {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 8px;
+    line-height: 1.4;
+    padding: 0 4px;
+}
+.card-draw-dup {
+    color: #FFD700;
+    font-size: 11px;
+    margin-top: 8px;
+    padding: 4px 8px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #FFD700;
+    border-radius: 4px;
+    display: inline-block;
+}
+.flip-in {
+    animation: cardFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes cardFlip {
+    0%   { transform: rotateY(180deg) scale(0.6); opacity: 0; }
+    60%  { transform: rotateY(360deg) scale(1.05); opacity: 1; }
+    100% { transform: rotateY(360deg) scale(1); opacity: 1; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* 卡片相簿 */
+#card-progress {
+    margin: 8px 0 12px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+}
+.card-progress-text-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #ccc;
+}
+.rarity-stats {
+    font-size: 11px;
+    color: #888;
+}
+.card-progress-text-row .rarity-stats span {
+    margin-left: 6px;
+}
+.card-progress-bar {
+    height: 8px;
+    background: #1a1a2e;
+    border-radius: 4px;
+    overflow: hidden;
+}
+#card-progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #888, #4488FF, #FF4444, #FFD700, #B026FF);
+    transition: width 0.5s ease;
+    border-radius: 4px;
+}
+#card-album-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 8px 0 12px;
+}
+.filter-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    color: #aaa;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.filter-btn:hover {
+    border-color: #666;
+    color: #fff;
+}
+.filter-btn.active {
+    background: var(--color-primary, #4488FF);
+    color: #fff;
+    border-color: var(--color-primary, #4488FF);
+}
+#card-album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+    padding: 4px 0 80px;
+}
+.album-card {
+    background: linear-gradient(135deg, #1a1a2e, #0a0a1a);
+    border: 2px solid var(--rarity-color, #888);
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    aspect-ratio: 3 / 4;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+.album-card:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 16px var(--rarity-color, #888);
+}
+.album-card.unowned {
+    filter: grayscale(1) brightness(0.35);
+    border-style: dashed;
+}
+.album-card.unowned:hover {
+    filter: grayscale(0.8) brightness(0.5);
+}
+.album-card-rarity {
+    color: var(--rarity-color, #888);
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.album-card-image,
+.album-card-silhouette {
+    width: 100%;
+    flex: 1;
+    object-fit: contain;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.album-card-silhouette {
+    font-size: 36px;
+    color: #555;
+}
+.album-card-name {
+    font-size: 10px;
+    color: #fff;
+    margin-top: 4px;
+    word-break: break-word;
+    line-height: 1.2;
+}
+.album-card.unowned .album-card-name {
+    color: #666;
+}
+
+/* 卡片詳情 Modal */
+#card-detail-content {
+    max-width: 360px;
+    text-align: center;
+    padding: 16px;
+}
+#card-detail-content .album-card {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto 12px;
+    cursor: default;
+    aspect-ratio: 3 / 4;
+}
+#card-detail-content .album-card.unowned {
+    filter: grayscale(1) brightness(0.5);
+}
+#card-detail-content h3 {
+    margin: 8px 0;
+    color: #fff;
+    font-size: 18px;
+}
+#card-detail-content p {
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* 火箭 / 乘員 刪除按鈕 */
+.rocket-card,
+.crew-card {
+    position: relative;
+}
+.btn-rocket-delete,
+.btn-crew-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid #555;
+    color: #ff6666;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    z-index: 5;
+    padding: 0;
+    transition: all 0.2s;
+}
+.btn-rocket-delete:hover:not(:disabled),
+.btn-crew-delete:hover {
+    background: #ff4444;
+    color: #fff;
+    border-color: #ff4444;
+}
+.btn-rocket-delete:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* 響應式：手機版抽卡/相簿調整 */
+@media (max-width: 600px) {
+    .card-draw-frame {
+        width: 240px;
+        height: 340px;
+        padding: 12px;
+    }
+    .card-draw-image {
+        width: 160px;
+        height: 160px;
+    }
+    .card-draw-rarity {
+        font-size: 22px;
+    }
+    #card-album-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    }
+}
+

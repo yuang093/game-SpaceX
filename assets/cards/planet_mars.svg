@@ -1,0 +1,14 @@
+<svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="mars-g" cx="35%" cy="35%">
+      <stop offset="0%" stop-color="#FF7755"/>
+      <stop offset="100%" stop-color="#882200"/>
+    </radialGradient>
+  </defs>
+  <rect width="240" height="320" fill="#0A0A1A"/>
+  <circle cx="120" cy="135" r="80" fill="url(#mars-g)"/>
+  <ellipse cx="100" cy="120" rx="20" ry="8" fill="#5A1A00" opacity="0.4"/>
+  <ellipse cx="140" cy="155" rx="15" ry="6" fill="#5A1A00" opacity="0.4"/>
+  <ellipse cx="120" cy="230" rx="100" ry="6" fill="#FF7755" opacity="0.3"/>
+  <text x="120" y="290" text-anchor="middle" fill="#FF7755" font-size="20" font-weight="bold" font-family="sans-serif">MARS</text>
+</svg>

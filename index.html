@@ -56,6 +56,7 @@
                 <button class="tab-btn" data-tab="stations">🏭 站點</button>
                 <button class="tab-btn" data-tab="crew">👥 乘員</button>
                 <button class="tab-btn" data-tab="stocks">📈 股票</button>
+                <button class="tab-btn" data-tab="cards">🃏 卡片</button>
             </nav>
 
             <!-- 火箭面板 -->
@@ -125,6 +126,31 @@
                 </div>
                 <button id="btn-refresh-stock" class="btn-secondary">🔄 重新整理股價</button>
                 <p class="stock-hint">任務成功可獲得 SPCX 股票獎勵。SPCX 是真實上市公司，行情來源 <span id="mirror-symbol">SPCX</span>，可於 reuters.com / yahoo finance 查看即時報價。</p>
+            </section>
+
+            <!-- 卡片相簿面板 -->
+            <section id="panel-cards" class="tab-panel">
+                <h2>🃏 太空卡片相簿</h2>
+                <div id="card-progress">
+                    <div class="card-progress-text-row">
+                        <span>收藏進度: <span id="card-progress-text">0/0 (0%)</span></span>
+                        <span id="card-rarity-stats" class="rarity-stats"></span>
+                    </div>
+                    <div class="card-progress-bar"><div id="card-progress-fill"></div></div>
+                </div>
+                <div id="card-album-filter">
+                    <button class="filter-btn active" data-filter="all">全部</button>
+                    <button class="filter-btn" data-filter="owned">已擁有</button>
+                    <button class="filter-btn" data-filter="unowned">未擁有</button>
+                    <button class="filter-btn" data-filter="person">👤 人物</button>
+                    <button class="filter-btn" data-filter="company">🏢 公司</button>
+                    <button class="filter-btn" data-filter="rocket">🚀 火箭</button>
+                    <button class="filter-btn" data-filter="planet">🌍 星球</button>
+                    <button class="filter-btn" data-filter="galaxy">🌌 星系</button>
+                    <button class="filter-btn" data-filter="spacecraft">🛸 探測器</button>
+                    <button class="filter-btn" data-filter="station">🛰 太空站</button>
+                </div>
+                <div id="card-album-grid"></div>
             </section>
 
             <!-- 發射 -->
@@ -227,6 +253,23 @@
             <h2>🔧 裝備商店</h2>
             <div id="equipment-shop"></div>
             <button id="btn-close-equipment" class="btn-secondary">關閉</button>
+        </div>
+    </div>
+
+    <!-- 抽卡動畫 -->
+    <div id="card-draw-overlay" class="hidden">
+        <div id="card-draw-content">
+            <div id="card-draw-card"></div>
+            <div id="card-draw-buttons">
+                <button id="btn-card-collect" class="btn-primary">收入卡片冊</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片詳情 -->
+    <div id="modal-card-detail" class="modal hidden">
+        <div class="modal-content" id="card-detail-content">
+            <!-- 由 JS 動態填入 -->
         </div>
     </div>
 

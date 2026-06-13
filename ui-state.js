@@ -68,6 +68,14 @@ const GameState = {
         solarPanel: null,
         communications: null,
         navigation: null
+    },
+
+    // 卡片收藏
+    cardCollection: [],
+    cardStats: {
+        totalPulls: 0,
+        lastPull: null,
+        lastPullTime: 0
     }
 };
 
@@ -634,7 +642,95 @@ const CONFIG = {
                 { name: '軌道轉運', cost: 45000, requires: 1200 }
             ]
         }
-    }
+    },
+
+    // ================================================
+    // 抽卡系統（卡片池）
+    // ================================================
+    // 稀有度配色
+    rarityColors: {
+        N:   '#888888',  // 灰
+        R:   '#4488FF',  // 藍
+        SR:  '#FF4444',  // 紅
+        SSR: '#FFD700',  // 金
+        UR:  '#B026FF'   // 紫
+    },
+
+    // 稀有度權重（N 25% / R 30% / SR 25% / SSR 15% / UR 5%）
+    rarityWeights: { N: 25, R: 30, SR: 25, SSR: 15, UR: 5 },
+
+    // 卡片池（55 張）
+    cards: [
+        // 人物 (12 張)
+        { id: 'elon_musk',     name: '伊隆·馬斯克',          rarity: 'UR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Elon_Musk_2022.jpg/240px-Elon_Musk_2022.jpg', desc: 'SpaceX、Tesla、xAI 創辦人，推動人類成為多行星物種' },
+        { id: 'neil_armstrong', name: '尼爾·阿姆斯壯',       rarity: 'SSR', category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Neil_Armstrong_pose.jpg/240px-Neil_Armstrong_pose.jpg', desc: '1969 年首位登月太空人「個人一小步，人類一大步」' },
+        { id: 'yuri_gagarin',   name: '尤里·加加林',         rarity: 'SSR', category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Gagarin_in_Sweden.jpg/240px-Gagarin_in_Sweden.jpg', desc: '1961 年首位進入太空的人類' },
+        { id: 'buzz_aldrin',    name: '巴茲·奧爾德林',       rarity: 'SR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Buzz_Aldrin.jpg/240px-Buzz_Aldrin.jpg', desc: '阿波羅 11 號登月艙駕駛員' },
+        { id: 'sally_ride',     name: '薩利·賴德',           rarity: 'SR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Sally_Ride_%28cropped%29.jpg/240px-Sally_Ride_%28cropped%29.jpg', desc: '美國首位進入太空的女性' },
+        { id: 'valentina',      name: '瓦倫京娜·捷列什科娃',  rarity: 'SR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Valentina_Tereshkova_-_JAXA.jpg/240px-Valentina_Tereshkova_-_JAXA.jpg', desc: '1963 年首位進入太空的女性' },
+        { id: 'john_glenn',     name: '約翰·葛倫',           rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/John_Glenn_NASA_bio_photo.jpg/240px-John_Glenn_NASA_bio_photo.jpg', desc: '美國首位環繞地球的太空人' },
+        { id: 'chris_hadfield', name: '克里斯·哈德菲爾德',   rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Chris_Hadfield_2011.jpg/240px-Chris_Hadfield_2011.jpg', desc: '加拿大首位太空站指揮官，太空吉他手' },
+        { id: 'wang_yaping',    name: '王亞平',              rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Wang_Yaping_in_2021.jpg/240px-Wang_Yaping_in_2021.jpg', desc: '中國首位太空授課女太空人' },
+        { id: 'mae_jemison',    name: '梅·傑米森',           rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Mae_Carol_Jemison.jpg/240px-Mae_Carol_Jemison.jpg', desc: '首位進入太空的非裔美國女性' },
+        { id: 'jose_hernandez', name: '荷西·赫南德茲',       rarity: 'N',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Jose_M._Hernandez.jpg/240px-Jose_M._Hernandez.jpg', desc: '墨裔美籍太空人，勵志典範' },
+        { id: 'tim_peake',      name: '提姆·皮克',           rarity: 'N',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tim_Peake_official_portrait.jpg/240px-Tim_Peake_official_portrait.jpg', desc: '英國 ESA 太空人，2015-2016 駐站' },
+
+        // 公司/品牌 (8 張)
+        { id: 'spacex_logo',    name: 'SpaceX',               rarity: 'SSR', category: 'company', image: 'assets/cards/spacex.svg',    desc: '可重複使用火箭的革命先驅' },
+        { id: 'tesla_logo',     name: 'TESLA 特斯拉',         rarity: 'SR',  category: 'company', image: 'assets/cards/tesla.svg',     desc: '電動車與能源革命的領導者' },
+        { id: 'xai_logo',       name: 'xAI',                  rarity: 'SR',  category: 'company', image: 'assets/cards/xai.svg',       desc: '馬斯克創辦的人工智慧公司' },
+        { id: 'neuralink_logo', name: 'Neuralink',            rarity: 'SR',  category: 'company', image: 'assets/cards/neuralink.svg', desc: '腦機介面先驅' },
+        { id: 'spcx_logo',      name: 'SPCX 太空指數',        rarity: 'UR',  category: 'company', image: 'assets/cards/spcx.svg',      desc: '太空探索指數，真實上市公司股票' },
+        { id: 'nasa_logo',      name: 'NASA',                 rarity: 'SR',  category: 'company', image: 'assets/cards/nasa.svg',      desc: '美國國家航空暨太空總署' },
+        { id: 'esa_logo',       name: 'ESA 歐洲太空總署',      rarity: 'N',   category: 'company', image: 'assets/cards/esa.svg',       desc: '歐洲多國合作的太空機構' },
+        { id: 'cnsa_logo',      name: 'CNSA 中國國家航天局',   rarity: 'N',   category: 'company', image: 'assets/cards/cnsa.svg',      desc: '中國載人航天的幕後推手' },
+
+        // 火箭 (10 張)
+        { id: 'falcon1',        name: '🚀 Falcon 1',          rarity: 'R',   category: 'rocket',   image: 'assets/cards/rocket_falcon1.svg',  desc: 'SpaceX 處女作，獵鷹系列起點' },
+        { id: 'falcon9',        name: '🚀 Falcon 9',          rarity: 'SR',  category: 'rocket',   image: 'assets/cards/rocket_falcon9.svg',  desc: '可重複使用的中型運載火箭' },
+        { id: 'falcon_heavy',   name: '🚀 Falcon Heavy',      rarity: 'SR',  category: 'rocket',   image: 'assets/cards/rocket_fh.svg',       desc: '現役最強運載火箭之一' },
+        { id: 'starship',       name: '🚀 Starship',          rarity: 'SSR', category: 'rocket',   image: 'assets/cards/rocket_starship.svg', desc: '史上最大火箭，目標火星' },
+        { id: 'starship_hls',   name: '🌙 Starship HLS',      rarity: 'SSR', category: 'rocket',   image: 'assets/cards/rocket_hls.svg',      desc: 'Artemis 計畫月球著陸器' },
+        { id: 'dragon',         name: '🐉 Dragon',            rarity: 'R',   category: 'rocket',   image: 'assets/cards/rocket_dragon.svg',   desc: '首艘商業載人太空船' },
+        { id: 'sls',            name: '🚀 SLS',               rarity: 'R',   category: 'rocket',   image: 'assets/cards/rocket_sls.svg',      desc: 'NASA 太空發射系統' },
+        { id: 'soyuz',          name: '🚀 Soyuz 聯合號',       rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_soyuz.svg',    desc: '蘇聯傳奇載人火箭系列' },
+        { id: 'ariane',         name: '🚀 Ariane 5',          rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_ariane.svg',   desc: '歐洲主力運載火箭' },
+        { id: 'electron',       name: '🚀 Electron',          rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_electron.svg', desc: 'Rocket Lab 小型發射服務' },
+
+        // 星球/天體 (12 張)
+        { id: 'sun',            name: '☀️ 太陽',               rarity: 'SSR', category: 'planet',   image: 'assets/cards/planet_sun.svg',      desc: '太陽系中心，地球的能量源' },
+        { id: 'mercury',        name: '☿️ 水星',              rarity: 'R',   category: 'planet',   image: 'assets/cards/planet_mercury.svg',  desc: '離太陽最近的行星' },
+        { id: 'venus',          name: '♀️ 金星',              rarity: 'R',   category: 'planet',   image: 'assets/cards/planet_venus.svg',    desc: '太陽系最熱的行星' },
+        { id: 'earth',          name: '🌍 地球',              rarity: 'SSR', category: 'planet',   image: 'assets/cards/planet_earth.svg',    desc: '人類的家園' },
+        { id: 'moon',           name: '🌕 月球',              rarity: 'SR',  category: 'planet',   image: 'assets/cards/planet_moon.svg',     desc: '地球唯一天然衛星' },
+        { id: 'mars',           name: '🔴 火星',              rarity: 'SSR', category: 'planet',   image: 'assets/cards/planet_mars.svg',     desc: '人類下一個登陸目標' },
+        { id: 'jupiter',        name: '♃ 木星',              rarity: 'SR',  category: 'planet',   image: 'assets/cards/planet_jupiter.svg',  desc: '太陽系最大行星' },
+        { id: 'saturn',         name: '🪐 土星',              rarity: 'SR',  category: 'planet',   image: 'assets/cards/planet_saturn.svg',   desc: '以壯麗光環聞名' },
+        { id: 'uranus',         name: '⛢ 天王星',            rarity: 'N',   category: 'planet',   image: 'assets/cards/planet_uranus.svg',   desc: '側躺旋轉的冰巨星' },
+        { id: 'neptune',        name: '♆ 海王星',            rarity: 'R',   category: 'planet',   image: 'assets/cards/planet_neptune.svg',  desc: '風速最快的行星' },
+        { id: 'pluto',          name: '♇ 冥王星',            rarity: 'N',   category: 'planet',   image: 'assets/cards/planet_pluto.svg',    desc: '矮行星，神秘的古柏帶' },
+        { id: 'titan',          name: '🌫 土衛六 Titan',      rarity: 'N',   category: 'planet',   image: 'assets/cards/planet_titan.svg',    desc: '土星最大衛星，有甲烷湖' },
+
+        // 星系/天體 (4 張)
+        { id: 'milky_way',      name: '🌌 銀河系',            rarity: 'SSR', category: 'galaxy',   image: 'assets/cards/galaxy_mw.svg',       desc: '我們所在的棒旋星系' },
+        { id: 'andromeda',      name: '🌌 仙女座星系',        rarity: 'R',   category: 'galaxy',   image: 'assets/cards/galaxy_and.svg',      desc: '離銀河系最近的大星系' },
+        { id: 'black_hole',     name: '🕳 黑洞',              rarity: 'SSR', category: 'galaxy',   image: 'assets/cards/blackhole.svg',       desc: '時空扭曲的極端天體' },
+        { id: 'nebula',         name: '💫 蟹狀星雲',          rarity: 'R',   category: 'galaxy',   image: 'assets/cards/nebula.svg',          desc: '1054 年超新星爆炸的殘骸' },
+
+        // 太空船/探測器 (6 張)
+        { id: 'voyager1',       name: '🛸 Voyager 1',         rarity: 'SSR', category: 'spacecraft', image: 'assets/cards/voyager1.svg',      desc: '1977 年發射，目前最遠人造物體' },
+        { id: 'voyager2',       name: '🛸 Voyager 2',         rarity: 'SR',  category: 'spacecraft', image: 'assets/cards/voyager2.svg',      desc: '唯一造訪過四大外行星的探測器' },
+        { id: 'cassini',        name: '🛸 Cassini',           rarity: 'R',   category: 'spacecraft', image: 'assets/cards/cassini.svg',       desc: '土星探測傳奇，2017 年壯烈犧牲' },
+        { id: 'new_horizons',   name: '🛸 New Horizons',      rarity: 'R',   category: 'spacecraft', image: 'assets/cards/horizons.svg',      desc: '首艘造訪冥王星的探測器' },
+        { id: 'jwst',           name: '🔭 詹姆斯韋伯太空望遠鏡', rarity: 'SSR', category: 'spacecraft', image: 'assets/cards/jwst.svg',        desc: '史上最強紅外線太空望遠鏡' },
+        { id: 'hubble',         name: '🔭 哈伯太空望遠鏡',      rarity: 'SR',  category: 'spacecraft', image: 'assets/cards/hubble.svg',        desc: '改變人類宇宙觀的經典望遠鏡' },
+
+        // 太空站 (4 張)
+        { id: 'iss',            name: '🛰 國際太空站 ISS',     rarity: 'SR',  category: 'station', image: 'assets/cards/iss.svg',             desc: '人類最大太空建築，1998 年起運作' },
+        { id: 'tiangong',       name: '🛰 天宮太空站',         rarity: 'R',   category: 'station', image: 'assets/cards/tiangong.svg',        desc: '中國自主太空站' },
+        { id: 'mir',            name: '🛰 和平號 Mir',         rarity: 'N',   category: 'station', image: 'assets/cards/mir.svg',             desc: '蘇聯傳奇太空站，1986-2001' },
+        { id: 'gateway',        name: '🛰 月球門戶 Gateway',   rarity: 'R',   category: 'station', image: 'assets/cards/gateway.svg',         desc: 'NASA 計畫中的月球軌道站' }
+    ]
 };
 
 // ================================================
@@ -651,7 +747,7 @@ function initGame() {
     GameState.crew.push(createCrewMember());
 
     // 生成初始任務
-    generateMissions(4);
+    generateAllAvailableMissions();
 
     // 更新 UI
     UI.updateAll();
@@ -729,6 +825,67 @@ function getReputationLevel(reputation) {
 // ================================================
 // 生成任務
 // ================================================
+
+/**
+ * 動態產生所有已解鎖的任務
+ * - 為每個已解鎖太空站隨機配 2-3 個任務類型
+ * - 至少 6 個任務，未滿則隨機補
+ * - 已解鎖太空站越多，任務池越豐富
+ */
+function generateAllAvailableMissions() {
+    GameState.availableMissions = [];
+    const availableStations = GameState.stations.filter(
+        s => GameState.reputation >= s.unlockReputation
+    );
+    if (availableStations.length === 0) {
+        // 沒有解鎖任何站，至少給 LEO
+        availableStations.push(GameState.stations[0]);
+    }
+
+    // 為每個已解鎖太空站產生 2-3 個任務類型
+    const typeKeys = Object.keys(CONFIG.missionTypes);
+    availableStations.forEach(station => {
+        const count = 2 + Math.floor(Math.random() * 2);  // 2-3
+        // 隨機挑選不重複的任務類型
+        const shuffled = typeKeys.slice().sort(() => Math.random() - 0.5);
+        const picked = shuffled.slice(0, count);
+        picked.forEach(type => {
+            GameState.availableMissions.push(
+                generateMissionByTypeAndStation(type, station)
+            );
+        });
+    });
+
+    // 若太空站已解鎖後任務仍少，補滿到至少 6 個
+    while (GameState.availableMissions.length < 6) {
+        GameState.availableMissions.push(generateSingleMission());
+    }
+}
+
+/**
+ * 依指定類型與太空站產生任務
+ */
+function generateMissionByTypeAndStation(type, station) {
+    // 彗星採樣任務固定以彗星為目標
+    if (type === 'comet_sample') {
+        const cometStation = GameState.stations.find(s => s.id === 'comet');
+        if (cometStation) station = cometStation;
+    }
+    const typeInfo = CONFIG.missionTypes[type];
+    const difficulty = Math.min(10, Math.max(1, station.difficulty + Math.floor(Math.random() * 3) - 1));
+    const cargo = generateCargo(type, station, difficulty);
+    const baseReward = Math.floor(station.reward.base * station.reward.multiplier * typeInfo.baseReward * (1 + difficulty * 0.2));
+    return {
+        id: Date.now() + Math.random() + Math.random(),
+        type: type,
+        station: station,
+        difficulty: difficulty,
+        cargo: cargo,
+        reward: baseReward,
+        requirements: getMissionRequirements(type, station, difficulty)
+    };
+}
+
 function generateMissions(count) {
     GameState.availableMissions = [];
     for (let i = 0; i < count; i++) {
@@ -1011,6 +1168,138 @@ const UI = {
         this.updateCrewList();
         this.updateMissionInfo();
         this.updateStockPanel();
+        this.updateCardAlbum();
+    },
+
+    // 刪除火箭
+    deleteRocket(index) {
+        if (GameState.rockets.length <= 1) {
+            if (UI && typeof UI.toast === 'function') UI.toast('⚠️ 至少需要保留 1 個火箭', 'warn');
+            else alert('⚠️ 至少需要保留 1 個火箭');
+            return;
+        }
+        const rocket = GameState.rockets[index];
+        if (!rocket) return;
+        if (!confirm(`確定要刪除「${rocket.name}」嗎？\n此操作無法復原。`)) return;
+
+        // 退款 50%（給玩家一點補償）
+        const template = CONFIG.rocketTypes[rocket.type];
+        const refund = Math.floor((template?.basePrice || 0) * 0.5);
+        GameState.credits += refund;
+        GameState.rockets.splice(index, 1);
+        if (GameState.selectedRocketIndex >= GameState.rockets.length) {
+            GameState.selectedRocketIndex = GameState.rockets.length - 1;
+        }
+        SaveSystem.save();
+        UI.updateAll();
+        if (UI && typeof UI.toast === 'function') {
+            UI.toast(`🗑️ 已刪除 ${rocket.name}，退款 $${refund.toLocaleString()}`, 'success');
+        } else {
+            alert(`🗑️ 已刪除 ${rocket.name}，退款 $${refund.toLocaleString()}`);
+        }
+    },
+
+    // 解散太空人
+    deleteCrew(crewId) {
+        const idx = GameState.crew.findIndex(c => c.id === crewId);
+        if (idx < 0) return;
+        const member = GameState.crew[idx];
+        if (!confirm(`確定要解散太空人「${member.name}」嗎？\n此操作無法復原。`)) return;
+
+        GameState.crew.splice(idx, 1);
+        GameState.hiredCrewCount = Math.max(0, GameState.hiredCrewCount - 1);
+        SaveSystem.save();
+        UI.updateAll();
+        if (UI && typeof UI.toast === 'function') {
+            UI.toast(`🗑️ 已解散 ${member.name}`, 'success');
+        } else {
+            alert(`🗑️ 已解散 ${member.name}`);
+        }
+    },
+
+    // 卡片相簿渲染
+    updateCardAlbum(filter = 'all') {
+        const grid = document.getElementById('card-album-grid');
+        if (!grid) return;
+        const cards = CardSystem.getAllCards();
+        const filtered = cards.filter(c => {
+            if (filter === 'all') return true;
+            if (filter === 'owned') return c.owned;
+            if (filter === 'unowned') return !c.owned;
+            return c.category === filter;
+        });
+
+        grid.innerHTML = filtered.map(c => {
+            const color = CONFIG.rarityColors[c.rarity] || '#888';
+            if (c.owned) {
+                return `
+                    <div class="album-card owned" style="--rarity-color: ${color}"
+                         data-card-id="${c.id}" title="${c.desc}">
+                        <div class="album-card-rarity">${c.rarity}</div>
+                        <img class="album-card-image" src="${c.image}" alt="${c.name}"
+                             onerror="this.outerHTML='<div class=\\'album-card-silhouette\\'>?</div>'">
+                        <div class="album-card-name">${c.name}</div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="album-card unowned" style="--rarity-color: ${color}" title="未解鎖">
+                        <div class="album-card-rarity">${c.rarity}</div>
+                        <div class="album-card-silhouette">❓</div>
+                        <div class="album-card-name">???</div>
+                    </div>
+                `;
+            }
+        }).join('');
+
+        // 進度條
+        const progress = CardSystem.getProgress();
+        const txt = document.getElementById('card-progress-text');
+        if (txt) txt.textContent = `${progress.owned}/${progress.total} (${progress.percent}%)`;
+        const fill = document.getElementById('card-progress-fill');
+        if (fill) fill.style.width = progress.percent + '%';
+
+        // 稀有度統計
+        const statsEl = document.getElementById('card-rarity-stats');
+        if (statsEl) {
+            const stats = CardSystem.getRarityStats();
+            statsEl.innerHTML = ['N','R','SR','SSR','UR']
+                .map(r => `<span style="color:${CONFIG.rarityColors[r]};margin-left:6px">${r}:${stats[r]||0}</span>`)
+                .join('');
+        }
+
+        // 綁定已擁有卡片的點擊事件
+        grid.querySelectorAll('.album-card.owned').forEach(el => {
+            el.addEventListener('click', () => {
+                const id = el.dataset.cardId;
+                UI.showCardDetail(id);
+            });
+        });
+    },
+
+    // 卡片詳情
+    showCardDetail(cardId) {
+        const card = CardSystem.getCardById(cardId);
+        if (!card) return;
+        const color = CONFIG.rarityColors[card.rarity] || '#888';
+        const owned = GameState.cardCollection.includes(cardId);
+        const modal = document.getElementById('modal-card-detail');
+        const content = document.getElementById('card-detail-content');
+        if (!modal || !content) return;
+        content.innerHTML = `
+            <div class="album-card ${owned ? 'owned' : 'unowned'}" style="--rarity-color: ${color}">
+                <div class="album-card-rarity">${card.rarity}</div>
+                ${owned
+                    ? `<img class="album-card-image" src="${card.image}" alt="${card.name}" onerror="this.outerHTML='<div class=\\'album-card-silhouette\\'>?</div>'">`
+                    : `<div class="album-card-silhouette">❓</div>`}
+                <div class="album-card-name">${owned ? card.name : '???'}</div>
+            </div>
+            <h3>${owned ? card.name : '未知卡片'}</h3>
+            <p>${owned ? card.desc : '完成任務抽取卡片以解鎖'}</p>
+            <p style="font-size:11px;color:#666">分類: ${card.category} | 稀有度: ${card.rarity}</p>
+            <button class="btn-secondary" onclick="document.getElementById('modal-card-detail').classList.add('hidden')">關閉</button>
+        `;
+        modal.classList.remove('hidden');
     },
 
     updateCurrency() {
@@ -1049,6 +1338,7 @@ const UI = {
             let healthClass = healthPercent < 30 ? 'critical' : (healthPercent < 60 ? 'damaged' : '');
 
             const imgSrc = CONFIG.rocketImages[rocket.type] || 'assets/rockets/scout.svg';
+            const canDelete = GameState.rockets.length > 1;
 
             card.innerHTML = `
                 <img class="rocket-card-image" src="${imgSrc}" alt="${rocket.name}" loading="lazy">
@@ -1059,8 +1349,11 @@ const UI = {
                         結構: ${healthPercent}% ${healthClass === 'critical' ? '⚠️' : ''}
                     </div>
                 </div>
+                <button class="btn-rocket-delete" data-rocket-index="${index}"
+                        title="${canDelete ? '刪除此火箭' : '至少需要 1 個火箭'}" ${canDelete ? '' : 'disabled'}>🗑️</button>
             `;
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-rocket-delete')) return;  // 刪除按鈕不觸發選取
                 GameState.selectedRocketIndex = index;
                 this.updateRocketList();
                 this.updateRocketStats();
@@ -1220,6 +1513,7 @@ const UI = {
                         </div>
                     </div>
                 </div>
+                <button class="btn-crew-delete" data-crew-id="${member.id}" title="解散此太空人">🗑️</button>
             `;
             DOM.crewList.appendChild(card);
         });
@@ -1455,6 +1749,16 @@ const UI = {
             const stockValue = sharesAwarded * stockPrice;
             SaveSystem.save();
 
+            // ===== 抽卡觸發（延遲 1.5 秒讓玩家看見結算）=====
+            setTimeout(() => {
+                try {
+                    const newCard = CardSystem.rollCard();
+                    CardAnimation.show(newCard);
+                } catch (err) {
+                    console.warn('抽卡失敗：', err);
+                }
+            }, 1500);
+
             // ===== 乘員升級（使用 rankUpXP 陣列）=====
             const crewLevelUps = [];
             GameState.crew.forEach(c => {
@@ -1508,11 +1812,8 @@ const UI = {
                 <div class="reward-row total"><span>聲譽總計</span><span>+${repGain} ⭐</span></div>
             `;
 
-            // 生成新任務填補列表
-            const newMissions = Math.max(1, 4 - GameState.availableMissions.length);
-            for (let i = 0; i < newMissions; i++) {
-                GameState.availableMissions.push(generateSingleMission());
-            }
+            // 生成新任務填補列表（顯示全部已解鎖任務）
+            generateAllAvailableMissions();
         } else {
             // 失敗：重置連勝
             GameState.missionStreak = 0;
@@ -1521,11 +1822,8 @@ const UI = {
             GameState.stats.failures++;
             DOM.resultStats.innerHTML = `<div class="result-row"><span>原因</span><span>${data.reason}</span></div>`;
             DOM.resultRewards.innerHTML = '<div class="reward-row"><span>獎勵</span><span>+$0</span></div><div class="reward-row"><span>連勝中斷</span><span>🔥 已重置</span></div>';
-            // 失敗也生成新任務填補
-            const failNew = Math.max(1, 4 - GameState.availableMissions.length);
-            for (let i = 0; i < failNew; i++) {
-                GameState.availableMissions.push(generateSingleMission());
-            }
+            // 失敗也補滿任務池
+            generateAllAvailableMissions();
         }
 
         this.updateAll();
@@ -1784,7 +2082,9 @@ const SaveSystem = {
             crew: GameState.crew,
             unlockedStations: GameState.unlockedStations,
             completedMissions: GameState.stats.successfulLandings,
-            stocks: GameState.stocks
+            stocks: GameState.stocks,
+            cardCollection: GameState.cardCollection,
+            cardStats: GameState.cardStats
         };
         try { localStorage.setItem(this.SAVE_KEY, JSON.stringify(data)); } catch (e) {}
     },
@@ -1803,13 +2103,114 @@ const SaveSystem = {
                     selectedRocketIndex: Math.min(data.selectedRocketIndex || 0, (data.rockets?.length || 1) - 1),
                     crew: data.crew ?? [],
                     unlockedStations: data.unlockedStations ?? ['leo'],
-                    stocks: data.stocks ?? GameState.stocks
+                    stocks: data.stocks ?? GameState.stocks,
+                    cardCollection: data.cardCollection ?? [],
+                    cardStats: data.cardStats ?? { totalPulls: 0, lastPull: null, lastPullTime: 0 }
                 });
                 console.log('存檔載入成功');
                 return true;
             }
         } catch (e) { console.warn('讀檔失敗'); }
         return false;
+    }
+};
+
+// ================================================
+// 抽卡系統 (CardSystem)
+// 任務成功後可抽卡，不重複
+// ================================================
+const CardSystem = {
+    /**
+     * 加權隨機抽一張（不重複機制）
+     * - 從未抽到卡片中加權隨機
+     * - 若全部抽完，從完整卡池中隨機（允許重複）
+     */
+    rollCard() {
+        const allCards = CONFIG.cards;
+        const ownedIds = new Set(GameState.cardCollection);
+        const unowned = allCards.filter(c => !ownedIds.has(c.id));
+        const pool = unowned.length > 0 ? unowned : allCards;
+        const weights = pool.map(c => CONFIG.rarityWeights[c.rarity] || 1);
+        const total = weights.reduce((a, b) => a + b, 0);
+        let r = Math.random() * total;
+        let pick = pool[0];
+        for (let i = 0; i < pool.length; i++) {
+            r -= weights[i];
+            if (r <= 0) { pick = pool[i]; break; }
+        }
+        // 加入收藏
+        GameState.cardCollection.push(pick.id);
+        GameState.cardStats.totalPulls++;
+        GameState.cardStats.lastPull = pick.id;
+        GameState.cardStats.lastPullTime = Date.now();
+        SaveSystem.save();
+        return pick;
+    },
+
+    /** 取得單張卡片資訊（依 ID） */
+    getCardById(id) { return CONFIG.cards.find(c => c.id === id); },
+
+    /** 取得所有卡片（含擁有狀態） */
+    getAllCards() {
+        return CONFIG.cards.map(c => ({
+            ...c,
+            owned: GameState.cardCollection.includes(c.id)
+        }));
+    },
+
+    /** 收藏進度統計 */
+    getProgress() {
+        const total = CONFIG.cards.length;
+        const owned = GameState.cardCollection.length;
+        return { total, owned, percent: Math.round(owned / total * 100) };
+    },
+
+    /** 依稀有度統計已收集數 */
+    getRarityStats() {
+        const stats = { N: 0, R: 0, SR: 0, SSR: 0, UR: 0 };
+        GameState.cardCollection.forEach(id => {
+            const card = this.getCardById(id);
+            if (card) stats[card.rarity] = (stats[card.rarity] || 0) + 1;
+        });
+        return stats;
+    }
+};
+
+// ================================================
+// 抽卡動畫 (CardAnimation)
+// 顯示抽卡結果的翻牌動畫
+// ================================================
+const CardAnimation = {
+    show(card) {
+        const overlay = document.getElementById('card-draw-overlay');
+        const cardEl = document.getElementById('card-draw-card');
+        if (!overlay || !cardEl) return;
+        const color = CONFIG.rarityColors[card.rarity] || '#888';
+        const isOwned = GameState.cardCollection.includes(card.id);
+        cardEl.innerHTML = `
+            <div class="card-draw-frame" style="--rarity-color: ${color}">
+                <div class="card-draw-rarity">${card.rarity}</div>
+                <img class="card-draw-image" src="${card.image}" alt="${card.name}"
+                     onerror="this.src='assets/cards/placeholder.svg'">
+                <div class="card-draw-name">${card.name}</div>
+                <div class="card-draw-desc">${card.desc}</div>
+                ${isOwned && GameState.cardCollection.filter(id => id === card.id).length > 1
+                    ? '<div class="card-draw-dup">重複！已收藏</div>' : ''}
+            </div>
+        `;
+        overlay.classList.remove('hidden');
+        cardEl.classList.remove('flip-in');
+        // 強制 reflow 重啟動畫
+        void cardEl.offsetWidth;
+        cardEl.classList.add('flip-in');
+        const btn = document.getElementById('btn-card-collect');
+        if (btn) btn.onclick = () => this.hide();
+    },
+    hide() {
+        const overlay = document.getElementById('card-draw-overlay');
+        const cardEl = document.getElementById('card-draw-card');
+        if (overlay) overlay.classList.add('hidden');
+        if (cardEl) cardEl.classList.remove('flip-in');
     }
 };
 
@@ -1994,6 +2395,13 @@ function setupEventListeners() {
             DOM.tabPanels.forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            // 切到特定分頁時自動更新
+            const target = tab.dataset.tab;
+            if (target === 'cards' && typeof UI.updateCardAlbum === 'function') {
+                UI.updateCardAlbum();
+            } else if (target === 'stocks' && typeof UI.updateStockPanel === 'function') {
+                UI.updateStockPanel();
+            }
         });
     });
 
@@ -2040,6 +2448,39 @@ function setupEventListeners() {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
         }
     });
+
+    // 刪除火箭按鈕（事件委派）
+    if (DOM.rocketsList) {
+        DOM.rocketsList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-rocket-delete')) {
+                e.stopPropagation();
+                const idx = parseInt(e.target.dataset.rocketIndex);
+                if (!isNaN(idx)) UI.deleteRocket(idx);
+            }
+        });
+    }
+
+    // 解散太空人按鈕（事件委派）
+    if (DOM.crewList) {
+        DOM.crewList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-crew-delete')) {
+                const id = e.target.dataset.crewId;
+                if (id) UI.deleteCrew(id);
+            }
+        });
+    }
+
+    // 卡片相簿篩選器
+    const albumFilter = document.getElementById('card-album-filter');
+    if (albumFilter) {
+        albumFilter.addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-btn')) {
+                albumFilter.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                UI.updateCardAlbum(e.target.dataset.filter);
+            }
+        });
+    }
 }
 
 // ================================================
