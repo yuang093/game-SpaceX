@@ -424,6 +424,52 @@ const CONFIG = {
             type: 'kuiper_station',
             color: '#9966ff',
             size: 1.8
+        },
+        // v2.5 新增太陽系站點
+        {
+            id: 'venus', name: '金星軌道研究站', altitude: 110000000, targetAltitude: 7500, difficulty: 11,
+            needs: ['耐腐蝕材料', '散熱系統', '科研設備'], supply: ['大氣數據', '地質樣本'],
+            reward: { base: 40000, multiplier: 14.0 },
+            unlockReputation: 1800,
+            type: 'venus_base',
+            color: '#ffcc88',
+            size: 1.0
+        },
+        {
+            id: 'mercury', name: '水星前哨站', altitude: 58000000, targetAltitude: 7000, difficulty: 12,
+            needs: ['高溫隔熱', '太陽能板', '散熱器'], supply: ['稀有金屬', '太陽風數據'],
+            reward: { base: 55000, multiplier: 16.0 },
+            unlockReputation: 2200,
+            type: 'mercury_base',
+            color: '#bbbbbb',
+            size: 0.9
+        },
+        {
+            id: 'neptune', name: '海王星深空基地', altitude: 4500000000, targetAltitude: 9800, difficulty: 20,
+            needs: ['核能電池', '長程通訊', '極端低溫設備'], supply: ['冰巨星數據', '未知化合物'],
+            reward: { base: 500000, multiplier: 60.0 },
+            unlockReputation: 10000,
+            type: 'neptune_station',
+            color: '#5577ff',
+            size: 2.0
+        },
+        {
+            id: 'pluto', name: '冥王星探測站', altitude: 7500000000, targetAltitude: 9600, difficulty: 17,
+            needs: ['核能電池', '低溫樣本艙', '遠距操控'], supply: ['冰氮樣本', '古老化學數據'],
+            reward: { base: 180000, multiplier: 38.0 },
+            unlockReputation: 7000,
+            type: 'pluto_station',
+            color: '#ccaa88',
+            size: 1.0
+        },
+        {
+            id: 'ceres', name: '穀神星採礦殖民地', altitude: 415000000, targetAltitude: 8000, difficulty: 10,
+            needs: ['採礦設備', '冶煉工廠', '太陽能板'], supply: ['鐵鎳礦石', '水冰', '稀有金屬'],
+            reward: { base: 30000, multiplier: 9.0 },
+            unlockReputation: 1200,
+            type: 'ceres_station',
+            color: '#aaaaaa',
+            size: 1.2
         }
     ],
 
@@ -445,7 +491,12 @@ const CONFIG = {
         // v2.2 新增任務
         asteroid_mining: { name: '小行星採礦', icon: '⛏️', color: '#ccaa66', baseReward: 4.0 },
         quantum_experiment: { name: '量子實驗', icon: '⚛️', color: '#66ffcc', baseReward: 3.2 },
-        alien_signal: { name: '外星訊號追蹤', icon: '👽', color: '#66ff66', baseReward: 5.0 }
+        alien_signal: { name: '外星訊號追蹤', icon: '👽', color: '#66ff66', baseReward: 5.0 },
+        // v2.5 新增任務
+        ice_mining: { name: '冰層開採', icon: '🧊', color: '#aaddff', baseReward: 2.8 },
+        deep_space_probe: { name: '深空探測', icon: '🔭', color: '#dd88ff', baseReward: 3.8 },
+        solar_observation: { name: '太陽觀測', icon: '☀️', color: '#ffdd44', baseReward: 2.5 },
+        first_contact: { name: '首次接觸', icon: '🤝', color: '#44ffaa', baseReward: 6.0 }
     },
 
     // 乘員職銜
@@ -1715,13 +1766,14 @@ const SaveSystem = {
 
 // ================================================
 // SPCX 股票系統
-// 鏡像真實股票（預設 RKLB Rocket Lab，最接近 SpaceX 的公開上市公司）
+// 鏡像真實股票（SPCE Virgin Galactic，太空旅遊主題最契合）
 // 透過 CORS 代理抓取 Yahoo Finance 行情
 // ================================================
 const StockSystem = {
     // 設定：SPCX 對標的真實股票（SpaceX 是私人公司，無法直接抓取）
-    // 可改為 RKLB / SPCE / ASTS / LUNR / PL 任一太空股
-    REAL_SYMBOL: 'RKLB',
+    // SPCE = Virgin Galactic 太空旅遊 / RKLB = Rocket Lab 衛星發射
+    // 可改為 SPCE / RKLB / ASTS / LUNR / PL 任一太空股
+    REAL_SYMBOL: 'SPCE',
     CORS_PROXY: 'https://corsproxy.io/?url=',
     YAHOO_URL: 'https://query1.finance.yahoo.com/v8/finance/chart/',
     CACHE_MS: 5 * 60 * 1000,   // 5 分鐘快取

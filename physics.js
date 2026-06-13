@@ -88,6 +88,27 @@ const MAX_PARTICLES = 300;
 const rocketImageCache = {};
 const ROCKET_IMAGE_BASE = 'assets/rockets/';
 
+// 行星/天體影像快取
+const planetImages = {};
+const PLANET_IMAGE_BASE = 'assets/planets/';
+
+/**
+ * 預先載入行星真實影像
+ */
+function preloadPlanetImages() {
+    const planetFiles = [
+        { key: 'earth', fileName: 'earth_real.jpg' },
+        { key: 'moon',  fileName: 'moon_real.jpg'  },
+        { key: 'mars',  fileName: 'mars_real.jpg'  }
+    ];
+    planetFiles.forEach(({ key, fileName }) => {
+        const img = new Image();
+        img.src = PLANET_IMAGE_BASE + fileName;
+        img.onerror = () => console.warn(`行星影像載入失敗: ${fileName}`);
+        planetImages[key] = img;
+    });
+}
+
 /**
  * 預先載入所有火箭 SVG 圖片
  * 使用與 CONFIG.rocketImages 一致的 key（底線命名）
@@ -266,6 +287,125 @@ function emitExplosionParticles(x, y) {
 // ================================================
 // 星空背景
 // ================================================
+
+/**
+ * 根據高度繪製動態太空背景（天空漸層 + 太陽 + 星雲）
+ */
+function drawSpaceBackground() {
+    const rocketY = rocket ? rocket.y : GROUND_Y;
+    const altitude = GROUND_Y - rocketY; // 高度越大（正數）= 在太空
+
+    // 背景底色：根據高度從藍天 → 深空過渡
+    if (altitude < 500) {
+        // 對流層/平流層（0-500m）
+        const t = altitude / 500;
+        const r = Math.round(5 + t * (3 - 5));
+        const g = Math.round(5 + t * (3 - 5));
+        const b = Math.round(20 + t * (10 - 20));
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    } else {
+        // 深空
+        ctx.fillStyle = '#050510';
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    }
+
+    // === 太陽（在高空可見）===
+    if (altitude > 200) {
+        drawSun(altitude);
+    }
+
+    // === 星雲效果（高空深空）===
+    if (altitude > 2000) {
+        drawNebula(altitude);
+    }
+}
+
+/**
+ * 繪製太陽（高空時出現在畫面右上角）
+ */
+function drawSun(altitude) {
+    const sunX = canvasWidth * 0.88;
+    const sunY = 80;
+    const sunRadius = 30 + Math.min(altitude / 500, 1) * 10; // 越高越大
+
+    // 太陽本體
+    const sunGrad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius);
+    sunGrad.addColorStop(0, '#ffffff');
+    sunGrad.addColorStop(0.3, '#ffee88');
+    sunGrad.addColorStop(0.7, '#ffcc44');
+    sunGrad.addColorStop(1, '#ff8800');
+    ctx.fillStyle = sunGrad;
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 日冕光暈
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    const coronaGrad = ctx.createRadialGradient(sunX, sunY, sunRadius, sunX, sunY, sunRadius * 3);
+    coronaGrad.addColorStop(0, 'rgba(255,220,100,0.6)');
+    coronaGrad.addColorStop(0.5, 'rgba(255,180,50,0.2)');
+    coronaGrad.addColorStop(1, 'rgba(255,150,0,0)');
+    ctx.fillStyle = coronaGrad;
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunRadius * 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 光芒
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.strokeStyle = '#ffdd66';
+    ctx.lineWidth = 2;
+    const rays = 12;
+    for (let i = 0; i < rays; i++) {
+        const angle = (i / rays) * Math.PI * 2 + Date.now() * 0.0001;
+        const innerR = sunRadius + 5;
+        const outerR = sunRadius + 20 + Math.sin(Date.now() * 0.003 + i) * 8;
+        ctx.beginPath();
+        ctx.moveTo(sunX + Math.cos(angle) * innerR, sunY + Math.sin(angle) * innerR);
+        ctx.lineTo(sunX + Math.cos(angle) * outerR, sunY + Math.sin(angle) * outerR);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+/**
+ * 繪製星雲（高空深空背景裝飾）
+ */
+function drawNebula(altitude) {
+    const intensity = Math.min((altitude - 2000) / 4000, 1);
+    ctx.save();
+    ctx.globalAlpha = intensity * 0.15;
+
+    // 紫色星雲斑塊
+    const nebX = canvasWidth * 0.2;
+    const nebY = canvasHeight * 0.3;
+    const nebGrad = ctx.createRadialGradient(nebX, nebY, 0, nebX, nebY, 200);
+    nebGrad.addColorStop(0, '#8844ff');
+    nebGrad.addColorStop(0.5, '#4422aa');
+    nebGrad.addColorStop(1, 'rgba(30,10,60,0)');
+    ctx.fillStyle = nebGrad;
+    ctx.beginPath();
+    ctx.arc(nebX, nebY, 200, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 藍綠色星雲斑塊
+    const neb2X = canvasWidth * 0.75;
+    const neb2Y = canvasHeight * 0.6;
+    const neb2Grad = ctx.createRadialGradient(neb2X, neb2Y, 0, neb2X, neb2Y, 150);
+    neb2Grad.addColorStop(0, '#22aacc');
+    neb2Grad.addColorStop(0.5, '#116688');
+    neb2Grad.addColorStop(1, 'rgba(10,30,50,0)');
+    ctx.fillStyle = neb2Grad;
+    ctx.beginPath();
+    ctx.arc(neb2X, neb2Y, 150, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
 const stars = [];
 const STAR_COUNT = 300;
 
@@ -305,44 +445,520 @@ function drawStars() {
     });
 }
 
-// 行星/地球
+// 行星/地球（真實衛星紋理）
 function drawEarth() {
     const earthY = GROUND_Y - 200 - cameraY;
 
-    if (earthY > canvasHeight + 500) return;
-    if (!isFinite(earthY)) return; // 防止非有限值
+    if (earthY > canvasHeight + 600) return;
+    if (!isFinite(earthY)) return;
 
-    // 地球曲率
-    const gradient = ctx.createRadialGradient(
-        WORLD_WIDTH / 2, Math.max(-500, earthY + 300),
-        200,
-        WORLD_WIDTH / 2, Math.max(-500, earthY + 300),
-        800
-    );
-    gradient.addColorStop(0, '#4488ff');
-    gradient.addColorStop(0.5, '#2266cc');
-    gradient.addColorStop(1, '#113388');
+    const cx = WORLD_WIDTH / 2;
+    const earthRadius = 550;
 
-    ctx.fillStyle = gradient;
+    // 若已載入真實紋理，優先使用
+    const earthImg = planetImages['earth'];
+    if (earthImg && earthImg.complete && earthImg.naturalWidth > 0) {
+        // 紋理地球
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, earthY, earthRadius, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(earthImg, cx - earthRadius, earthY - earthRadius, earthRadius * 2, earthRadius * 2);
+        ctx.restore();
+    } else {
+        // Fallback：漸層地球
+        const gradient = ctx.createRadialGradient(cx, earthY - 100, 100, cx, earthY, earthRadius);
+        gradient.addColorStop(0, '#4488ff');
+        gradient.addColorStop(0.5, '#2266cc');
+        gradient.addColorStop(1, '#113388');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, earthY, earthRadius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // 大氣層藍色光暈（內發光）
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    const atmoInner = ctx.createRadialGradient(cx, earthY, earthRadius * 0.7, cx, earthY, earthRadius + 80);
+    atmoInner.addColorStop(0, 'rgba(100, 180, 255, 0.4)');
+    atmoInner.addColorStop(1, 'rgba(100, 180, 255, 0)');
+    ctx.fillStyle = atmoInner;
     ctx.beginPath();
-    ctx.arc(WORLD_WIDTH / 2, Math.max(-500, earthY + 500), 800, 0, Math.PI * 2);
+    ctx.arc(cx, earthY, earthRadius + 80, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 大氣層外層微光
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    const atmoOuter = ctx.createRadialGradient(cx, earthY, earthRadius, cx, earthY, earthRadius + 200);
+    atmoOuter.addColorStop(0, 'rgba(60, 140, 255, 0.3)');
+    atmoOuter.addColorStop(1, 'rgba(60, 140, 255, 0)');
+    ctx.fillStyle = atmoOuter;
+    ctx.beginPath();
+    ctx.arc(cx, earthY, earthRadius + 200, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 白天/黑夜交界線（細微弧線）
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx - 300, earthY, earthRadius, -Math.PI * 0.3, Math.PI * 0.3);
+    ctx.stroke();
+    ctx.restore();
+}
+
+/**
+ * 繪製月球（真實衛星紋理）
+ * @param {number} worldY - 月球中心的世界座標 Y
+ * @param {number} scale - 縮放比例（預設 1）
+ */
+function drawMoon(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 200 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    const moonImg = planetImages['moon'];
+    if (moonImg && moonImg.complete && moonImg.naturalWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(moonImg, cx - radius, screenY - radius, radius * 2, radius * 2);
+        ctx.restore();
+    } else {
+        // Fallback：灰色漸層
+        const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+        grad.addColorStop(0, '#dddddd');
+        grad.addColorStop(1, '#555555');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // 月球微光
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + 60);
+    glow.addColorStop(0, 'rgba(200, 200, 210, 0.5)');
+    glow.addColorStop(1, 'rgba(200, 200, 210, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius + 60, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * 繪製金星（厚重大氣層）
+ */
+function drawVenus(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 160 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // 金星厚重雲層
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#ffeecc');
+    grad.addColorStop(0.4, '#ddaa66');
+    grad.addColorStop(1, '#aa6622');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // 大氣層光暈
+    // 雲層條紋
     ctx.save();
     ctx.globalAlpha = 0.3;
-    const safeY = Math.max(-500, earthY + 500);
-    const atmoGradient = ctx.createRadialGradient(
-        WORLD_WIDTH / 2, safeY,
-        750,
-        WORLD_WIDTH / 2, safeY,
-        850
-    );
-    atmoGradient.addColorStop(0, 'rgba(100, 180, 255, 0.5)');
-    atmoGradient.addColorStop(1, 'rgba(100, 180, 255, 0)');
-    ctx.fillStyle = atmoGradient;
+    ctx.strokeStyle = '#ffcc88';
+    ctx.lineWidth = 4;
+    for (let i = 0; i < 5; i++) {
+        const yOff = (i - 2) * radius * 0.3;
+        ctx.beginPath();
+        ctx.arc(cx, screenY + yOff, Math.sqrt(Math.max(0, radius * radius - yOff * yOff)), 0, Math.PI);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // 金星微光
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + 60);
+    glow.addColorStop(0, 'rgba(255, 200, 100, 0.5)');
+    glow.addColorStop(1, 'rgba(255, 200, 100, 0)');
+    ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(WORLD_WIDTH / 2, earthY + 500, 850, 0, Math.PI * 2);
+    ctx.arc(cx, screenY, radius + 60, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * 繪製水星（隕石坑表面）
+ */
+function drawMercury(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 140 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#bbbbbb');
+    grad.addColorStop(1, '#555555');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 水星隕石坑
+    ctx.fillStyle = '#444444';
+    const craters = [[-40, -30, 20], [30, 20, 15], [-10, 50, 12], [50, -20, 10], [-50, 10, 8]];
+    craters.forEach(([dx, dy, r]) => {
+        ctx.beginPath();
+        ctx.arc(cx + dx, screenY + dy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#888888';
+        ctx.beginPath();
+        ctx.arc(cx + dx - 2, screenY + dy - 2, r * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#444444';
+    });
+
+    // 微光
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + 40);
+    glow.addColorStop(0, 'rgba(200, 200, 200, 0.4)');
+    glow.addColorStop(1, 'rgba(200, 200, 200, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius + 40, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * 繪製海王星（冰巨星）
+ */
+function drawNeptune(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 220 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#6688ff');
+    grad.addColorStop(0.5, '#3355cc');
+    grad.addColorStop(1, '#112255');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 海王星條紋
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.strokeStyle = '#88aaff';
+    ctx.lineWidth = 5;
+    for (let i = 0; i < 4; i++) {
+        const yOff = (i - 1.5) * radius * 0.3;
+        ctx.beginPath();
+        ctx.arc(cx, screenY + yOff, Math.sqrt(Math.max(0, radius * radius - yOff * yOff)), 0, Math.PI);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // 大氣微光
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + 100);
+    glow.addColorStop(0, 'rgba(100, 140, 255, 0.4)');
+    glow.addColorStop(1, 'rgba(100, 140, 255, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius + 100, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * 繪製冥王星（冰矮星）
+ */
+function drawPluto(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 100 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#ddccaa');
+    grad.addColorStop(0.5, '#aa8866');
+    grad.addColorStop(1, '#664433');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 冰冠（冥王星有氮冰冠）
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(cx, screenY - radius * 0.6, radius * 0.4, radius * 0.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 表面紋理
+    ctx.fillStyle = '#885533';
+    ctx.beginPath();
+    ctx.arc(cx - 20, screenY + 20, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx + 30, screenY - 10, 10, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/**
+ * 繪製穀神星（小行星帶最大天體）
+ */
+function drawCeres(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 120 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#aaaaaa');
+    grad.addColorStop(1, '#555555');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 不規則形狀（稍微變形）
+    ctx.fillStyle = '#666666';
+    ctx.beginPath();
+    ctx.arc(cx - 30, screenY + 20, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx + 40, screenY - 15, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 採礦痕跡
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#ffcc44';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius * 0.7, 0, Math.PI * 0.5);
+    ctx.stroke();
+    ctx.restore();
+}
+
+/**
+ * 繪製土衛六泰坦（橙色甲烷大氣）
+ */
+function drawTitan(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 180 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // 土衛六本體（橙褐色厚重大氣）
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#ddaa66');
+    grad.addColorStop(0.5, '#cc8833');
+    grad.addColorStop(1, '#885522');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 甲烷雲層條紋
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = '#ffcc88';
+    ctx.lineWidth = 5;
+    for (let i = 0; i < 4; i++) {
+        const yOff = (i - 1.5) * radius * 0.25;
+        ctx.beginPath();
+        ctx.arc(cx, screenY + yOff, Math.sqrt(Math.max(0, radius * radius - yOff * yOff)), 0, Math.PI);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // 厚重大氣光暈
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + 100);
+    glow.addColorStop(0, 'rgba(220, 160, 80, 0.5)');
+    glow.addColorStop(1, 'rgba(220, 160, 80, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius + 100, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * 繪製土衛二（冰噴射水柱）
+ */
+function drawEnceladus(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 130 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // 土衛二本體（冰白色）
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.6, '#ddeeff');
+    grad.addColorStop(1, '#8899bb');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 冰裂紋
+    ctx.strokeStyle = 'rgba(100, 150, 200, 0.5)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 6; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx, screenY);
+        const angle = (i / 6) * Math.PI * 2;
+        ctx.lineTo(cx + Math.cos(angle) * radius * 0.8, screenY + Math.sin(angle) * radius * 0.8);
+        ctx.stroke();
+    }
+
+    // 水噴射柱（動畫）
+    const time = Date.now() * 0.002;
+    const jetHeight = 40 + Math.sin(time) * 10;
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    const jetGrad = ctx.createLinearGradient(cx, screenY - radius, cx, screenY - radius - jetHeight);
+    jetGrad.addColorStop(0, 'rgba(200, 230, 255, 0.8)');
+    jetGrad.addColorStop(1, 'rgba(200, 230, 255, 0)');
+    ctx.fillStyle = jetGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - 5, screenY - radius);
+    ctx.lineTo(cx - 15, screenY - radius - jetHeight);
+    ctx.lineTo(cx + 15, screenY - radius - jetHeight);
+    ctx.lineTo(cx + 5, screenY - radius);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
+ * 繪製古柏帶天體（冰封岩石 + 星光背景）
+ */
+function drawKuiper(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 150 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // 古柏帶天體本體
+    const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+    grad.addColorStop(0, '#bb99dd');
+    grad.addColorStop(0.5, '#7755aa');
+    grad.addColorStop(1, '#332255');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 冰表面斑塊
+    ctx.fillStyle = '#cc99ee';
+    ctx.beginPath();
+    ctx.arc(cx - 30, screenY - 20, 25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#9988cc';
+    ctx.beginPath();
+    ctx.arc(cx + 40, screenY + 30, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 周圍小岩石
+    const rocks = [[-80, -50, 15], [90, -30, 12], [-60, 60, 10], [70, 50, 8]];
+    ctx.fillStyle = '#6644aa';
+    rocks.forEach(([rx, ry, rr]) => {
+        ctx.beginPath();
+        ctx.arc(cx + rx, screenY + ry, rr, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    // 深空星光背景
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    const time = Date.now() * 0.001;
+    const kStars = [[-200, -100], [250, -50], [-180, 150], [220, 180], [-100, 250]];
+    kStars.forEach(([sx, sy], i) => {
+        const twinkle = Math.sin(time * 2 + i) * 0.3 + 0.7;
+        ctx.globalAlpha = 0.6 * twinkle;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx + sx, screenY + sy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    ctx.restore();
+}
+
+/**
+ * 繪製火星（真實衛星紋理）
+ * @param {number} worldY - 火星中心的世界座標 Y
+ * @param {number} scale - 縮放比例（預設 1）
+ */
+function drawMars(worldY, scale = 1) {
+    const screenY = worldY - cameraY;
+    const cx = WORLD_WIDTH / 2;
+    const radius = 180 * scale;
+
+    if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    const marsImg = planetImages['mars'];
+    if (marsImg && marsImg.complete && marsImg.naturalWidth > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(marsImg, cx - radius, screenY - radius, radius * 2, radius * 2);
+        ctx.restore();
+    } else {
+        // Fallback：紅色漸層
+        const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
+        grad.addColorStop(0, '#ee9966');
+        grad.addColorStop(1, '#662200');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // 火星大氣微光
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + 80);
+    glow.addColorStop(0, 'rgba(200, 100, 60, 0.4)');
+    glow.addColorStop(1, 'rgba(200, 100, 60, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius + 80, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 }
@@ -383,6 +999,9 @@ function drawGround() {
     }
 }
 
+/**
+ * 繪製真實發射塔（肯尼迪航天中心 39A 風格）
+ */
 function drawLaunchTower() {
     const towerX = LAUNCH_TOWER.x - LAUNCH_TOWER.width / 2;
     const towerTop = LAUNCH_TOWER.y - LAUNCH_TOWER.height - cameraY;
@@ -390,55 +1009,162 @@ function drawLaunchTower() {
 
     if (towerBottom < -50 || towerTop > canvasHeight + 50) return;
 
-    // 主結構
-    ctx.fillStyle = '#5a5a7e';
+    // === 發射塔主結構 ===
+    // 塔架本體（深灰色金屬）
+    ctx.fillStyle = '#3a3a50';
     ctx.fillRect(towerX, towerTop, LAUNCH_TOWER.width, LAUNCH_TOWER.height);
 
-    // 框架
-    ctx.strokeStyle = '#7a7a9e';
-    ctx.lineWidth = 2;
-    const numSections = 7;
-    for (let i = 1; i < numSections; i++) {
-        const y = towerTop + (LAUNCH_TOWER.height / numSections) * i;
-        ctx.beginPath();
-        ctx.moveTo(towerX, y);
-        ctx.lineTo(towerX + LAUNCH_TOWER.width, y);
-        ctx.stroke();
+    // 塔架垂直支撐（X 型斜撐）
+    ctx.strokeStyle = '#5a5a70';
+    ctx.lineWidth = 3;
+    // 左斜撐
+    ctx.beginPath();
+    ctx.moveTo(towerX, towerTop);
+    ctx.lineTo(towerX + LAUNCH_TOWER.width, towerTop + LAUNCH_TOWER.height);
+    ctx.stroke();
+    // 右斜撐
+    ctx.beginPath();
+    ctx.moveTo(towerX + LAUNCH_TOWER.width, towerTop);
+    ctx.lineTo(towerX, towerTop + LAUNCH_TOWER.height);
+    ctx.stroke();
+
+    // 水平平台（4 層）
+    const numPlatforms = 4;
+    for (let i = 0; i < numPlatforms; i++) {
+        const py = towerTop + (LAUNCH_TOWER.height / numPlatforms) * (i + 0.5);
+        ctx.fillStyle = '#4a4a65';
+        ctx.fillRect(towerX - 30, py - 4, LAUNCH_TOWER.width + 60, 8);
+        // 平台柵格
+        ctx.strokeStyle = '#5a5a78';
+        ctx.lineWidth = 1;
+        for (let j = 0; j < 8; j++) {
+            const px = towerX - 30 + j * ((LAUNCH_TOWER.width + 60) / 8);
+            ctx.beginPath();
+            ctx.moveTo(px, py - 4);
+            ctx.lineTo(px, py + 4);
+            ctx.stroke();
+        }
     }
 
-    // 警示燈
-    ctx.fillStyle = '#ff4466';
+    // 爬梯軌道（塔架兩側）
+    ctx.strokeStyle = '#6a6a85';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 4, 0, Math.PI * 2);
+    ctx.moveTo(towerX + 3, towerTop);
+    ctx.lineTo(towerX + 3, towerBottom);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(towerX + LAUNCH_TOWER.width - 3, towerTop);
+    ctx.lineTo(towerX + LAUNCH_TOWER.width - 3, towerBottom);
+    ctx.stroke();
+
+    // === 頂部旋臂（服務臂）===
+    const armY = towerTop + 20;
+    ctx.fillStyle = '#5a5a70';
+    ctx.fillRect(towerX - 40, armY, LAUNCH_TOWER.width + 80, 10);
+    // 旋臂關節
+    ctx.fillStyle = '#707088';
+    ctx.beginPath();
+    ctx.arc(towerX - 40, armY + 5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(towerX + LAUNCH_TOWER.width + 40, armY + 5, 5, 0, Math.PI * 2);
     ctx.fill();
 
-    // 發射台
-    ctx.fillStyle = '#4a4a6e';
-    ctx.fillRect(LANDING_PAD.x - 50, towerBottom - 10, 100, 10);
+    // === 警示燈（頂部紅燈）===
+    const blink = Math.sin(Date.now() * 0.005) > 0;
+    ctx.fillStyle = blink ? '#ff3344' : '#661122';
+    ctx.beginPath();
+    ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    if (blink) {
+        ctx.save();
+        ctx.globalAlpha = 0.3;
+        const glowR = ctx.createRadialGradient(LAUNCH_TOWER.x, towerTop + 5, 0, LAUNCH_TOWER.x, towerTop + 5, 20);
+        glowR.addColorStop(0, '#ff3344');
+        glowR.addColorStop(1, 'rgba(255,50,68,0)');
+        ctx.fillStyle = glowR;
+        ctx.beginPath();
+        ctx.arc(LAUNCH_TOWER.x, towerTop + 5, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // === 地面發射台基座 ===
+    ctx.fillStyle = '#2a2a40';
+    ctx.fillRect(LANDING_PAD.x - 80, towerBottom - 8, 160, 12);
+    ctx.fillStyle = '#3a3a55';
+    ctx.fillRect(LANDING_PAD.x - 75, towerBottom - 5, 150, 6);
+
+    // 排焰槽（火箭尾焰通道）
+    ctx.fillStyle = '#1a1a30';
+    ctx.fillRect(LANDING_PAD.x - 40, towerBottom + 4, 80, 15);
 }
 
+/**
+ * 繪製真實著陸平台（H 標記 + 排焰槽 + 夜間照明）
+ */
 function drawLandingPad() {
     const padX = LANDING_PAD.x - LANDING_PAD.width / 2;
     const padY = LANDING_PAD.y - cameraY;
 
     if (padY < -50 || padY > canvasHeight + 50) return;
 
-    // 著陸台（底座）
-    ctx.fillStyle = '#3a3a5e';
-    ctx.fillRect(padX - 10, padY, LANDING_PAD.width + 20, LANDING_PAD.height);
+    // 混凝土基座
+    ctx.fillStyle = '#2a2a40';
+    ctx.fillRect(padX - 20, padY, LANDING_PAD.width + 40, LANDING_PAD.height + 5);
 
-    // 著陸墊表面
-    ctx.fillStyle = '#4a4a6e';
-    ctx.fillRect(padX, padY, LANDING_PAD.width, 8);
+    // 排焰/散熱槽格柵
+    ctx.fillStyle = '#1a1a30';
+    ctx.fillRect(padX - 10, padY, LANDING_PAD.width + 20, 8);
+    ctx.strokeStyle = '#3a3a55';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 16; i++) {
+        ctx.beginPath();
+        ctx.moveTo(padX - 10 + i * 10, padY);
+        ctx.lineTo(padX - 10 + i * 10, padY + 8);
+        ctx.stroke();
+    }
 
-    // H 標記
+    // 著陸墊表面（深灰）
+    ctx.fillStyle = '#3a3a55';
+    ctx.fillRect(padX, padY + 8, LANDING_PAD.width, 10);
+
+    // H 白色外框
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(LANDING_PAD.x - 55, padY + 9, 110, 2);
+    ctx.fillRect(LANDING_PAD.x - 55, padY + 16, 110, 2);
+    ctx.fillRect(LANDING_PAD.x - 5, padY + 9, 4, 9);  // H 直桿
+
+    // H 標記（青色發光）
     ctx.fillStyle = '#00d4ff';
-    ctx.fillRect(LANDING_PAD.x - 50, padY - 3, 100, 3);
-
-    ctx.fillStyle = '#00d4ff';
-    ctx.font = 'bold 32px Arial';
+    ctx.font = 'bold 28px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('H', LANDING_PAD.x, padY - 10);
+    ctx.fillText('H', LANDING_PAD.x, padY + 30);
+
+    // H 標記微光
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.shadowColor = '#00d4ff';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = '#00d4ff';
+    ctx.font = 'bold 28px Arial';
+    ctx.fillText('H', LANDING_PAD.x, padY + 30);
+    ctx.restore();
+
+    // 四角導引燈（藍色）
+    const cornerLights = [
+        [padX + 10, padY + 10],
+        [padX + LANDING_PAD.width - 10, padY + 10],
+        [padX + 10, padY + 15],
+        [padX + LANDING_PAD.width - 10, padY + 15]
+    ];
+    ctx.fillStyle = '#00aaff';
+    cornerLights.forEach(([lx, ly]) => {
+        ctx.beginPath();
+        ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+        ctx.fill();
+    });
 
     // 安全進場引導錐（從天而降的虛線錐）
     drawApproachGuide(padX, padY);
@@ -526,42 +1252,22 @@ function drawCelestialBody(station, worldY) {
 
     switch (station.type) {
         case 'moon_base':
-            // 月球（灰色，有隕石坑）
-            ctx.fillStyle = '#888';
-            ctx.beginPath();
-            ctx.arc(cx + 150, screenY, size, 0, Math.PI * 2);
-            ctx.fill();
-            // 隕石坑
-            ctx.fillStyle = '#555';
-            for (let i = 0; i < 5; i++) {
-                const angle = i * (Math.PI * 2 / 5);
-                ctx.beginPath();
-                ctx.arc(cx + 150 + Math.cos(angle) * size * 0.4, screenY + Math.sin(angle) * size * 0.4, size * 0.1, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // 月球（真實衛星紋理 + 縮放）
+            drawMoon(worldY, (station.size || 1) * 1.2);
             // 標籤
-            ctx.fillStyle = '#fff';
-            ctx.font = '10px Arial';
+            ctx.fillStyle = '#ffee88';
+            ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('🌙 月球', cx + 150, screenY + size + 15);
+            ctx.fillText('🌙 月球基地', cx, screenY + (station.size || 1) * 240 + 20);
             break;
         case 'mars_base':
-            // 火星（紅色）
-            const marsGrad = ctx.createRadialGradient(cx - 30, screenY - 30, 20, cx + 150, screenY, size);
-            marsGrad.addColorStop(0, '#ee7755');
-            marsGrad.addColorStop(0.7, '#cc4422');
-            marsGrad.addColorStop(1, '#552200');
-            ctx.fillStyle = marsGrad;
-            ctx.beginPath();
-            ctx.arc(cx + 150, screenY, size, 0, Math.PI * 2);
-            ctx.fill();
-            // 極冠
-            ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.beginPath();
-            ctx.ellipse(cx + 150, screenY - size * 0.9, size * 0.3, size * 0.1, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.fillText('🔴 火星', cx + 150, screenY + size + 15);
+            // 火星（真實衛星紋理 + 縮放）
+            drawMars(worldY, (station.size || 1) * 1.1);
+            // 標籤
+            ctx.fillStyle = '#ff8866';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔴 火星基地', cx, screenY + (station.size || 1) * 200 + 20);
             break;
         case 'europa_base':
             // 歐羅巴（冰藍色）
@@ -685,6 +1391,46 @@ function drawCelestialBody(station, worldY) {
             ctx.fillStyle = '#fff';
             ctx.fillText('☄️ 彗星', cx, screenY + 40);
             break;
+        case 'venus_base':
+            // 金星基地（厚重雲層行星）
+            drawVenus(worldY, (station.size || 1) * 1.0);
+            ctx.fillStyle = '#ffcc88';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌼 金星基地', cx, screenY + 180);
+            break;
+        case 'mercury_base':
+            // 水星基地（隕石坑行星）
+            drawMercury(worldY, (station.size || 1) * 1.0);
+            ctx.fillStyle = '#cccccc';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('☿ 水星基地', cx, screenY + 160);
+            break;
+        case 'neptune_station':
+            // 海王星軌道站（冰巨星）
+            drawNeptune(worldY, (station.size || 1) * 1.5);
+            ctx.fillStyle = '#88aaff';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔵 海王星基地', cx, screenY + 350);
+            break;
+        case 'pluto_station':
+            // 冥王星基地（冰矮星）
+            drawPluto(worldY, (station.size || 1) * 1.0);
+            ctx.fillStyle = '#ccaa88';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🪐 冥王星基地', cx, screenY + 120);
+            break;
+        case 'ceres_station':
+            // 穀神星採礦站（小行星帶）
+            drawCeres(worldY, (station.size || 1) * 1.0);
+            ctx.fillStyle = '#aaaaaa';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('⛏️ 穀神星礦區', cx, screenY + 140);
+            break;
     }
 }
 
@@ -763,6 +1509,30 @@ function drawStationByType(station, worldY) {
             ctx.font = 'bold 10px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('H', 0, 22 * size);
+            break;
+        case 'titan_base':
+            // 土衛六基地（橙褐色甲烷湖 + 天然氣）
+            drawTitan(worldY, (station.size || 1) * 1.5);
+            ctx.fillStyle = '#cc9944';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌑 土衛六基地', cx, screenY + 250);
+            break;
+        case 'enceladus_station':
+            // 土衛二噴泉站（冰噴射）
+            drawEnceladus(worldY, (station.size || 1) * 1.2);
+            ctx.fillStyle = '#88ccff';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('💧 土衛二觀測站', cx, screenY + 200);
+            break;
+        case 'kuiper_station':
+            // 古柏帶站（冰封岩石 + 星光）
+            drawKuiper(worldY, (station.size || 1) * 1.8);
+            ctx.fillStyle = '#9966ff';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('⭐ 古柏帶探測站', cx, screenY + 280);
             break;
         case 'lagrange_point':
             // 拉格朗日點（特殊標記 + 太空站）
@@ -1248,8 +2018,8 @@ function gameLoop(timestamp) {
         const deltaTime = timestamp - lastTime;
         lastTime = timestamp;
 
-        ctx.fillStyle = '#050510';
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        // 根據火箭高度動態調整天空顏色（從地面到大氣層到深空）
+        drawSpaceBackground();
 
         drawStars();
         drawEarth();
@@ -1287,6 +2057,7 @@ const Physics = {
                 this.resizeCanvas();
                 generateStars();
                 preloadRocketImages();
+                preloadPlanetImages();
                 this.setupControls();
                 this.drawInitialScene();
             });
