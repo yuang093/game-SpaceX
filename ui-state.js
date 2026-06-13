@@ -1622,7 +1622,9 @@ function showMissionDetails(index) {
     if (reqs.minCrew > GameState.crew.length) { canAccept = false; reasons.push(`需要 ${reqs.minCrew} 名太空人`); }
 
     // 燃料容量檢查（顯示需要的燃料量 vs 火箭容量）
-    const fuelCapacity = rocket.maxFuel; // 火箭最大燃料容量
+    // 燃料容量 = 100（基礎）+ 等級加成（從 fuelLevels 取得）
+    const fuelLevels = [0, 30, 70, 120, 180, 250];
+    const fuelCapacity = 100 + (fuelLevels[rocket.fuel - 1] || 0);
     const needFuel = reqs.minFuelCapacity;
     const fuelOk = fuelCapacity >= needFuel;
     if (!fuelOk) { canAccept = false; }
@@ -1639,7 +1641,7 @@ function showMissionDetails(index) {
         <p><strong>類型:</strong> <span style="color:${typeInfo.color}">${typeInfo.icon} ${typeInfo.name}</span></p>
         <p><strong>目的地:</strong> ${mission.station.name}</p>
         <p><strong>距離:</strong> ${distDisplay}</p>
-        <p><strong>燃料需求:</strong> ${needFuel} 單位 <span style="color:${fuelOk ? '#00ff88' : '#ff4466'}">${fuelOk ? '✅' : '⚠️ 需要 ' + fuelCapacity + '+'}</span></p>
+        <p><strong>燃料需求:</strong> ${needFuel} 單位 <span style="color:${fuelOk ? '#00ff88' : '#ff4466'}">${fuelOk ? '✅' : '⚠️ 需要 ' + fuelCapacity + '（你有 ' + fuelCapacity + '）'}</span></p>
         <p><strong>難度:</strong> ${'⭐'.repeat(mission.difficulty)}</p>
         <p><strong>獎勵:</strong> <span style="color:#00ff88">$${mission.reward.toLocaleString()}</span></p>
         <p><strong>貨物:</strong> ${mission.cargo.items.map(i => `${i.name} x${i.quantity}`).join(', ') || '無'}</p>
