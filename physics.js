@@ -57,7 +57,8 @@ const rocket = {
     height: 70,
     phase: 'GROUND',
     dockedStation: null,
-    targetReached: false
+    targetReached: false,
+    lastY: undefined
 };
 
 // ================================================
@@ -1101,14 +1102,16 @@ function checkCollisions() {
     if (GameState.currentMission) {
         const station = GameState.currentMission.station;
         const targetY = station.targetAltitude;
-        const tolerance = 30;
+        const yTolerance = 200;        // 放寬 y 容差（30→200）
+        const xTolerance = 200;        // 放寬 x 容差（40→200）
 
-        // 抵達目標高度且速度低、x 接近中心
-        if (Math.abs(rocket.y - targetY) < tolerance &&
-            Math.abs(rocket.x - WORLD_WIDTH / 2) < 40 &&
-            Math.abs(rocket.vy) < 5) {
+        // 穿越式檢測：記錄上一幀 y，偵測跨越目標線
+        if (rocket.lastY === undefined) rocket.lastY = rocket.y;
+        const crossedTarget = (rocket.lastY > targetY && rocket.y <= targetY) ||
+                              (rocket.lastY < targetY && rocket.y >= targetY);
+        const inZone = Math.abs(rocket.x - WORLD_WIDTH / 2) < xTolerance;
 
-            // 標記已抵達目標
+        if (crossedTarget && inZone) {
             if (!rocket.targetReached) {
                 rocket.targetReached = true;
                 if (typeof UI !== 'undefined' && UI.toast) {
@@ -1116,6 +1119,17 @@ function checkCollisions() {
                 }
             }
         }
+
+        // 也支援：在目標區域內（穿越後滯留）
+        if (Math.abs(rocket.y - targetY) < yTolerance && inZone) {
+            if (!rocket.targetReached) {
+                rocket.targetReached = true;
+                if (typeof UI !== 'undefined' && UI.toast) {
+                    UI.toast(`🎯 已抵達 ${station.name}！`, 'success');
+                }
+            }
+        }
+        rocket.lastY = rocket.y;
     }
 
     // 轉換為下降階段
@@ -1348,6 +1362,7 @@ const Physics = {
         rocket.phase = 'ASCENDING';
         rocket.dockedStation = null;
         rocket.targetReached = false;
+        rocket.lastY = undefined;
 
         cameraY = Math.max(0, rocket.y - canvasHeight * 0.7);
     },
