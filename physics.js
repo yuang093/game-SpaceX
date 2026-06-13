@@ -559,8 +559,60 @@ function drawStartingBody() {
 
     // === 地球 / 地球軌道太空站（顯示地球）===
     if (loc === 'earth' || loc === 'leo' || loc === 'polar' ||
-        loc === 'solar_satellite' || loc === 'lagrange') {
+        loc === 'lagrange') {
         drawEarth();
+        return;
+    }
+
+    // === 太陽能衛星矩陣（顯示太陽 + 矩陣）===
+    if (loc === 'solar_satellite') {
+        const screenY = displayY - cameraY;
+        // 太陽（小型）
+        const sunGrad = ctx.createRadialGradient(cx - 200, screenY - 100, 30, cx - 200, screenY - 100, 80);
+        sunGrad.addColorStop(0, '#ffffff');
+        sunGrad.addColorStop(0.3, '#ffee88');
+        sunGrad.addColorStop(0.7, '#ffcc44');
+        sunGrad.addColorStop(1, '#ff8800');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(cx - 200, screenY - 100, 80, 0, Math.PI * 2);
+        ctx.fill();
+        // 太陽光芒
+        ctx.save();
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = '#ffdd66';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 16; i++) {
+            const angle = (i / 16) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(cx - 200 + Math.cos(angle) * 85, screenY - 100 + Math.sin(angle) * 85);
+            ctx.lineTo(cx - 200 + Math.cos(angle) * 110, screenY - 100 + Math.sin(angle) * 110);
+            ctx.stroke();
+        }
+        ctx.restore();
+        // 太陽能板陣列
+        ctx.fillStyle = '#1a3a6e';
+        for (let i = -2; i <= 2; i++) {
+            ctx.fillRect(cx - 100 + i * 50, screenY - 40, 45, 80);
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(cx - 100 + i * 50, screenY - 40, 45, 80);
+            // 內部格線
+            for (let j = 1; j < 4; j++) {
+                ctx.beginPath();
+                ctx.moveTo(cx - 100 + i * 50, screenY - 40 + j * 20);
+                ctx.lineTo(cx - 100 + i * 50 + 45, screenY - 40 + j * 20);
+                ctx.stroke();
+            }
+        }
+        // 中心連接桁架
+        ctx.fillStyle = '#888';
+        ctx.fillRect(cx - 150, screenY - 3, 300, 6);
+        // 標籤
+        ctx.fillStyle = '#ffcc00';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('☀️ 太陽能衛星矩陣', cx, screenY + 80);
         return;
     }
 

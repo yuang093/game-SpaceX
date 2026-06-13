@@ -1,0 +1,11 @@
+<svg viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="g" cx="0.5" cy="0.4" r="0.7">
+      <stop offset="0%" stop-color="#c3c"/>
+      <stop offset="100%" stop-color="#000"/>
+    </radialGradient>
+  </defs>
+  <rect width="240" height="320" fill="url(#g)"/>
+  <text x="120" y="180" text-anchor="middle" font-size="100" font-family="Apple Color Emoji, Segoe UI Emoji, sans-serif">🌌</text>
+  <text x="120" y="280" text-anchor="middle" fill="#fff" font-size="20" font-weight="bold" font-family="sans-serif">捷列什科娃</text>
+</svg>

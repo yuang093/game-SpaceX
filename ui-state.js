@@ -665,18 +665,18 @@ const CONFIG = {
     // 卡片池（55 張）
     cards: [
         // 人物 (12 張)
-        { id: 'elon_musk',     name: '伊隆·馬斯克',          rarity: 'UR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Elon_Musk_2022.jpg/240px-Elon_Musk_2022.jpg', desc: 'SpaceX、Tesla、xAI 創辦人，推動人類成為多行星物種' },
-        { id: 'neil_armstrong', name: '尼爾·阿姆斯壯',       rarity: 'SSR', category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Neil_Armstrong_pose.jpg/240px-Neil_Armstrong_pose.jpg', desc: '1969 年首位登月太空人「個人一小步，人類一大步」' },
-        { id: 'yuri_gagarin',   name: '尤里·加加林',         rarity: 'SSR', category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Gagarin_in_Sweden.jpg/240px-Gagarin_in_Sweden.jpg', desc: '1961 年首位進入太空的人類' },
-        { id: 'buzz_aldrin',    name: '巴茲·奧爾德林',       rarity: 'SR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Buzz_Aldrin.jpg/240px-Buzz_Aldrin.jpg', desc: '阿波羅 11 號登月艙駕駛員' },
-        { id: 'sally_ride',     name: '薩利·賴德',           rarity: 'SR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Sally_Ride_%28cropped%29.jpg/240px-Sally_Ride_%28cropped%29.jpg', desc: '美國首位進入太空的女性' },
-        { id: 'valentina',      name: '瓦倫京娜·捷列什科娃',  rarity: 'SR',  category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Valentina_Tereshkova_-_JAXA.jpg/240px-Valentina_Tereshkova_-_JAXA.jpg', desc: '1963 年首位進入太空的女性' },
-        { id: 'john_glenn',     name: '約翰·葛倫',           rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/John_Glenn_NASA_bio_photo.jpg/240px-John_Glenn_NASA_bio_photo.jpg', desc: '美國首位環繞地球的太空人' },
-        { id: 'chris_hadfield', name: '克里斯·哈德菲爾德',   rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Chris_Hadfield_2011.jpg/240px-Chris_Hadfield_2011.jpg', desc: '加拿大首位太空站指揮官，太空吉他手' },
-        { id: 'wang_yaping',    name: '王亞平',              rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Wang_Yaping_in_2021.jpg/240px-Wang_Yaping_in_2021.jpg', desc: '中國首位太空授課女太空人' },
-        { id: 'mae_jemison',    name: '梅·傑米森',           rarity: 'R',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Mae_Carol_Jemison.jpg/240px-Mae_Carol_Jemison.jpg', desc: '首位進入太空的非裔美國女性' },
-        { id: 'jose_hernandez', name: '荷西·赫南德茲',       rarity: 'N',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Jose_M._Hernandez.jpg/240px-Jose_M._Hernandez.jpg', desc: '墨裔美籍太空人，勵志典範' },
-        { id: 'tim_peake',      name: '提姆·皮克',           rarity: 'N',   category: 'person', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Tim_Peake_official_portrait.jpg/240px-Tim_Peake_official_portrait.jpg', desc: '英國 ESA 太空人，2015-2016 駐站' },
+        { id: 'elon_musk',     name: '伊隆·馬斯克',          rarity: 'UR',  category: 'person', image: 'assets/cards/person_elon_musk.svg',     desc: 'SpaceX、Tesla、xAI 創辦人，推動人類成為多行星物種' },
+        { id: 'neil_armstrong', name: '尼爾·阿姆斯壯',       rarity: 'SSR', category: 'person', image: 'assets/cards/person_neil_armstrong.svg', desc: '1969 年首位登月太空人「個人一小步，人類一大步」' },
+        { id: 'yuri_gagarin',   name: '尤里·加加林',         rarity: 'SSR', category: 'person', image: 'assets/cards/person_yuri_gagarin.svg',   desc: '1961 年首位進入太空的人類' },
+        { id: 'buzz_aldrin',    name: '巴茲·奧爾德林',       rarity: 'SR',  category: 'person', image: 'assets/cards/person_buzz_aldrin.svg',    desc: '阿波羅 11 號登月艙駕駛員' },
+        { id: 'sally_ride',     name: '薩利·賴德',           rarity: 'SR',  category: 'person', image: 'assets/cards/person_sally_ride.svg',     desc: '美國首位進入太空的女性' },
+        { id: 'valentina',      name: '瓦倫京娜·捷列什科娃',  rarity: 'SR',  category: 'person', image: 'assets/cards/person_valentina.svg',      desc: '1963 年首位進入太空的女性' },
+        { id: 'john_glenn',     name: '約翰·葛倫',           rarity: 'R',   category: 'person', image: 'assets/cards/person_john_glenn.svg',     desc: '美國首位環繞地球的太空人' },
+        { id: 'chris_hadfield', name: '克里斯·哈德菲爾德',   rarity: 'R',   category: 'person', image: 'assets/cards/person_chris_hadfield.svg', desc: '加拿大首位太空站指揮官，太空吉他手' },
+        { id: 'wang_yaping',    name: '王亞平',              rarity: 'R',   category: 'person', image: 'assets/cards/person_wang_yaping.svg',    desc: '中國首位太空授課女太空人' },
+        { id: 'mae_jemison',    name: '梅·傑米森',           rarity: 'R',   category: 'person', image: 'assets/cards/person_mae_jemison.svg',    desc: '首位進入太空的非裔美國女性' },
+        { id: 'jose_hernandez', name: '荷西·赫南德茲',       rarity: 'N',   category: 'person', image: 'assets/cards/person_jose_hernandez.svg', desc: '墨裔美籍太空人，勵志典範' },
+        { id: 'tim_peake',      name: '提姆·皮克',           rarity: 'N',   category: 'person', image: 'assets/cards/person_tim_peake.svg',      desc: '英國 ESA 太空人，2015-2016 駐站' },
 
         // 公司/品牌 (8 張)
         { id: 'spacex_logo',    name: 'SpaceX',               rarity: 'SSR', category: 'company', image: 'assets/cards/spacex.svg',    desc: '可重複使用火箭的革命先驅' },
@@ -1295,7 +1295,7 @@ const UI = {
                          data-card-id="${c.id}" title="${c.desc}">
                         <div class="album-card-rarity">${c.rarity}</div>
                         <img class="album-card-image" src="${c.image}" alt="${c.name}"
-                             onerror="this.outerHTML='<div class=\\'album-card-silhouette\\'>?</div>'">
+                             onerror="this.onerror=null;this.src='assets/cards/placeholder.svg'">
                         <div class="album-card-name">${c.name}</div>
                     </div>
                 `;
@@ -1348,7 +1348,7 @@ const UI = {
             <div class="album-card ${owned ? 'owned' : 'unowned'}" style="--rarity-color: ${color}">
                 <div class="album-card-rarity">${card.rarity}</div>
                 ${owned
-                    ? `<img class="album-card-image" src="${card.image}" alt="${card.name}" onerror="this.outerHTML='<div class=\\'album-card-silhouette\\'>?</div>'">`
+                    ? `<img class="album-card-image" src="${card.image}" alt="${card.name}" onerror="this.onerror=null;this.src='assets/cards/placeholder.svg'">`
                     : `<div class="album-card-silhouette">❓</div>`}
                 <div class="album-card-name">${owned ? card.name : '???'}</div>
             </div>
