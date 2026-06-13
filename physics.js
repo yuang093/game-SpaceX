@@ -838,8 +838,8 @@ const Physics = {
 
         const resizeCanvas = () => {
             const rect = gameArea.getBoundingClientRect();
-            canvasWidth = Math.max(400, rect.width);
-            canvasHeight = Math.max(300, rect.height);
+            canvasWidth = Math.max(100, Math.floor(rect.width));
+            canvasHeight = Math.max(100, Math.floor(rect.height));
 
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
@@ -849,12 +849,29 @@ const Physics = {
             console.log(`Canvas: ${canvasWidth}x${canvasHeight}`);
         };
 
-        resizeCanvas();
-        generateStars();
-        this.setupControls();
-        this.drawInitialScene();
+        // 延遲到 DOM 完成 layout 後再初始化 canvas
+        // 使用雙 rAF 確保 layout 完成
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                resizeCanvas();
+                generateStars();
+                this.setupControls();
+                this.drawInitialScene();
+            });
+        });
 
-        window.addEventListener('resize', resizeCanvas);
+        // ResizeObserver 監聽 game-area 尺寸變化（含面板開合）
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(() => {
+                resizeCanvas();
+                // 重繪以避免黑屏
+                if (GameState.phase === 'PREP') this.drawInitialScene();
+            });
+            ro.observe(gameArea);
+        }
+
+        window.addEventListener('resize', () => setTimeout(resizeCanvas, 50));
+        window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
     },
 
     drawInitialScene() {
