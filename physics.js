@@ -97,9 +97,22 @@ const PLANET_IMAGE_BASE = 'assets/planets/';
  */
 function preloadPlanetImages() {
     const planetFiles = [
-        { key: 'earth', fileName: 'earth_real.jpg' },
-        { key: 'moon',  fileName: 'moon_real.jpg'  },
-        { key: 'mars',  fileName: 'mars_real.jpg'  }
+        { key: 'earth',      fileName: 'earth_real.jpg'    },
+        { key: 'moon',       fileName: 'moon_real.jpg'     },
+        { key: 'mars',       fileName: 'mars_real.jpg'     },
+        // v3.4 新增真實天體照片（PNG）
+        { key: 'mercury',    fileName: 'mercury_real.png'  },
+        { key: 'venus',      fileName: 'venus_real.png'    },
+        { key: 'jupiter',    fileName: 'jupiter_real.png'  },
+        { key: 'saturn',     fileName: 'saturn_real.png'   },
+        { key: 'sun',        fileName: 'sun_real.png'      },
+        { key: 'neptune',    fileName: 'neptune_real.png'  },
+        { key: 'pluto',      fileName: 'pluto_real.png'    },
+        { key: 'titan',      fileName: 'titan_real.png'    },
+        { key: 'enceladus',  fileName: 'enceladus_real.png'},
+        { key: 'phobos',     fileName: 'phobos_real.png'   },
+        { key: 'europa',     fileName: 'europa_real.png'   },
+        { key: 'ceres',      fileName: 'ceres_real.png'    }
     ];
     planetFiles.forEach(({ key, fileName }) => {
         const img = new Image();
@@ -1725,6 +1738,58 @@ function drawCelestialBody(station, worldY, opts = {}) {
 }
 
 function drawCelestialBodyInner(station, worldY, screenY, cx, size, omitLabel) {
+    // v3.4 天體照片對照表（type → { 照片 key, 標籤 }）
+    // 優先使用真實照片渲染，缺照片時 fallback 至 switch 程序繪製
+    const CELESTIAL_PHOTO = {
+        'moon_base':       { key: 'moon',      label: '🌙 月球基地' },
+        'mars_base':       { key: 'mars',      label: '🔴 火星基地' },
+        'venus_base':      { key: 'venus',     label: '🌼 金星基地' },
+        'mercury_base':    { key: 'mercury',   label: '☿ 水星基地' },
+        'europa_base':     { key: 'europa',    label: '🧊 歐羅巴'   },
+        'jupiter_station': { key: 'jupiter',   label: '🪐 木星'     },
+        'saturn_station':  { key: 'saturn',    label: '🪐 土星'     },
+        'neptune_station': { key: 'neptune',   label: '🔵 海王星基地' },
+        'pluto_station':   { key: 'pluto',     label: '🪐 冥王星基地' },
+        'titan_base':      { key: 'titan',     label: '🌑 土衛六基地' },
+        'enceladus_station': { key: 'enceladus', label: '🧊 土衛二' },
+        'phobos_station':  { key: 'phobos',    label: '🪨 火衛一'   },
+        'ceres_station':   { key: 'ceres',     label: '⛏️ 穀神星礦區' }
+    };
+    const photoEntry = CELESTIAL_PHOTO[station.type];
+    if (photoEntry) {
+        const img = planetImages[photoEntry.key];
+        if (img && img.complete && img.naturalWidth > 0) {
+            // 統一照片繪製：圓形剪裁 + 微光
+            const radius = size;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(img, cx - radius, screenY - radius, radius * 2, radius * 2);
+            ctx.restore();
+            // 大氣微光（依體型）
+            if (size > 30) {
+                ctx.save();
+                ctx.globalAlpha = 0.18;
+                const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + radius * 0.4);
+                glow.addColorStop(0, 'rgba(150,200,255,0.4)');
+                glow.addColorStop(1, 'rgba(150,200,255,0)');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(cx, screenY, radius + radius * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            // 標籤
+            if (!omitLabel) {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(photoEntry.label, cx, screenY + radius + 15);
+            }
+            return;
+        }
+    }
     switch (station.type) {
         case 'moon_base':
             // 月球（真實衛星紋理 + 縮放）
