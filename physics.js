@@ -2203,11 +2203,10 @@ const Physics = {
         const rocketData = GameState.rockets[GameState.selectedRocketIndex];
         if (!rocketData) return;
 
-        // 計算屬性
-        const fuelLevels = [0, 30, 70, 120, 180, 250];
+        // 計算屬性（與 ui-state.js 同步，避免燃料/隔熱容量不一致）
+        // 燃料容量使用共用 getFuelCapacity 函式（含升級等級 + 裝備加成）
+        // 隔熱容量：基礎 100 + 等級加成
         const shieldLevels = [0, 50, 100, 180, 280, 400];
-
-        const fuelBonus = fuelLevels[rocketData.fuel - 1] || 0;
         const shieldBonus = shieldLevels[rocketData.shield - 1] || 0;
 
         rocket.x = LAUNCH_TOWER.x;
@@ -2216,7 +2215,11 @@ const Physics = {
         rocket.vy = -6;
         rocket.angle = 0;
         rocket.angularVelocity = 0;
-        rocket.maxFuel = 100 + fuelBonus;
+        // 使用共用函式確保與 UI 顯示一致
+        const fuelCap = (typeof getFuelCapacity === 'function')
+            ? getFuelCapacity(rocketData)
+            : 100;
+        rocket.maxFuel = fuelCap;
         rocket.fuel = rocket.maxFuel;
         rocket.maxHeat = 100 + shieldBonus;
         rocket.heat = 0;

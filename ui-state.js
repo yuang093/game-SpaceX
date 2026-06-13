@@ -737,6 +737,26 @@ const CONFIG = {
 };
 
 // ================================================
+// 燃料容量計算（共用，物理與 UI 必須一致）
+// ================================================
+// 升級等級 1-10 對應的燃料容量加成
+// 曲線設計：Lv.5 可達月球 (180)，Lv.7 可達木星 (504)，Lv.8 可達海王星 (660)
+const FUEL_LEVEL_BONUS = [0, 50, 120, 220, 350, 500, 680, 880, 1100, 1400];
+
+function getFuelCapacity(rocket) {
+    if (!rocket) return 100;
+    // 1) 基礎容量 100
+    // 2) 升級等級加成
+    const levelBonus = FUEL_LEVEL_BONUS[rocket.fuel - 1] || 0;
+    // 3) 裝備燃料槽加成
+    const fuelTankId = GameState.equipment && GameState.equipment.fuelTank;
+    const tankItem = fuelTankId ? CONFIG.equipmentItems[fuelTankId] : null;
+    const equipBonus = tankItem && tankItem.bonus && tankItem.bonus.fuelCapacity
+        ? tankItem.bonus.fuelCapacity : 0;
+    return 100 + levelBonus + equipBonus;
+}
+
+// ================================================
 // 初始化遊戲
 // ================================================
 function initGame() {
@@ -1196,6 +1216,7 @@ const UI = {
         this.updateRocketList();
         this.updateRocketStats();
         this.updateUpgradeList();
+        this.updateEquipmentSummary();
         this.updateMissionList();
         this.updateStationList();
         this.updateCrewList();
@@ -1395,6 +1416,8 @@ const UI = {
                 this.updateRocketList();
                 this.updateRocketStats();
                 this.updateUpgradeList();
+                this.updateEquipmentSummary();
+                this.updateMissionList();
             });
             DOM.rocketsList.appendChild(card);
         });
@@ -1455,6 +1478,33 @@ const UI = {
         });
     },
 
+    // 火箭面板的裝備摘要（已裝備的裝備一覽）
+    updateEquipmentSummary() {
+        const el = document.getElementById('equipment-summary');
+        if (!el) return;
+        const rocket = GameState.rockets[GameState.selectedRocketIndex];
+        if (!rocket) { el.innerHTML = ''; return; }
+
+        // 計算總容量給玩家看
+        const totalFuel = getFuelCapacity(rocket);
+
+        const equipped = EQUIPMENT_SLOTS
+            .map(s => {
+                const id = GameState.equipment[s.key];
+                if (!id) return null;
+                const item = CONFIG.equipmentItems[id];
+                return item ? `<span style="color:#00ff88">${s.name} ${item.name}</span>` : null;
+            })
+            .filter(Boolean);
+
+        el.innerHTML = `
+            <div style="margin-top: 6px; padding: 6px; background: var(--color-bg-light); border-radius: 4px; font-size: 0.9em;">
+                <div>⛽ <b>燃料容量: ${totalFuel}</b> 單位</div>
+                <div style="color: #888; margin-top: 4px;">${equipped.length > 0 ? equipped.join(' / ') : '（未安裝任何裝備）'}</div>
+            </div>
+        `;
+    },
+
     // 任務列表
     updateMissionList() {
         DOM.missionsList.innerHTML = '';
@@ -1466,11 +1516,17 @@ const UI = {
         const locBadge = document.getElementById('current-location-badge');
         if (locBadge) locBadge.textContent = `📍 ${locStation.name}`;
 
+        // 取得當前火箭與燃料容量（每張任務卡共用）
+        const rocket = GameState.rockets[GameState.selectedRocketIndex];
+        const fuelCapacity = rocket ? getFuelCapacity(rocket) : 0;
+
         GameState.availableMissions.forEach((mission, index) => {
             const typeInfo = CONFIG.missionTypes[mission.type];
             const card = document.createElement('div');
             card.className = 'mission-card';
             const originName = mission.originStation === 'earth' ? '🌍 地球' : (GameState.stations.find(s => s.id === mission.originStation)?.name || mission.originStation);
+            const needFuel = mission.requirements?.minFuelCapacity || 0;
+            const fuelOk = fuelCapacity >= needFuel;
             card.innerHTML = `
                 <div class="mission-header">
                     <span class="mission-name">${typeInfo.icon} ${typeInfo.name}</span>
@@ -1481,6 +1537,9 @@ const UI = {
                 </div>
                 <div class="mission-info-row">
                     <span class="mission-difficulty">難度 ${'⭐'.repeat(mission.difficulty)}</span>
+                    <span class="mission-fuel" style="color: ${fuelOk ? '#00ff88' : '#ff4466'}; margin-left: 8px;">
+                        ⛽ ${needFuel} 燃料 ${fuelOk ? '✅' : '❌'}
+                    </span>
                 </div>
             `;
             card.addEventListener('click', () => showMissionDetails(index));
@@ -1972,9 +2031,8 @@ function showMissionDetails(index) {
     if (reqs.minCrew > GameState.crew.length) { canAccept = false; reasons.push(`需要 ${reqs.minCrew} 名太空人`); }
 
     // 燃料容量檢查（顯示需要的燃料量 vs 火箭容量）
-    // 燃料容量 = 100（基礎）+ 等級加成（從 fuelLevels 取得）
-    const fuelLevels = [0, 30, 70, 120, 180, 250];
-    const fuelCapacity = 100 + (fuelLevels[rocket.fuel - 1] || 0);
+    // 使用共用函式 getFuelCapacity 確保 UI 與物理一致
+    const fuelCapacity = getFuelCapacity(rocket);
     const needFuel = reqs.minFuelCapacity;
     const fuelOk = fuelCapacity >= needFuel;
     if (!fuelOk) { canAccept = false; }
@@ -2027,6 +2085,77 @@ const UpgradeSystem = {
         rocket[type]++;
         UI.updateAll();
         SaveSystem.save();
+        return true;
+    }
+};
+
+// ================================================
+// 裝備系統（購買/安裝/卸下）
+// ================================================
+// 裝備槽位定義：每個槽位只能裝一個，type 對應 CONFIG.equipmentItems 的 type 欄位
+const EQUIPMENT_SLOTS = [
+    { key: 'engine',          name: '🔧 引擎',          itemType: 'engine' },
+    { key: 'fuelTank',        name: '⛽ 燃料槽',        itemType: 'fuelTank' },
+    { key: 'heatShield',      name: '🛡️ 隔熱盾',       itemType: 'heatShield' },
+    { key: 'cargoModule',     name: '📦 貨艙模組',      itemType: 'cargoModule' },
+    { key: 'lifeSupport',     name: '🫁 生命維持',      itemType: 'lifeSupport' },
+    { key: 'solarPanel',      name: '☀️ 太陽能板',      itemType: 'solarPanel' },
+    { key: 'communications',  name: '📡 通訊',          itemType: 'communications' },
+    { key: 'navigation',      name: '🧭 導航',          itemType: 'navigation' }
+];
+
+// 玩家已購買的裝備庫存（id → 已購買次數；同一個裝備可重複購買但只能裝一個）
+GameState.equipmentInventory = GameState.equipmentInventory || {};
+
+const EquipmentSystem = {
+    // 購買裝備（加入庫存）
+    buy(itemId) {
+        const item = CONFIG.equipmentItems[itemId];
+        if (!item) return false;
+        if (GameState.credits < item.price) {
+            UI.showToast('💰 信用點不足', 'error');
+            return false;
+        }
+        GameState.credits -= item.price;
+        GameState.equipmentInventory[itemId] = (GameState.equipmentInventory[itemId] || 0) + 1;
+        UI.updateAll();
+        SaveSystem.save();
+        UI.showToast(`✅ 已購買 ${item.name}`, 'success');
+        return true;
+    },
+
+    // 裝備到對應槽位
+    install(itemId) {
+        const item = CONFIG.equipmentItems[itemId];
+        if (!item) return false;
+        const slot = EQUIPMENT_SLOTS.find(s => s.itemType === item.type);
+        if (!slot) return false;
+        // 需要先買過
+        if (!GameState.equipmentInventory[itemId]) {
+            UI.showToast('❌ 請先購買此裝備', 'error');
+            return false;
+        }
+        // 檢查解鎖前置
+        if (item.requires && !GameState.equipmentInventory[item.requires]) {
+            UI.showToast(`❌ 需先購買 ${CONFIG.equipmentItems[item.requires].name}`, 'error');
+            return false;
+        }
+        // 卸下舊裝備（不退回庫存，僅清空槽位）
+        GameState.equipment[slot.key] = itemId;
+        UI.updateAll();
+        SaveSystem.save();
+        UI.showToast(`🔧 已裝備 ${item.name}`, 'success');
+        return true;
+    },
+
+    // 卸下
+    uninstall(slotKey) {
+        if (!GameState.equipment[slotKey]) return false;
+        const item = CONFIG.equipmentItems[GameState.equipment[slotKey]];
+        GameState.equipment[slotKey] = null;
+        UI.updateAll();
+        SaveSystem.save();
+        UI.showToast(item ? `🔽 已卸下 ${item.name}` : '🔽 已卸下', 'info');
         return true;
     }
 };
@@ -2122,6 +2251,90 @@ function hireCrew(candidate, cost) {
 }
 
 // ================================================
+// 裝備商店 modal
+// ================================================
+function showEquipmentModal() {
+    if (!DOM.equipmentShop) return;
+    DOM.equipmentShop.innerHTML = '';
+
+    EQUIPMENT_SLOTS.forEach(slot => {
+        const section = document.createElement('div');
+        section.className = 'equipment-section';
+        const equippedId = GameState.equipment[slot.key];
+        const equipped = equippedId ? CONFIG.equipmentItems[equippedId] : null;
+        section.innerHTML = `
+            <h3 style="margin: 12px 0 6px; color: var(--color-accent);">${slot.name}</h3>
+            <div class="equipment-equipped">
+                ${equipped
+                    ? `<span>已裝備: <b style="color:#00ff88">${equipped.name}</b> <span style="color:#888">(${equipped.desc})</span>
+                         <button class="btn-uninstall" data-slot="${slot.key}">卸下</button></span>`
+                    : '<span style="color:#888">未裝備</span>'}
+            </div>
+        `;
+
+        // 列出此槽位可購買的裝備
+        const items = Object.entries(CONFIG.equipmentItems)
+            .filter(([id, item]) => item.type === slot.itemType);
+        if (items.length === 0) {
+            section.innerHTML += '<p style="color:#666">（此類別無可購買裝備）</p>';
+        } else {
+            items.forEach(([id, item]) => {
+                const owned = GameState.equipmentInventory[id] || 0;
+                const isEquipped = equippedId === id;
+                const unlocked = !item.requires || GameState.equipmentInventory[item.requires];
+                const canBuy = GameState.credits >= item.price;
+                const row = document.createElement('div');
+                row.className = 'equipment-item';
+                row.innerHTML = `
+                    <div class="equipment-info">
+                        <span class="equipment-name">${item.name}</span>
+                        <span class="equipment-desc">${item.desc}</span>
+                        ${item.requires ? `<span style="color:#666;font-size:0.85em">需要 ${CONFIG.equipmentItems[item.requires]?.name || item.requires}</span>` : ''}
+                    </div>
+                    <div class="equipment-actions">
+                        <span style="color:#888">庫存: ${owned}</span>
+                        ${isEquipped
+                            ? '<span style="color:#00ff88">已裝備</span>'
+                            : unlocked
+                                ? `<span class="shop-price">$${item.price.toLocaleString()}</span>
+                                   <button class="btn-buy-equip" data-id="${id}" ${!canBuy ? 'disabled' : ''}>購買</button>
+                                   ${owned > 0 ? `<button class="btn-install-equip" data-id="${id}">安裝</button>` : ''}`
+                                : '<span style="color:#666">🔒 未解鎖</span>'}
+                    </div>
+                `;
+                section.appendChild(row);
+            });
+        }
+        DOM.equipmentShop.appendChild(section);
+    });
+
+    // 事件綁定（一次性指派 onclick）
+    DOM.equipmentShop.querySelectorAll('.btn-buy-equip').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            EquipmentSystem.buy(btn.dataset.id);
+            showEquipmentModal();  // 重繪
+        };
+    });
+    DOM.equipmentShop.querySelectorAll('.btn-install-equip').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            EquipmentSystem.install(btn.dataset.id);
+            showEquipmentModal();
+        };
+    });
+    DOM.equipmentShop.querySelectorAll('.btn-uninstall').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            EquipmentSystem.uninstall(btn.dataset.slot);
+            showEquipmentModal();
+        };
+    });
+
+    DOM.modalEquipment.classList.remove('hidden');
+}
+
+// ================================================
 // 存檔系統
 // ================================================
 const SaveSystem = {
@@ -2141,7 +2354,9 @@ const SaveSystem = {
             stocks: GameState.stocks,
             cardCollection: GameState.cardCollection,
             cardStats: GameState.cardStats,
-            currentLocation: GameState.currentLocation
+            currentLocation: GameState.currentLocation,
+            equipment: GameState.equipment,
+            equipmentInventory: GameState.equipmentInventory
         };
         try { localStorage.setItem(this.SAVE_KEY, JSON.stringify(data)); } catch (e) {}
     },
@@ -2163,7 +2378,9 @@ const SaveSystem = {
                     stocks: data.stocks ?? GameState.stocks,
                     cardCollection: data.cardCollection ?? [],
                     cardStats: data.cardStats ?? { totalPulls: 0, lastPull: null, lastPullTime: 0 },
-                    currentLocation: data.currentLocation ?? 'earth'
+                    currentLocation: data.currentLocation ?? 'earth',
+                    equipment: data.equipment ?? { engine: null, fuelTank: null, heatShield: null, cargoModule: null, lifeSupport: null, solarPanel: null, communications: null, navigation: null },
+                    equipmentInventory: data.equipmentInventory ?? {}
                 });
                 console.log('存檔載入成功');
                 return true;
@@ -2468,6 +2685,12 @@ function setupEventListeners() {
     document.getElementById('btn-hire-crew').addEventListener('click', showHireCrewModal);
     document.getElementById('btn-close-hire').addEventListener('click', () => DOM.modalHireCrew.classList.add('hidden'));
 
+    // 裝備商店
+    const btnOpenEquip = document.getElementById('btn-open-equipment');
+    if (btnOpenEquip) btnOpenEquip.addEventListener('click', showEquipmentModal);
+    const btnCloseEquip = document.getElementById('btn-close-equipment');
+    if (btnCloseEquip) btnCloseEquip.addEventListener('click', () => DOM.modalEquipment.classList.add('hidden'));
+
     DOM.btnLaunch.addEventListener('click', () => { if (GameState.phase === 'PREP' && GameState.currentMission) StateMachine.transition('LAUNCH'); });
     DOM.btnContinue.addEventListener('click', () => StateMachine.transition('PREP'));
 
@@ -2501,6 +2724,7 @@ function setupEventListeners() {
             if (GameState.phase !== 'PREP' && confirm('放棄任務？')) StateMachine.transition('PREP');
             DOM.modalBuyRocket.classList.add('hidden');
             DOM.modalHireCrew.classList.add('hidden');
+            if (DOM.modalEquipment) DOM.modalEquipment.classList.add('hidden');
         }
         if (GameState.phase !== 'PREP') {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
