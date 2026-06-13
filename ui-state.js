@@ -137,6 +137,55 @@ const CONFIG = {
             stats: { hull: 120, engine: 3, fuel: 4, shield: 4, cargo: 2 },
             slots: { engine: 3, fuel: 4, shield: 4, cargo: 2, lifeSupport: 1, solar: 1, comm: 1 },
             hasLifeSupport: true
+        },
+        // ===== Starship 全系列（基於 Wikipedia 公開資料）=====
+        starship_block1: {
+            name: '🚀 Starship Block 1',
+            description: '121.3m 全不鏽鋼火箭，已退役於 IFT-6',
+            basePrice: 180000,
+            stats: { hull: 250, engine: 6, fuel: 6, shield: 5, cargo: 4 },
+            slots: { engine: 6, fuel: 6, shield: 5, cargo: 4, lifeSupport: 1, solar: 2, comm: 1 },
+            hasLifeSupport: true
+        },
+        starship_block2: {
+            name: '🚀 Starship Block 2',
+            description: '123.3m，更薄襟翼，25% 更多燃料，35t LEO',
+            basePrice: 250000,
+            stats: { hull: 280, engine: 7, fuel: 8, shield: 6, cargo: 5 },
+            slots: { engine: 7, fuel: 8, shield: 6, cargo: 5, lifeSupport: 1, solar: 2, comm: 1 },
+            hasLifeSupport: true
+        },
+        starship_block3: {
+            name: '🚀 Starship Block 3',
+            description: '124.4m，Raptor 3 引擎，3 個格柵翼，100t LEO',
+            basePrice: 400000,
+            stats: { hull: 320, engine: 9, fuel: 10, shield: 7, cargo: 8 },
+            slots: { engine: 9, fuel: 10, shield: 7, cargo: 8, lifeSupport: 2, solar: 3, comm: 2 },
+            hasLifeSupport: true
+        },
+        starship_block4: {
+            name: '🚀 Starship Block 4',
+            description: '142m 超巨型，6 個真空引擎，200t LEO（規劃中）',
+            basePrice: 800000,
+            stats: { hull: 400, engine: 12, fuel: 15, shield: 9, cargo: 15 },
+            slots: { engine: 12, fuel: 15, shield: 9, cargo: 15, lifeSupport: 3, solar: 4, comm: 2 },
+            hasLifeSupport: true
+        },
+        starship_hls: {
+            name: '🌙 Starship HLS 月球版',
+            description: 'NASA Artemis 載人月著陸器，無熱盾/襟翼，4 著陸腿',
+            basePrice: 500000,
+            stats: { hull: 200, engine: 5, fuel: 7, shield: 2, cargo: 3 },
+            slots: { engine: 5, fuel: 7, shield: 2, cargo: 3, lifeSupport: 2, solar: 2, comm: 2 },
+            hasLifeSupport: true
+        },
+        starship_mars: {
+            name: '🔴 Starship 火星運輸船',
+            description: '100t 火星載貨，紅色 regolith 隔熱塗裝',
+            basePrice: 350000,
+            stats: { hull: 300, engine: 8, fuel: 9, shield: 8, cargo: 12 },
+            slots: { engine: 8, fuel: 9, shield: 8, cargo: 12, lifeSupport: 1, solar: 3, comm: 2 },
+            hasLifeSupport: true
         }
     },
 
@@ -328,7 +377,14 @@ const CONFIG = {
         starship_v2: 'assets/rockets/starship-v2.svg',
         super_heavy: 'assets/rockets/super-heavy.svg',
         tanker: 'assets/rockets/tanker.svg',
-        lynx: 'assets/rockets/lynx.svg'
+        lynx: 'assets/rockets/lynx.svg',
+        // Starship 全系列
+        starship_block1: 'assets/rockets/starship-block1.svg',
+        starship_block2: 'assets/rockets/starship-block2.svg',
+        starship_block3: 'assets/rockets/starship-block3.svg',
+        starship_block4: 'assets/rockets/starship-block4.svg',
+        starship_hls: 'assets/rockets/starship-hls.svg',
+        starship_mars: 'assets/rockets/starship-mars.svg'
     },
 
     // 太空人頭像（依姓名 hash 對應固定 SVG）

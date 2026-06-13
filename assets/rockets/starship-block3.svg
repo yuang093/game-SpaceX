@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="b3-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d0d0d0"/>
+      <stop offset="0.5" stop-color="#f0f0f0"/>
+      <stop offset="1" stop-color="#888"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#0a0a1a"/>
+  <!-- Block 3: 124.4m，3 個格柵翼 + Raptor 3，100t LEO -->
+  <path d="M 60 60 L 140 60 L 142 360 L 58 360 Z" fill="url(#b3-body)" stroke="#555" stroke-width="1.5"/>
+  <!-- 改進型隔熱瓦（更小更密） -->
+  <g fill="#1a1a1a" opacity="0.95">
+    <rect x="60" y="110" width="82" height="3"/>
+    <rect x="60" y="116" width="82" height="3"/>
+    <rect x="60" y="122" width="82" height="3"/>
+    <rect x="60" y="128" width="82" height="3"/>
+    <rect x="60" y="134" width="82" height="3"/>
+    <rect x="60" y="140" width="82" height="3"/>
+    <rect x="60" y="146" width="82" height="3"/>
+    <rect x="60" y="152" width="82" height="3"/>
+    <rect x="60" y="158" width="82" height="3"/>
+    <rect x="60" y="164" width="82" height="3"/>
+  </g>
+  <!-- 紅色 SpaceX 標誌條紋（Block 3 新特色） -->
+  <rect x="60" y="180" width="82" height="4" fill="#ff4466"/>
+  <!-- 頭錐 -->
+  <path d="M 60 60 Q 100 35 140 60 Z" fill="#aaa"/>
+  <!-- 3 個格柵翼（Block 3 新增！這是關鍵識別） -->
+  <g fill="#666" stroke="#333" stroke-width="0.5">
+    <!-- 格柵翼 1 (左前) -->
+    <rect x="42" y="220" width="20" height="8"/>
+    <line x1="42" y1="222" x2="62" y2="222" stroke="#000" stroke-width="0.3"/>
+    <line x1="42" y1="226" x2="62" y2="226" stroke="#000" stroke-width="0.3"/>
+    <line x1="46" y1="220" x2="46" y2="228" stroke="#000" stroke-width="0.3"/>
+    <line x1="52" y1="220" x2="52" y2="228" stroke="#000" stroke-width="0.3"/>
+    <line x1="58" y1="220" x2="58" y2="228" stroke="#000" stroke-width="0.3"/>
+    <!-- 格柵翼 2 (右前) -->
+    <rect x="138" y="220" width="20" height="8"/>
+    <line x1="138" y1="222" x2="158" y2="222" stroke="#000" stroke-width="0.3"/>
+    <line x1="138" y1="226" x2="158" y2="226" stroke="#000" stroke-width="0.3"/>
+    <line x1="142" y1="220" x2="142" y2="228" stroke="#000" stroke-width="0.3"/>
+    <line x1="148" y1="220" x2="148" y2="228" stroke="#000" stroke-width="0.3"/>
+    <line x1="154" y1="220" x2="154" y2="228" stroke="#000" stroke-width="0.3"/>
+    <!-- 格柵翼 3 (下方中央 - 新增) -->
+    <rect x="88" y="250" width="24" height="8"/>
+    <line x1="88" y1="252" x2="112" y2="252" stroke="#000" stroke-width="0.3"/>
+    <line x1="88" y1="256" x2="112" y2="256" stroke="#000" stroke-width="0.3"/>
+    <line x1="92" y1="250" x2="92" y2="258" stroke="#000" stroke-width="0.3"/>
+    <line x1="100" y1="250" x2="100" y2="258" stroke="#000" stroke-width="0.3"/>
+    <line x1="108" y1="250" x2="108" y2="258" stroke="#000" stroke-width="0.3"/>
+  </g>
+  <!-- 整合通風段（Block 3 特色） -->
+  <ellipse cx="100" cy="280" rx="20" ry="3" fill="#444"/>
+  <text x="100" y="222" text-anchor="middle" font-size="11" font-family="Arial" font-weight="bold" fill="#00d4ff">BLOCK 3</text>
+  <text x="100" y="234" text-anchor="middle" font-size="7" font-family="Arial" fill="#666">v3.0 · 100t LEO · Raptor 3</text>
+  <!-- 對接埠（加油用） -->
+  <rect x="92" y="240" width="16" height="4" fill="#888" stroke="#333" stroke-width="0.5"/>
+  <text x="100" y="237" text-anchor="middle" font-size="5" fill="#00d4ff">REFUEL</text>
+  <!-- Raptor 3 引擎（更大噴嘴） -->
+  <g fill="#0a0a0a">
+    <ellipse cx="68" cy="360" rx="6" ry="3"/>
+    <ellipse cx="82" cy="360" rx="6" ry="3"/>
+    <ellipse cx="96" cy="360" rx="6" ry="3"/>
+    <ellipse cx="100" cy="360" rx="6" ry="3"/>
+    <ellipse cx="104" cy="360" rx="6" ry="3"/>
+    <ellipse cx="118" cy="360" rx="6" ry="3"/>
+    <ellipse cx="132" cy="360" rx="6" ry="3"/>
+  </g>
+  <g opacity="0.9">
+    <ellipse cx="100" cy="385" rx="45" ry="14" fill="#ff6b35"/>
+    <ellipse cx="100" cy="380" rx="30" ry="9" fill="#ffcc00"/>
+  </g>
+</svg>

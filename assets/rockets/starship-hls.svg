@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="hls-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e8e8e8"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#888"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#0a0a1a"/>
+  <!-- HLS 月球版：無熱盾、無襟翼、無捕獲硬體 -->
+  <path d="M 65 80 L 135 80 L 138 320 L 62 320 Z" fill="url(#hls-body)" stroke="#666" stroke-width="1.5"/>
+  <!-- 不鏽鋼原色（無熱盾！這是 HLS 關鍵特徵） -->
+  <!-- 紋理（結構加強） -->
+  <g stroke="#bbb" stroke-width="0.4" opacity="0.5">
+    <line x1="65" y1="100" x2="135" y2="100"/>
+    <line x1="65" y1="120" x2="135" y2="120"/>
+    <line x1="65" y1="140" x2="135" y2="140"/>
+    <line x1="65" y1="160" x2="135" y2="160"/>
+    <line x1="65" y1="180" x2="135" y2="180"/>
+    <line x1="65" y1="200" x2="135" y2="200"/>
+    <line x1="65" y1="220" x2="135" y2="220"/>
+    <line x1="65" y1="240" x2="135" y2="240"/>
+    <line x1="65" y1="260" x2="135" y2="260"/>
+    <line x1="65" y1="280" x2="135" y2="280"/>
+    <line x1="65" y1="300" x2="135" y2="300"/>
+  </g>
+  <!-- 頭錐 -->
+  <path d="M 65 80 Q 100 50 135 80 Z" fill="#aaa"/>
+  <!-- 對接口（HLS 與 Orion 對接用） -->
+  <rect x="92" y="105" width="16" height="6" fill="#444" stroke="#222"/>
+  <circle cx="100" cy="108" r="2" fill="#00d4ff"/>
+  <text x="100" y="118" text-anchor="middle" font-size="4" fill="#00d4ff">NASA DOCK</text>
+  <!-- 大型 NASA 標誌（醒目） -->
+  <ellipse cx="100" cy="160" rx="22" ry="10" fill="#0a3a8a"/>
+  <text x="100" y="163" text-anchor="middle" font-size="9" font-family="Arial" font-weight="bold" fill="#fff">NASA</text>
+  <!-- 美國國旗 -->
+  <rect x="78" y="175" width="20" height="14" fill="#cc0000"/>
+  <rect x="78" y="175" width="9" height="7" fill="#fff"/>
+  <g fill="#0066cc">
+    <rect x="78" y="175" width="9" height="7"/>
+  </g>
+  <!-- 月球任務標誌 -->
+  <text x="100" y="200" text-anchor="middle" font-size="11" font-family="Arial" font-weight="bold" fill="#222">HLS</text>
+  <text x="100" y="212" text-anchor="middle" font-size="7" font-family="Arial" fill="#666">ARTEMIS III</text>
+  <!-- 4 個著陸腿（HLS 關鍵特徵，無襟翼） -->
+  <g fill="#666" stroke="#222" stroke-width="0.5">
+    <!-- 左前腿 -->
+    <line x1="65" y1="320" x2="40" y2="380" stroke-width="2"/>
+    <ellipse cx="38" cy="382" rx="6" ry="2" fill="#333"/>
+    <!-- 右前腿 -->
+    <line x1="135" y1="320" x2="160" y2="380" stroke-width="2"/>
+    <ellipse cx="162" cy="382" rx="6" ry="2" fill="#333"/>
+    <!-- 左後腿 -->
+    <line x1="75" y1="320" x2="65" y2="395" stroke-width="2"/>
+    <ellipse cx="63" cy="397" rx="5" ry="2" fill="#333"/>
+    <!-- 右後腿 -->
+    <line x1="125" y1="320" x2="135" y2="395" stroke-width="2"/>
+    <ellipse cx="137" cy="397" rx="5" ry="2" fill="#333"/>
+  </g>
+  <!-- 中央引擎 -->
+  <g fill="#222">
+    <rect x="92" y="320" width="16" height="8"/>
+  </g>
+  <!-- 火焰（單一中央引擎，著陸用） -->
+  <g opacity="0.85">
+    <path d="M 88 328 Q 90 360 95 400 Q 100 360 105 400 Q 110 360 112 328 Z" fill="#ff6b35"/>
+    <path d="M 92 328 Q 95 360 100 390 Q 105 360 108 328 Z" fill="#ffcc00"/>
+  </g>
+  <!-- 月球符號（角落） -->
+  <text x="100" y="50" text-anchor="middle" font-size="20" fill="#ffdd00">🌙</text>
+</svg>

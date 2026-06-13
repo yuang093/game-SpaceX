@@ -107,7 +107,14 @@ function preloadRocketImages() {
         { key: 'starship_v2', fileName: 'starship-v2' },
         { key: 'super_heavy', fileName: 'super-heavy' },
         { key: 'tanker', fileName: 'tanker' },
-        { key: 'lynx', fileName: 'lynx' }
+        { key: 'lynx', fileName: 'lynx' },
+        // Starship 全系列
+        { key: 'starship_block1', fileName: 'starship-block1' },
+        { key: 'starship_block2', fileName: 'starship-block2' },
+        { key: 'starship_block3', fileName: 'starship-block3' },
+        { key: 'starship_block4', fileName: 'starship-block4' },
+        { key: 'starship_hls', fileName: 'starship-hls' },
+        { key: 'starship_mars', fileName: 'starship-mars' }
     ];
     mapping.forEach(({ key, fileName }) => {
         const img = new Image();

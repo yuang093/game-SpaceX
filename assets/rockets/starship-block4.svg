@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="b4-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d8d8e0"/>
+      <stop offset="0.5" stop-color="#f5f5ff"/>
+      <stop offset="1" stop-color="#888"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="400" fill="#0a0a1a"/>
+  <!-- Block 4: 142m 超巨型，更寬（畫布加寬到 240 凸顯巨大感） -->
+  <path d="M 50 50 L 190 50 L 195 365 L 45 365 Z" fill="url(#b4-body)" stroke="#444" stroke-width="2"/>
+  <!-- 巨型隔熱瓦（更精密） -->
+  <g fill="#0a0a0a">
+    <rect x="50" y="100" width="145" height="2"/>
+    <rect x="50" y="105" width="145" height="2"/>
+    <rect x="50" y="110" width="145" height="2"/>
+    <rect x="50" y="115" width="145" height="2"/>
+    <rect x="50" y="120" width="145" height="2"/>
+    <rect x="50" y="125" width="145" height="2"/>
+    <rect x="50" y="130" width="145" height="2"/>
+    <rect x="50" y="135" width="145" height="2"/>
+    <rect x="50" y="140" width="145" height="2"/>
+    <rect x="50" y="145" width="145" height="2"/>
+    <rect x="50" y="150" width="145" height="2"/>
+    <rect x="50" y="155" width="145" height="2"/>
+  </g>
+  <!-- 頭錐（更尖） -->
+  <path d="M 50 50 Q 120 20 190 50 Z" fill="#aaa"/>
+  <!-- 巨型襟翼 -->
+  <path d="M 50 180 L 15 280 L 50 280 Z" fill="#777"/>
+  <path d="M 190 180 L 225 280 L 190 280 Z" fill="#777"/>
+  <!-- 巨型 4 個格柵翼（Block 4 強化） -->
+  <g fill="#555" stroke="#222" stroke-width="0.5">
+    <rect x="30" y="200" width="22" height="10"/>
+    <rect x="188" y="200" width="22" height="10"/>
+    <rect x="30" y="250" width="22" height="10"/>
+    <rect x="188" y="250" width="22" height="10"/>
+  </g>
+  <!-- 紅色「V4」標記 -->
+  <rect x="50" y="170" width="145" height="6" fill="#ff4466"/>
+  <text x="120" y="208" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" fill="#ff4466">BLOCK 4</text>
+  <text x="120" y="222" text-anchor="middle" font-size="8" font-family="Arial" fill="#fff">v4.0 · 200t LEO</text>
+  <text x="120" y="234" text-anchor="middle" font-size="7" font-family="Arial" fill="#aaa">6× Raptor-Vac · 142m tall</text>
+  <!-- 大型真空引擎噴嘴（6 個） -->
+  <g fill="#0a0a0a">
+    <ellipse cx="62" cy="365" rx="8" ry="6"/>
+    <ellipse cx="84" cy="365" rx="8" ry="6"/>
+    <ellipse cx="106" cy="365" rx="8" ry="6"/>
+    <ellipse cx="120" cy="365" rx="8" ry="6"/>
+    <ellipse cx="134" cy="365" rx="8" ry="6"/>
+    <ellipse cx="156" cy="365" rx="8" ry="6"/>
+  </g>
+  <!-- 巨大火焰（6 引擎） -->
+  <g opacity="0.9">
+    <ellipse cx="120" cy="385" rx="80" ry="18" fill="#ff6b35"/>
+    <ellipse cx="120" cy="378" rx="50" ry="12" fill="#ffcc00"/>
+  </g>
+</svg>
