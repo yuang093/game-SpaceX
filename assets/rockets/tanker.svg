@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="tank-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d0d0d0"/>
+      <stop offset="0.5" stop-color="#f5f5f5"/>
+      <stop offset="1" stop-color="#888"/>
+    </linearGradient>
+    <linearGradient id="tank-fuel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#66bbff"/>
+      <stop offset="1" stop-color="#2266cc"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#0a0a1a"/>
+  <!-- Tanker 箭體（類似 Starship 但短胖） -->
+  <path d="M 65 60 L 135 60 L 138 350 L 62 350 Z" fill="url(#tank-body)" stroke="#666" stroke-width="1.5"/>
+  <!-- 大型燃料槽（藍色標示） -->
+  <rect x="65" y="120" width="73" height="180" fill="url(#tank-fuel)" opacity="0.4" stroke="#00d4ff" stroke-width="0.5"/>
+  <!-- 燃料槽標籤 -->
+  <text x="100" y="200" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" fill="#00d4ff">⛽ FUEL</text>
+  <text x="100" y="220" text-anchor="middle" font-size="8" font-family="Arial" fill="#00d4ff">TANKER</text>
+  <!-- 加油對接口 -->
+  <rect x="90" y="80" width="20" height="6" fill="#aaa" stroke="#666"/>
+  <rect x="95" y="74" width="10" height="6" fill="#444"/>
+  <!-- 頭錐 -->
+  <path d="M 65 60 Q 100 35 135 60 Z" fill="#888"/>
+  <!-- 加油探管（突出） -->
+  <path d="M 100 50 L 100 35 L 105 30 L 105 25" stroke="#aaa" stroke-width="2" fill="none"/>
+  <circle cx="105" cy="25" r="3" fill="#ff4466"/>
+  <!-- 襟翼 -->
+  <path d="M 65 240 L 35 290 L 65 290 Z" fill="#888"/>
+  <path d="M 135 240 L 165 290 L 135 290 Z" fill="#888"/>
+  <!-- 隔熱瓦 -->
+  <g stroke="#bbb" stroke-width="0.3" opacity="0.4">
+    <line x1="65" y1="80" x2="135" y2="80"/>
+    <line x1="65" y1="100" x2="135" y2="100"/>
+    <line x1="65" y1="260" x2="135" y2="260"/>
+    <line x1="65" y1="280" x2="135" y2="280"/>
+    <line x1="65" y1="300" x2="135" y2="300"/>
+    <line x1="65" y1="320" x2="135" y2="320"/>
+  </g>
+  <text x="100" y="155" text-anchor="middle" font-size="9" font-family="Arial" fill="#fff">PROPELLANT</text>
+  <!-- 引擎（少於 Starship） -->
+  <g fill="#222">
+    <rect x="70" y="350" width="10" height="10"/>
+    <rect x="90" y="350" width="10" height="10"/>
+    <rect x="100" y="350" width="10" height="10"/>
+    <rect x="120" y="350" width="10" height="10"/>
+  </g>
+  <!-- 火焰 -->
+  <g opacity="0.7">
+    <path d="M 70 360 Q 73 385 75 400 Q 80 385 80 360 Z" fill="#ff6b35"/>
+    <path d="M 90 360 Q 93 385 95 400 Q 100 385 100 360 Z" fill="#ff6b35"/>
+    <path d="M 100 360 Q 103 385 105 400 Q 110 385 110 360 Z" fill="#ff6b35"/>
+    <path d="M 120 360 Q 123 385 125 400 Q 130 385 130 360 Z" fill="#ff6b35"/>
+  </g>
+</svg>

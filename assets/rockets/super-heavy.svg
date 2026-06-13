@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="sh-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d0d0d0"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#888"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0a0a1a"/>
+  <!-- 史上最大單體火箭 -->
+  <!-- 中央超級重型助推器 -->
+  <rect x="120" y="40" width="60" height="340" fill="url(#sh-body)" stroke="#666" stroke-width="1.5"/>
+  <!-- 兩側推進器 -->
+  <rect x="40" y="60" width="50" height="310" fill="url(#sh-body)" stroke="#666"/>
+  <rect x="210" y="60" width="50" height="310" fill="url(#sh-body)" stroke="#666"/>
+  <!-- 整流罩 -->
+  <path d="M 120 40 Q 150 15 180 40 Z" fill="#aaa"/>
+  <!-- 33 個 Raptor 引擎格柵（中央下方） -->
+  <g fill="#222" stroke="#000" stroke-width="0.3">
+    <!-- 中心環 7 個 -->
+    <circle cx="135" cy="370" r="3"/>
+    <circle cx="143" cy="370" r="3"/>
+    <circle cx="150" cy="370" r="3"/>
+    <circle cx="157" cy="370" r="3"/>
+    <circle cx="165" cy="370" r="3"/>
+    <!-- 內環 14 個 -->
+    <circle cx="125" cy="370" r="3"/>
+    <circle cx="175" cy="370" r="3"/>
+    <circle cx="118" cy="370" r="3"/>
+    <circle cx="182" cy="370" r="3"/>
+    <circle cx="130" cy="378" r="3"/>
+    <circle cx="170" cy="378" r="3"/>
+    <circle cx="140" cy="378" r="3"/>
+    <circle cx="160" cy="378" r="3"/>
+    <circle cx="150" cy="378" r="3"/>
+    <circle cx="110" cy="370" r="3"/>
+    <circle cx="190" cy="370" r="3"/>
+    <!-- 外環 12 個 -->
+    <circle cx="100" cy="370" r="3"/>
+    <circle cx="200" cy="370" r="3"/>
+    <circle cx="92" cy="370" r="3"/>
+    <circle cx="208" cy="370" r="3"/>
+    <circle cx="115" cy="385" r="3"/>
+    <circle cx="185" cy="385" r="3"/>
+    <circle cx="125" cy="385" r="3"/>
+    <circle cx="175" cy="385" r="3"/>
+    <circle cx="135" cy="385" r="3"/>
+    <circle cx="165" cy="385" r="3"/>
+    <circle cx="145" cy="385" r="3"/>
+    <circle cx="155" cy="385" r="3"/>
+  </g>
+  <!-- 文字 -->
+  <text x="150" y="180" text-anchor="middle" font-size="11" font-family="Arial" font-weight="bold" fill="#222">SUPER</text>
+  <text x="150" y="195" text-anchor="middle" font-size="11" font-family="Arial" font-weight="bold" fill="#222">HEAVY</text>
+  <text x="150" y="215" text-anchor="middle" font-size="7" font-family="Arial" fill="#666">33 RAPTORS</text>
+  <!-- 多重火焰 -->
+  <g opacity="0.8">
+    <!-- 兩側推進器火焰 -->
+    <path d="M 50 360 Q 55 385 60 400 Q 70 385 75 360 Z" fill="#ff6b35"/>
+    <path d="M 80 360 Q 83 385 85 400 Q 90 385 90 360 Z" fill="#ff6b35"/>
+    <path d="M 220 360 Q 225 385 230 400 Q 240 385 245 360 Z" fill="#ff6b35"/>
+    <path d="M 210 360 Q 213 385 215 400 Q 220 385 220 360 Z" fill="#ff6b35"/>
+    <!-- 中央助推器大量火焰 -->
+    <ellipse cx="150" cy="390" rx="50" ry="15" fill="#ff6b35" opacity="0.6"/>
+  </g>
+</svg>

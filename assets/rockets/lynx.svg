@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="lynx-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d8d8e8"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#909098"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#0a0a1a"/>
+  <!-- 太空旅遊船：流線型，類似 XCOR Lynx -->
+  <!-- 機身（短粗圓潤） -->
+  <path d="M 80 80 L 120 80 L 130 280 L 70 280 Z" fill="url(#lynx-body)" stroke="#666" stroke-width="1.2"/>
+  <!-- 駕駛艙（大型圓窗） -->
+  <ellipse cx="100" cy="110" rx="20" ry="14" fill="#88ccff" stroke="#00d4ff" stroke-width="1.5"/>
+  <ellipse cx="100" cy="108" rx="14" ry="9" fill="#aaddff" opacity="0.7"/>
+  <!-- 觀景窗（側面） -->
+  <circle cx="85" cy="140" r="5" fill="#88ccff" stroke="#00d4ff" stroke-width="0.8"/>
+  <circle cx="115" cy="140" r="5" fill="#88ccff" stroke="#00d4ff" stroke-width="0.8"/>
+  <circle cx="85" cy="160" r="5" fill="#88ccff" stroke="#00d4ff" stroke-width="0.8"/>
+  <circle cx="115" cy="160" r="5" fill="#88ccff" stroke="#00d4ff" stroke-width="0.8"/>
+  <!-- 頭錐（尖銳流線） -->
+  <path d="M 80 80 L 100 50 L 120 80 Z" fill="#aaa"/>
+  <line x1="100" y1="50" x2="100" y2="65" stroke="#fff" stroke-width="1"/>
+  <!-- 大型三角翼（V 型尾翼 + 主翼） -->
+  <!-- 主翼 -->
+  <path d="M 70 200 L 30 240 L 70 240 Z" fill="#888"/>
+  <path d="M 130 200 L 170 240 L 130 240 Z" fill="#888"/>
+  <!-- V 型尾翼 -->
+  <path d="M 80 250 L 60 300 L 80 290 Z" fill="#666"/>
+  <path d="M 120 250 L 140 300 L 120 290 Z" fill="#666"/>
+  <!-- 太空旅遊標誌 -->
+  <text x="100" y="190" text-anchor="middle" font-size="11" font-family="Arial" font-weight="bold" fill="#222">LYNX</text>
+  <text x="100" y="220" text-anchor="middle" font-size="7" font-family="Arial" fill="#666">SPACE TOURISM</text>
+  <!-- 引擎噴嘴（單一） -->
+  <path d="M 85 280 L 80 320 L 90 320 L 95 280 Z" fill="#444"/>
+  <ellipse cx="85" cy="320" rx="8" ry="3" fill="#222"/>
+  <!-- 火焰 -->
+  <path d="M 78 320 Q 80 350 82 380 Q 85 350 88 380 Q 90 350 92 320 Z" fill="#ff6b35" opacity="0.8"/>
+  <path d="M 82 320 Q 84 350 85 370 Q 86 350 88 320 Z" fill="#ffcc00"/>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="ssv2-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f0f0f0"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#909090"/>
+    </linearGradient>
+    <linearGradient id="ssv2-stripe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff6688"/>
+      <stop offset="1" stop-color="#cc2244"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#0a0a1a"/>
+  <!-- 更粗壯的箭體 -->
+  <path d="M 60 40 L 140 40 L 145 360 L 55 360 Z" fill="url(#ssv2-body)" stroke="#666" stroke-width="1.5"/>
+  <!-- 標誌性黑色隔熱瓦條紋 -->
+  <rect x="55" y="100" width="90" height="20" fill="#222"/>
+  <rect x="55" y="140" width="90" height="6" fill="#ff4466"/>
+  <!-- 頭錐 -->
+  <path d="M 60 40 Q 100 15 140 40 Z" fill="#aaa"/>
+  <!-- 大型襟翼（雙） -->
+  <path d="M 60 220 L 25 280 L 60 280 Z" fill="#888"/>
+  <path d="M 140 220 L 175 280 L 140 280 Z" fill="#888"/>
+  <path d="M 60 240 L 35 290 L 60 290 Z" fill="#666" opacity="0.7"/>
+  <path d="M 140 240 L 165 290 L 140 290 Z" fill="#666" opacity="0.7"/>
+  <!-- 隔熱瓦 -->
+  <g stroke="#bbb" stroke-width="0.3" opacity="0.5">
+    <line x1="60" y1="60" x2="140" y2="60"/>
+    <line x1="60" y1="80" x2="140" y2="80"/>
+    <line x1="55" y1="120" x2="145" y2="120"/>
+    <line x1="55" y1="180" x2="145" y2="180"/>
+    <line x1="55" y1="200" x2="145" y2="200"/>
+    <line x1="55" y1="300" x2="145" y2="300"/>
+    <line x1="55" y1="320" x2="145" y2="320"/>
+    <line x1="55" y1="340" x2="145" y2="340"/>
+  </g>
+  <text x="100" y="180" text-anchor="middle" font-size="12" font-family="Arial" font-weight="bold" fill="#222">STARSHIP V2</text>
+  <text x="100" y="195" text-anchor="middle" font-size="8" font-family="Arial" fill="#666">FLAGSHIP</text>
+  <!-- Raptor 引擎陣列（更多） -->
+  <g fill="#222">
+    <rect x="60" y="360" width="10" height="10"/>
+    <rect x="74" y="360" width="10" height="10"/>
+    <rect x="90" y="360" width="10" height="10"/>
+    <rect x="100" y="360" width="10" height="10"/>
+    <rect x="116" y="360" width="10" height="10"/>
+    <rect x="130" y="360" width="10" height="10"/>
+  </g>
+  <!-- 多重火焰 -->
+  <g opacity="0.85">
+    <path d="M 60 370 Q 63 390 65 400 Q 70 390 70 370 Z" fill="#ff6b35"/>
+    <path d="M 74 370 Q 77 390 79 400 Q 84 390 84 370 Z" fill="#ff6b35"/>
+    <path d="M 90 370 Q 93 390 95 400 Q 100 390 100 370 Z" fill="#ff6b35"/>
+    <path d="M 100 370 Q 103 390 105 400 Q 110 390 110 370 Z" fill="#ff6b35"/>
+    <path d="M 116 370 Q 119 390 121 400 Q 126 390 126 370 Z" fill="#ff6b35"/>
+    <path d="M 130 370 Q 133 390 135 400 Q 140 390 140 370 Z" fill="#ff6b35"/>
+  </g>
+</svg>

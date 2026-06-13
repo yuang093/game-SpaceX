@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="bg1" cx="0.5" cy="0.4">
+      <stop offset="0" stop-color="#1a3355"/>
+      <stop offset="1" stop-color="#050510"/>
+    </radialGradient>
+    <linearGradient id="helmet1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#dddddd"/>
+      <stop offset="1" stop-color="#888888"/>
+    </linearGradient>
+    <linearGradient id="visor1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#88ccff"/>
+      <stop offset="0.5" stop-color="#4488cc"/>
+      <stop offset="1" stop-color="#1a3355"/>
+    </linearGradient>
+  </defs>
+  <!-- 背景 -->
+  <circle cx="60" cy="60" r="60" fill="url(#bg1)"/>
+  <!-- 星空 -->
+  <g fill="#ffffff">
+    <circle cx="20" cy="20" r="0.8" opacity="0.7"/>
+    <circle cx="100" cy="30" r="1" opacity="0.8"/>
+    <circle cx="15" cy="90" r="0.7" opacity="0.6"/>
+    <circle cx="105" cy="95" r="0.9" opacity="0.7"/>
+  </g>
+  <!-- 肩膀/太空衣 -->
+  <ellipse cx="60" cy="105" rx="40" ry="20" fill="#e8e8e8" stroke="#888" stroke-width="0.5"/>
+  <rect x="35" y="80" width="50" height="30" fill="#e8e8e8" stroke="#666" stroke-width="0.5"/>
+  <!-- 太空衣細節 -->
+  <rect x="55" y="85" width="10" height="8" fill="#00d4ff"/>
+  <text x="60" y="92" text-anchor="middle" font-size="6" font-weight="bold" fill="#000">NASA</text>
+  <!-- 頭盔 -->
+  <circle cx="60" cy="55" r="32" fill="url(#helmet1)" stroke="#666" stroke-width="1.5"/>
+  <!-- 護面罩 -->
+  <ellipse cx="60" cy="55" rx="24" ry="20" fill="url(#visor1)" stroke="#000" stroke-width="0.5"/>
+  <!-- 護面罩高光 -->
+  <ellipse cx="50" cy="48" rx="6" ry="3" fill="#ffffff" opacity="0.5"/>
+  <!-- 隱約可見的臉 -->
+  <ellipse cx="60" cy="60" rx="14" ry="16" fill="#d4a584" opacity="0.4"/>
+  <!-- 頭盔反光邊 -->
+  <path d="M 35 40 A 32 32 0 0 1 60 23" fill="none" stroke="#fff" stroke-width="2" opacity="0.6"/>
+  <!-- 國旗徽章 -->
+  <rect x="78" y="95" width="8" height="6" fill="#cc0000"/>
+  <rect x="78" y="95" width="4" height="3" fill="#fff"/>
+</svg>

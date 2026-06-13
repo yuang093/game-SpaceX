@@ -20,8 +20,13 @@ const GameState = {
         failures: 0,
         totalDistance: 0,
         cargoDelivered: 0,
-        crewSaved: 0
+        crewSaved: 0,
+        perfectLandings: 0
     },
+
+    // 連勝與探索紀錄
+    missionStreak: 0,
+    visitedStations: [],
 
     currentMission: null,
     maxAltitude: 0,
@@ -303,10 +308,70 @@ const CONFIG = {
     },
 
     // 乘員職銜
-    crewRanks: ['見習', '初級', '中級', '高級', '資深', '專家', '指挥官'],
+    crewRanks: ['見習', '初級', '中級', '高級', '資深', '專家', '指揮官'],
     crewNames: [
         '張明', '王芳', '李偉', '陳曉', '劉洋', '黃美', '周杰', '吳欣',
         '鄭強', '孫麗', '林濤', '黃雲', '楊帆', '趙敏', '孫悟空', '周杰倫'
+    ],
+
+    // 乘員升級經驗值（指數成長：每級約 1.5x）
+    // 等級 0→1: 100 XP, 1→2: 180, 2→3: 270, ... 6→7: 1840
+    rankUpXP: [100, 180, 270, 405, 610, 915, 1370, 1840],
+
+    // 火箭圖片對照表（type → SVG 檔案）
+    rocketImages: {
+        scout: 'assets/rockets/scout.svg',
+        falcon: 'assets/rockets/falcon-9.svg',
+        dragon: 'assets/rockets/dragon.svg',
+        heavy: 'assets/rockets/falcon-heavy.svg',
+        starship: 'assets/rockets/starship.svg',
+        starship_v2: 'assets/rockets/starship-v2.svg',
+        super_heavy: 'assets/rockets/super-heavy.svg',
+        tanker: 'assets/rockets/tanker.svg',
+        lynx: 'assets/rockets/lynx.svg'
+    },
+
+    // 太空人頭像（依姓名 hash 對應固定 SVG）
+    astronautPortraits: [
+        'assets/astronauts/astronaut-1.svg',
+        'assets/astronauts/astronaut-2.svg',
+        'assets/astronauts/astronaut-3.svg',
+        'assets/astronauts/astronaut-4.svg',
+        'assets/astronauts/astronaut-5.svg',
+        'assets/astronauts/astronaut-6.svg',
+        'assets/astronauts/astronaut-7.svg',
+        'assets/astronauts/astronaut-8.svg'
+    ],
+
+    // 太空人真實照片 URL（NASA 公共領域，下載後可替換 SVG）
+    // 完整清單見 assets/astronauts/PHOTO_SOURCES.md
+    astronautPhotoSources: {
+        male_suit_white: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Astronaut-EVA.jpg/240px-Astronaut-EVA.jpg',
+        female_suit: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Stephanie_Wilson_official_portrait.jpg/240px-Stephanie_Wilson_official_portrait.jpg',
+        male_portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Buzz_Aldrin_Apollo_11_original.jpg/240px-Buzz_Aldrin_Apollo_11_original.jpg',
+        crew_portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Astronaut_Group_18.jpg/320px-Astronaut_Group_18.jpg'
+    },
+
+    // 聲譽獲得管道（公式透明化）
+    reputationSources: {
+        missionSuccess: (difficulty) => difficulty * 5,           // 任務成功（5-75 點）
+        freeFlight: () => 10,                                      // 自由飛行
+        firstStationVisit: (stationId) => 50,                      // 首次到站
+        crewRankUp: (newRank) => newRank * 20,                    // 乘員升級（20-120 點）
+        missionStreak: (streak) => Math.min(streak * 10, 100),    // 連勝獎勵（最高 100）
+        allStations: () => 200,                                    // 解鎖所有太空站
+        perfectLanding: () => 30                                  // 完美著陸
+    },
+
+    // 聲譽等級（每 100 點 = 1 等）
+    reputationLevels: [
+        { level: 1, name: '菜鳥', min: 0 },
+        { level: 2, name: '飛行員', min: 100 },
+        { level: 3, name: '資深飛行員', min: 300 },
+        { level: 4, name: '指揮官', min: 600 },
+        { level: 5, name: '王牌', min: 1000 },
+        { level: 6, name: '傳奇', min: 2000 },
+        { level: 7, name: '太空英雄', min: 5000 }
     ],
 
     // 科技樹
@@ -404,15 +469,41 @@ function createRocket(type) {
 // ================================================
 function createCrewMember() {
     const name = CONFIG.crewNames[Math.floor(Math.random() * CONFIG.crewNames.length)];
+    // 用姓名 hash 對應固定頭像（同名同頭像）
+    const nameHash = name.split('').reduce((h, c) => h * 31 + c.charCodeAt(0), 0);
+    const portrait = CONFIG.astronautPortraits[Math.abs(nameHash) % CONFIG.astronautPortraits.length];
     return {
         id: Date.now() + Math.random(),
         name: name,
         rank: CONFIG.crewRanks[0],
+        rankIndex: 0,
         command: Math.floor(Math.random() * 20) + 15,
         engineering: Math.floor(Math.random() * 20) + 15,
         piloting: Math.floor(Math.random() * 20) + 15,
-        experience: 0
+        experience: 0,
+        portrait: portrait
     };
+}
+
+// 取得乘員升級所需經驗值
+function getRankUpXP(currentRankIndex) {
+    return CONFIG.rankUpXP[currentRankIndex] || Infinity;
+}
+
+// 取得乘員到下一級所需經驗
+function getXPToNextRank(crew) {
+    if (crew.rankIndex >= CONFIG.crewRanks.length - 1) return 0;
+    const need = getRankUpXP(crew.rankIndex);
+    return Math.max(0, need - crew.experience);
+}
+
+// 取得聲譽等級資訊
+function getReputationLevel(reputation) {
+    let level = CONFIG.reputationLevels[0];
+    for (const lvl of CONFIG.reputationLevels) {
+        if (reputation >= lvl.min) level = lvl;
+    }
+    return level;
 }
 
 // ================================================
@@ -597,8 +688,19 @@ const UI = {
     updateCurrency() {
         DOM.credits.textContent = GameState.credits.toLocaleString();
         DOM.research.textContent = GameState.research.toLocaleString();
-        const stars = Math.min(10, Math.floor(GameState.reputation / 50) + 1);
-        DOM.reputation.textContent = '⭐'.repeat(Math.min(stars, 5)) + (stars > 5 ? `+${stars - 5}` : '');
+        // 聲譽等級顯示
+        const rep = GameState.reputation;
+        const lvl = getReputationLevel(rep);
+        const nextLvl = CONFIG.reputationLevels.find(l => l.level === lvl.level + 1);
+        let repText = `⭐ ${rep}`;
+        if (nextLvl) {
+            const need = nextLvl.min - rep;
+            repText += ` (${lvl.name} → ${nextLvl.name} 還差 ${need})`;
+        } else {
+            repText += ` (${lvl.name} MAX)`;
+        }
+        DOM.reputation.textContent = repText;
+        DOM.reputation.title = `等級 ${lvl.level}: ${lvl.name}`;
     },
 
     updateStats() {
@@ -618,13 +720,16 @@ const UI = {
             const healthPercent = Math.round((rocket.hull / rocket.maxHull) * 100);
             let healthClass = healthPercent < 30 ? 'critical' : (healthPercent < 60 ? 'damaged' : '');
 
+            const imgSrc = CONFIG.rocketImages[rocket.type] || 'assets/rockets/scout.svg';
+
             card.innerHTML = `
+                <img class="rocket-card-image" src="${imgSrc}" alt="${rocket.name}" loading="lazy">
                 <div class="rocket-card-header">
                     <span class="rocket-name">${rocket.name}</span>
                     <span class="rocket-type">${rocket.type}</span>
-                </div>
-                <div class="rocket-health ${healthClass}">
-                    結構: ${healthPercent}% ${healthClass === 'critical' ? '⚠️' : ''}
+                    <div class="rocket-health ${healthClass}">
+                        結構: ${healthPercent}% ${healthClass === 'critical' ? '⚠️' : ''}
+                    </div>
                 </div>
             `;
             card.addEventListener('click', () => {
@@ -753,19 +858,38 @@ const UI = {
         DOM.crewList.innerHTML = '';
         if (GameState.crew.length === 0) {
             DOM.crewList.innerHTML = '<p style="color: var(--color-text-dim)">目前沒有太空人</p>';
+            return;
         }
         GameState.crew.forEach(member => {
             const card = document.createElement('div');
             card.className = 'crew-card';
+
+            // 經驗值資料
+            const need = getRankUpXP(member.rankIndex);
+            const isMax = member.rankIndex >= CONFIG.crewRanks.length - 1;
+            const xpToNext = getXPToNextRank(member);
+            const xpPercent = isMax ? 100 : Math.round((member.experience / need) * 100);
+
             card.innerHTML = `
-                <div class="crew-avatar">👨‍🚀</div>
+                <img class="crew-portrait" src="${member.portrait}" alt="${member.name}" loading="lazy">
                 <div class="crew-info">
                     <div class="crew-name">${member.name}</div>
-                    <div class="crew-rank">${member.rank}</div>
+                    <div class="crew-rank">
+                        <span class="rank-badge">${member.rank}</span>
+                        <span class="rank-level">Lv.${member.rankIndex + 1}</span>
+                    </div>
                     <div class="crew-skills">
-                        <span class="skill">指揮 ${member.command}</span>
-                        <span class="skill">工程 ${member.engineering}</span>
-                        <span class="skill">駕駛 ${member.piloting}</span>
+                        <span class="skill" title="指揮">🎖️ ${member.command}</span>
+                        <span class="skill" title="工程">🔧 ${member.engineering}</span>
+                        <span class="skill" title="駕駛">✈️ ${member.piloting}</span>
+                    </div>
+                    <div class="crew-xp">
+                        <div class="xp-bar">
+                            <div class="xp-fill" style="width: ${xpPercent}%"></div>
+                        </div>
+                        <div class="xp-text">
+                            ${isMax ? '✨ MAX 滿級' : `${member.experience} / ${need} XP（還需 ${xpToNext}）`}
+                        </div>
                     </div>
                 </div>
             `;
@@ -822,36 +946,98 @@ const UI = {
             const crewBonus = GameState.crew.reduce((sum, c) => sum + Math.floor(c.command / 10) * 30, 0);
             const total = base + altitudeBonus + fuelBonus + healthBonus + crewBonus;
 
+            // 完美著陸判定（速度 < 10、角度 < 5°、結構 > 90%）
+            const isPerfect = data.hull / data.maxHull > 0.9 && data.fuel / data.maxFuel > 0.5;
+
+            // ===== 聲譽計算（多管道）=====
+            let repGain = 0;
+            const repBreakdown = [];
+            const repSrc = CONFIG.reputationSources;
+
+            const baseRep = m ? repSrc.missionSuccess(m.difficulty) : repSrc.freeFlight();
+            repGain += baseRep;
+            repBreakdown.push({ label: m ? `任務成功 (難度 ${m.difficulty}★)` : '自由飛行', value: baseRep });
+
+            // 連勝獎勵
+            GameState.missionStreak++;
+            if (GameState.missionStreak >= 2) {
+                const streakRep = repSrc.missionStreak(GameState.missionStreak);
+                repGain += streakRep;
+                repBreakdown.push({ label: `連勝獎勵 (${GameState.missionStreak}連勝)`, value: streakRep });
+            }
+
+            // 首次到站
+            if (m && !GameState.visitedStations.includes(m.station.id)) {
+                GameState.visitedStations.push(m.station.id);
+                const firstRep = repSrc.firstStationVisit(m.station.id);
+                repGain += firstRep;
+                repBreakdown.push({ label: `🆕 首次到站: ${m.station.name}`, value: firstRep });
+                this.toast(`首次到站: ${m.station.name}！+${firstRep} 聲譽`, 'success');
+            }
+
+            // 完美著陸
+            if (isPerfect) {
+                GameState.stats.perfectLandings++;
+                const perfectRep = repSrc.perfectLanding();
+                repGain += perfectRep;
+                repBreakdown.push({ label: '⭐ 完美著陸', value: perfectRep });
+            }
+
             GameState.credits += total;
             GameState.research += Math.floor(total * 0.15);
-            GameState.reputation += m ? m.difficulty * 5 : 10;
+            GameState.reputation += repGain;
             GameState.stats.successfulLandings++;
             GameState.stats.cargoDelivered += m?.cargo?.capacity || 0;
             GameState.stats.totalDistance += GameState.maxAltitude * 2;
+
+            // ===== 乘員升級（使用 rankUpXP 陣列）=====
+            const crewLevelUps = [];
+            GameState.crew.forEach(c => {
+                const xpGain = 15 + m?.difficulty * 5;
+                c.experience += xpGain;
+
+                // 持續升級檢查（可能一次跳多級）
+                while (c.rankIndex < CONFIG.crewRanks.length - 1 && c.experience >= getRankUpXP(c.rankIndex)) {
+                    c.experience -= getRankUpXP(c.rankIndex);
+                    c.rankIndex++;
+                    c.rank = CONFIG.crewRanks[c.rankIndex];
+                    crewLevelUps.push({ name: c.name, rank: c.rank, rankIndex: c.rankIndex });
+                }
+
+                // 升級聲譽獎勵
+                crewLevelUps.forEach(up => {
+                    if (up.name === c.name) {
+                        const rankRep = repSrc.crewRankUp(c.rankIndex);
+                        GameState.reputation += rankRep;
+                        repBreakdown.push({ label: `🎖️ ${c.name} 升至 ${c.rank}`, value: rankRep });
+                    }
+                });
+            });
+
+            // 延遲顯示升級 Toast
+            crewLevelUps.forEach((up, i) => {
+                setTimeout(() => this.toast(`🎖️ ${up.name} 晉升為 ${up.rank}！`, 'success'), 500 + i * 800);
+            });
 
             DOM.resultMission.innerHTML = m ? `${CONFIG.missionTypes[m.type].icon} ${m.station.name}` : '自由飛行';
             DOM.resultStats.innerHTML = `
                 <div class="result-row"><span>最高高度</span><span>${GameState.maxAltitude} m</span></div>
                 <div class="result-row"><span>燃料</span><span>${Math.round(data.fuel / data.maxFuel * 100)}%</span></div>
                 <div class="result-row"><span>結構</span><span>${Math.round(data.hull / data.maxHull * 100)}%</span></div>
+                <div class="result-row"><span>連勝</span><span>🔥 ${GameState.missionStreak}</span></div>
             `;
+            const repHTML = repBreakdown.map(r => `<div class="reward-row"><span>${r.label}</span><span style="color:#ffcc00">+${r.value} ⭐</span></div>`).join('');
             DOM.resultRewards.innerHTML = `
                 <div class="reward-row"><span>基本獎勵</span><span>+$${base.toLocaleString()}</span></div>
                 <div class="reward-row"><span>高度加成</span><span>+$${altitudeBonus.toLocaleString()}</span></div>
                 <div class="reward-row"><span>燃料獎勵</span><span>+$${fuelBonus.toLocaleString()}</span></div>
                 <div class="reward-row"><span>結構獎勵</span><span>+$${healthBonus.toLocaleString()}</span></div>
                 ${crewBonus > 0 ? `<div class="reward-row"><span>乘員加成</span><span>+$${crewBonus.toLocaleString()}</span></div>` : ''}
-                <div class="reward-row"><span>總計</span><span>+$${total.toLocaleString()}</span></div>
+                <div class="reward-row"><span>總獎勵</span><span>+$${total.toLocaleString()}</span></div>
+                <div class="reward-divider">⭐ 聲譽獲得</div>
+                ${repHTML}
+                <div class="reward-row total"><span>聲譽總計</span><span>+${repGain} ⭐</span></div>
             `;
-
-            GameState.crew.forEach(c => {
-                c.experience += 15;
-                if (c.experience >= 100) {
-                    c.experience = 0;
-                    const idx = CONFIG.crewRanks.indexOf(c.rank);
-                    if (idx < CONFIG.crewRanks.length - 1) c.rank = CONFIG.crewRanks[idx + 1];
-                }
-            });
 
             // 生成新任務填補列表
             const newMissions = Math.max(1, 4 - GameState.availableMissions.length);
@@ -859,11 +1045,13 @@ const UI = {
                 GameState.availableMissions.push(generateSingleMission());
             }
         } else {
+            // 失敗：重置連勝
+            GameState.missionStreak = 0;
             DOM.resultTitle.textContent = '💥 ' + (data.reason || '任務失敗');
             DOM.resultTitle.className = 'failure';
             GameState.stats.failures++;
             DOM.resultStats.innerHTML = `<div class="result-row"><span>原因</span><span>${data.reason}</span></div>`;
-            DOM.resultRewards.innerHTML = '<div class="reward-row"><span>獎勵</span><span>+$0</span></div>';
+            DOM.resultRewards.innerHTML = '<div class="reward-row"><span>獎勵</span><span>+$0</span></div><div class="reward-row"><span>連勝中斷</span><span>🔥 已重置</span></div>';
             // 失敗也生成新任務填補
             const failNew = Math.max(1, 4 - GameState.availableMissions.length);
             for (let i = 0; i < failNew; i++) {
@@ -999,13 +1187,18 @@ function showBuyRocketModal() {
         if (key === 'scout') return;
         const owned = GameState.rockets.some(rock => rock.type === key);
         const canBuy = GameState.credits >= r.basePrice;
+        const imgSrc = CONFIG.rocketImages[key] || 'assets/rockets/scout.svg';
 
         const item = document.createElement('div');
         item.className = 'shop-item';
         item.innerHTML = `
+            <img class="shop-item-image" src="${imgSrc}" alt="${r.name}" loading="lazy">
             <div class="shop-info">
                 <div class="shop-name">${r.name}</div>
                 <div class="shop-desc">${r.description}</div>
+                <div class="shop-stats" style="font-size: var(--fs-xs); color: var(--color-text-dim); margin-top: 4px;">
+                    引擎 Lv.${r.stats.engine} | 燃料 Lv.${r.stats.fuel} | 隔熱 Lv.${r.stats.shield} | 貨艙 Lv.${r.stats.cargo}
+                </div>
             </div>
             <div>
                 ${owned ? '<span style="color:#888">已擁有</span>' :

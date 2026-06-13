@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="bg7" cx="0.5" cy="0.4">
+      <stop offset="0" stop-color="#225566"/>
+      <stop offset="1" stop-color="#051015"/>
+    </radialGradient>
+    <linearGradient id="helmet7" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f0f8"/>
+      <stop offset="0.5" stop-color="#c8c8d8"/>
+      <stop offset="1" stop-color="#888898"/>
+    </linearGradient>
+    <linearGradient id="visor7" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffddaa"/>
+      <stop offset="0.5" stop-color="#cc8855"/>
+      <stop offset="1" stop-color="#553322"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bg7)"/>
+  <g fill="#ffffff" opacity="0.7">
+    <circle cx="20" cy="25" r="0.8"/>
+    <circle cx="100" cy="30" r="1"/>
+    <circle cx="22" cy="95" r="0.7"/>
+    <circle cx="100" cy="100" r="0.9"/>
+  </g>
+  <ellipse cx="60" cy="105" rx="40" ry="20" fill="#d8d8e0" stroke="#888898" stroke-width="0.5"/>
+  <rect x="35" y="80" width="50" height="30" fill="#d8d8e0" stroke="#888898" stroke-width="0.5"/>
+  <rect x="55" y="85" width="10" height="8" fill="#ff4466"/>
+  <text x="60" y="92" text-anchor="middle" font-size="5" font-weight="bold" fill="#fff">UAE</text>
+  <circle cx="60" cy="55" r="32" fill="url(#helmet7)" stroke="#888898" stroke-width="1.5"/>
+  <ellipse cx="60" cy="55" rx="24" ry="20" fill="url(#visor7)" stroke="#000" stroke-width="0.5"/>
+  <ellipse cx="50" cy="48" rx="6" ry="3" fill="#ffffff" opacity="0.5"/>
+  <ellipse cx="60" cy="60" rx="14" ry="16" fill="#b89070" opacity="0.4"/>
+  <path d="M 35 40 A 32 32 0 0 1 60 23" fill="none" stroke="#fff" stroke-width="2" opacity="0.6"/>
+  <rect x="34" y="95" width="8" height="6" fill="#009900"/>
+  <rect x="34" y="95" width="4" height="3" fill="#000"/>
+</svg>
