@@ -76,7 +76,10 @@ const GameState = {
         totalPulls: 0,
         lastPull: null,
         lastPullTime: 0
-    }
+    },
+
+    // 玩家當前所在位置（'earth' = 地球，'moon'/'mars'... = 太空站 ID）
+    currentLocation: 'earth'
 };
 
 // ================================================
@@ -823,67 +826,96 @@ function getReputationLevel(reputation) {
 }
 
 // ================================================
-// 生成任務
+// 生成任務（v3.0：單一起點、限制數量 10 個）
 // ================================================
 
+const MISSION_TARGET_COUNT = 10;  // 任務數量上限
+
 /**
- * 動態產生所有已解鎖的任務
- * - 為每個已解鎖太空站隨機配 2-3 個任務類型
- * - 至少 6 個任務，未滿則隨機補
- * - 已解鎖太空站越多，任務池越豐富
+ * 動態產生 10 個任務
+ * - 起點：GameState.currentLocation（地球或太空站）
+ * - 終點：已解鎖的太空站（不可等於起點）
+ * - 為每個目標站配 1-2 個任務類型
+ * - 補足到剛好 10 個；超過則隨機取 10
  */
 function generateAllAvailableMissions() {
     GameState.availableMissions = [];
-    const availableStations = GameState.stations.filter(
-        s => GameState.reputation >= s.unlockReputation
+    const currentLoc = GameState.currentLocation || 'earth';
+    const originStation = currentLoc === 'earth'
+        ? { id: 'earth', name: '地球', targetAltitude: 0, difficulty: 1, fuelRequired: 0, reward: { base: 0, multiplier: 1.0 }, needs: [], unlockReputation: 0, color: '#88ddff', size: 1 }
+        : GameState.stations.find(s => s.id === currentLoc);
+
+    if (!originStation) return;
+
+    // 目標站：已解鎖 + 不是自己
+    const targets = GameState.stations.filter(s =>
+        s.id !== currentLoc && GameState.reputation >= s.unlockReputation
     );
-    if (availableStations.length === 0) {
-        // 沒有解鎖任何站，至少給 LEO
-        availableStations.push(GameState.stations[0]);
+    if (targets.length === 0) {
+        targets.push(GameState.stations[0]);
     }
 
-    // 為每個已解鎖太空站產生 2-3 個任務類型
     const typeKeys = Object.keys(CONFIG.missionTypes);
-    availableStations.forEach(station => {
-        const count = 2 + Math.floor(Math.random() * 2);  // 2-3
-        // 隨機挑選不重複的任務類型
+    const targetStations = [...targets];
+
+    // 為每個目標站配 1-2 個任務類型
+    targetStations.forEach(target => {
+        const count = Math.random() < 0.6 ? 2 : 1;  // 60% 機率 2 個
         const shuffled = typeKeys.slice().sort(() => Math.random() - 0.5);
-        const picked = shuffled.slice(0, count);
-        picked.forEach(type => {
+        shuffled.slice(0, count).forEach(type => {
             GameState.availableMissions.push(
-                generateMissionByTypeAndStation(type, station)
+                generateMissionByOriginAndTarget(originStation, target, type)
             );
         });
     });
 
-    // 若太空站已解鎖後任務仍少，補滿到至少 6 個
-    while (GameState.availableMissions.length < 6) {
-        GameState.availableMissions.push(generateSingleMission());
+    // 補足到剛好 10 個
+    while (GameState.availableMissions.length < MISSION_TARGET_COUNT) {
+        const target = targets[Math.floor(Math.random() * targets.length)];
+        const type = typeKeys[Math.floor(Math.random() * typeKeys.length)];
+        GameState.availableMissions.push(
+            generateMissionByOriginAndTarget(originStation, target, type)
+        );
+    }
+
+    // 超過則隨機取 10
+    if (GameState.availableMissions.length > MISSION_TARGET_COUNT) {
+        GameState.availableMissions = GameState.availableMissions
+            .sort(() => Math.random() - 0.5)
+            .slice(0, MISSION_TARGET_COUNT);
     }
 }
 
 /**
- * 依指定類型與太空站產生任務
+ * 依指定起點與終點產生任務
  */
-function generateMissionByTypeAndStation(type, station) {
-    // 彗星採樣任務固定以彗星為目標
-    if (type === 'comet_sample') {
-        const cometStation = GameState.stations.find(s => s.id === 'comet');
-        if (cometStation) station = cometStation;
+function generateMissionByOriginAndTarget(origin, target, type) {
+    if (type === 'comet_sample' && target.id !== 'comet') {
+        const comet = GameState.stations.find(s => s.id === 'comet');
+        if (comet) target = comet;
     }
     const typeInfo = CONFIG.missionTypes[type];
-    const difficulty = Math.min(10, Math.max(1, station.difficulty + Math.floor(Math.random() * 3) - 1));
-    const cargo = generateCargo(type, station, difficulty);
-    const baseReward = Math.floor(station.reward.base * station.reward.multiplier * typeInfo.baseReward * (1 + difficulty * 0.2));
+    const difficulty = Math.min(10, Math.max(1, target.difficulty + Math.floor(Math.random() * 3) - 1));
+    const cargo = generateCargo(type, target, difficulty);
+    const baseReward = Math.floor(target.reward.base * target.reward.multiplier * typeInfo.baseReward * (1 + difficulty * 0.2));
     return {
         id: Date.now() + Math.random() + Math.random(),
         type: type,
-        station: station,
+        originStation: origin.id,
+        station: target,
         difficulty: difficulty,
         cargo: cargo,
         reward: baseReward,
-        requirements: getMissionRequirements(type, station, difficulty)
+        requirements: getMissionRequirements(type, target, difficulty)
     };
+}
+
+/**
+ * 依指定類型與太空站產生任務（向後相容，預設地球起點）
+ */
+function generateMissionByTypeAndStation(type, station) {
+    const earth = { id: 'earth', name: '地球' };
+    return generateMissionByOriginAndTarget(earth, station, type);
 }
 
 function generateMissions(count) {
@@ -930,6 +962,7 @@ function generateSingleMission() {
     return {
         id: Date.now() + Math.random(),
         type: type,
+        originStation: GameState.currentLocation || 'earth',
         station: station,
         difficulty: difficulty,
         cargo: cargo,
@@ -1425,18 +1458,29 @@ const UI = {
     // 任務列表
     updateMissionList() {
         DOM.missionsList.innerHTML = '';
+        // 顯示玩家當前位置
+        const currentLoc = GameState.currentLocation || 'earth';
+        const locStation = currentLoc === 'earth'
+            ? { name: '🌍 地球', id: 'earth' }
+            : (GameState.stations.find(s => s.id === currentLoc) || { name: currentLoc, id: currentLoc });
+        const locBadge = document.getElementById('current-location-badge');
+        if (locBadge) locBadge.textContent = `📍 ${locStation.name}`;
+
         GameState.availableMissions.forEach((mission, index) => {
             const typeInfo = CONFIG.missionTypes[mission.type];
             const card = document.createElement('div');
             card.className = 'mission-card';
+            const originName = mission.originStation === 'earth' ? '🌍 地球' : (GameState.stations.find(s => s.id === mission.originStation)?.name || mission.originStation);
             card.innerHTML = `
                 <div class="mission-header">
                     <span class="mission-name">${typeInfo.icon} ${typeInfo.name}</span>
                     <span class="mission-reward">$${mission.reward.toLocaleString()}</span>
                 </div>
                 <div class="mission-info-row">
-                    <span class="mission-type">${mission.station.name}</span>
-                    <span>難度: ${'⭐'.repeat(mission.difficulty)}</span>
+                    <span class="mission-route">${originName} → <b>${mission.station.name}</b></span>
+                </div>
+                <div class="mission-info-row">
+                    <span class="mission-difficulty">難度 ${'⭐'.repeat(mission.difficulty)}</span>
                 </div>
             `;
             card.addEventListener('click', () => showMissionDetails(index));
@@ -1816,7 +1860,11 @@ const UI = {
                 <div class="reward-row total"><span>聲譽總計</span><span>+${repGain} ⭐</span></div>
             `;
 
-            // 生成新任務填補列表（顯示全部已解鎖任務）
+            // v3.0：更新玩家當前位置（抵達目標站）
+            if (data?.station && GameState.currentMission) {
+                GameState.currentLocation = GameState.currentMission.station.id;
+            }
+            // 生成新任務填補列表（v3.0：依新位置生成 10 個）
             generateAllAvailableMissions();
         } else {
             // 失敗：重置連勝
@@ -1939,11 +1987,15 @@ function showMissionDetails(index) {
             ? (distKm / 1000).toFixed(0) + 'k km'
             : distKm.toFixed(0) + ' km';
 
+    // 起點資訊
+    const originName = mission.originStation === 'earth' ? '🌍 地球' :
+        (GameState.stations.find(s => s.id === mission.originStation)?.name || mission.originStation);
+
     DOM.missionInfo.innerHTML = `
         <p><strong>類型:</strong> <span style="color:${typeInfo.color}">${typeInfo.icon} ${typeInfo.name}</span></p>
-        <p><strong>目的地:</strong> ${mission.station.name}</p>
+        <p><strong>航線:</strong> ${originName} → <b>${mission.station.name}</b></p>
         <p><strong>距離:</strong> ${distDisplay}</p>
-        <p><strong>燃料需求:</strong> ${needFuel} 單位 <span style="color:${fuelOk ? '#00ff88' : '#ff4466'}">${fuelOk ? '✅' : '⚠️ 需要 ' + fuelCapacity + '（你有 ' + fuelCapacity + '）'}</span></p>
+        <p><strong>燃料需求:</strong> ${needFuel} 單位 <span style="color:${fuelOk ? '#00ff88' : '#ff4466'}">${fuelOk ? '✅' : '⚠️ 需要 ' + needFuel + '（你有 ' + fuelCapacity + '）'}</span></p>
         <p><strong>難度:</strong> ${'⭐'.repeat(mission.difficulty)}</p>
         <p><strong>獎勵:</strong> <span style="color:#00ff88">$${mission.reward.toLocaleString()}</span></p>
         <p><strong>貨物:</strong> ${mission.cargo.items.map(i => `${i.name} x${i.quantity}`).join(', ') || '無'}</p>
@@ -2088,7 +2140,8 @@ const SaveSystem = {
             completedMissions: GameState.stats.successfulLandings,
             stocks: GameState.stocks,
             cardCollection: GameState.cardCollection,
-            cardStats: GameState.cardStats
+            cardStats: GameState.cardStats,
+            currentLocation: GameState.currentLocation
         };
         try { localStorage.setItem(this.SAVE_KEY, JSON.stringify(data)); } catch (e) {}
     },
@@ -2109,7 +2162,8 @@ const SaveSystem = {
                     unlockedStations: data.unlockedStations ?? ['leo'],
                     stocks: data.stocks ?? GameState.stocks,
                     cardCollection: data.cardCollection ?? [],
-                    cardStats: data.cardStats ?? { totalPulls: 0, lastPull: null, lastPullTime: 0 }
+                    cardStats: data.cardStats ?? { totalPulls: 0, lastPull: null, lastPullTime: 0 },
+                    currentLocation: data.currentLocation ?? 'earth'
                 });
                 console.log('存檔載入成功');
                 return true;

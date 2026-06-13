@@ -406,40 +406,75 @@ function drawNebula(altitude) {
     ctx.restore();
 }
 
+// v3.0：三層視差星空（遠/中/近 不同速度，營造 3D 飛行感）
 const stars = [];
-const STAR_COUNT = 300;
+const STAR_LAYERS = [
+    { count: 80,  baseSize: 0.5, parallax: 0.2, alpha: 0.4, color: '#ffffff' },  // 遠景
+    { count: 120, baseSize: 1.0, parallax: 0.5, alpha: 0.7, color: '#ffffff' },  // 中景
+    { count: 80,  baseSize: 1.8, parallax: 1.0, alpha: 1.0, color: '#ffffff' }   // 近景
+];
 
 function generateStars() {
     stars.length = 0;
-    for (let i = 0; i < STAR_COUNT; i++) {
-        stars.push({
-            x: Math.random() * WORLD_WIDTH,
-            y: Math.random() * WORLD_HEIGHT,
-            size: 0.5 + Math.random() * 2.5,
-            brightness: 0.3 + Math.random() * 0.7,
-            twinkle: Math.random() * Math.PI * 2,
-            color: Math.random() > 0.8 ? (Math.random() > 0.5 ? '#ffdd88' : '#aaccff') : '#ffffff'
-        });
-    }
+    STAR_LAYERS.forEach((layer, layerIdx) => {
+        for (let i = 0; i < layer.count; i++) {
+            stars.push({
+                x: Math.random() * WORLD_WIDTH,
+                y: Math.random() * WORLD_HEIGHT,
+                z: layer.parallax,
+                size: layer.baseSize * (0.7 + Math.random() * 0.6),
+                brightness: layer.alpha * (0.5 + Math.random() * 0.5),
+                twinkle: Math.random() * Math.PI * 2,
+                twinkleSpeed: 1.5 + Math.random() * 1.5,
+                color: layer.color,
+                layer: layerIdx
+            });
+        }
+    });
 }
 
 function drawStars() {
     const time = Date.now() * 0.001;
+    const speed = rocket ? Math.abs(rocket.vy) : 0;
+    const trailLength = Math.min(speed * 6, 60);  // 拖尾長度上限 60px
 
-    stars.forEach(star => {
+    // 按 z 排序：遠景先繪製（z 小），近景後（z 大）
+    const sorted = [...stars].sort((a, b) => a.z - b.z);
+
+    sorted.forEach(star => {
+        // 視差：近景跟隨相機較多，遠景較少
         const screenX = star.x;
-        const screenY = star.y - cameraY;
+        const screenY = star.y - cameraY * star.z;
 
-        if (screenY < -10 || screenY > canvasHeight + 10) return;
+        // 循環：超出畫面就回到頂端/底端
+        let finalY = screenY;
+        if (finalY < -50) finalY = finalY + WORLD_HEIGHT * star.z;
+        if (finalY > canvasHeight + 50) finalY = finalY - WORLD_HEIGHT * star.z;
 
-        const twinkle = Math.sin(time * 2 + star.twinkle) * 0.3 + 0.7;
+        // 閃爍
+        const twinkle = Math.sin(time * star.twinkleSpeed + star.twinkle) * 0.3 + 0.7;
         const alpha = star.brightness * twinkle;
 
+        // 速度拖尾（速度大於 1 時繪製）
+        if (trailLength > 5 && rocket) {
+            const trailY = -rocket.vy * trailLength * star.z;
+            ctx.save();
+            ctx.strokeStyle = star.color;
+            ctx.globalAlpha = alpha * 0.35;
+            ctx.lineWidth = star.size * 0.3;
+            ctx.beginPath();
+            ctx.moveTo(screenX, finalY);
+            ctx.lineTo(screenX, finalY + trailY);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 星點
         ctx.save();
         ctx.globalAlpha = alpha;
         ctx.fillStyle = star.color;
         ctx.beginPath();
-        ctx.arc(screenX, screenY, star.size, 0, Math.PI * 2);
+        ctx.arc(screenX, finalY, star.size, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     });
@@ -1878,36 +1913,30 @@ function checkCollisions() {
         return;
     }
 
-    // 任務目標對接（若有指派任務）
-    if (GameState.currentMission) {
+    // 任務目標對接（v3.0：抵達目標即任務完成，自動吸附）
+    if (GameState.currentMission && rocket.phase !== 'DOCKED' && rocket.phase !== 'LANDED' && rocket.phase !== 'EXPLODED') {
         const station = GameState.currentMission.station;
         const targetY = station.targetAltitude;
-        const yTolerance = 200;        // 放寬 y 容差（30→200）
-        const xTolerance = 200;        // 放寬 x 容差（40→200）
+        const yTolerance = 200;        // 放寬 y 容差
+        const xTolerance = 200;        // 放寬 x 容差
 
         // 穿越式檢測：記錄上一幀 y，偵測跨越目標線
         if (rocket.lastY === undefined) rocket.lastY = rocket.y;
         const crossedTarget = (rocket.lastY > targetY && rocket.y <= targetY) ||
                               (rocket.lastY < targetY && rocket.y >= targetY);
         const inZone = Math.abs(rocket.x - WORLD_WIDTH / 2) < xTolerance;
+        const reachedZone = (crossedTarget || Math.abs(rocket.y - targetY) < yTolerance) && inZone;
 
-        if (crossedTarget && inZone) {
+        if (reachedZone) {
             if (!rocket.targetReached) {
                 rocket.targetReached = true;
                 if (typeof UI !== 'undefined' && UI.toast) {
-                    UI.toast(`🎯 已抵達 ${station.name}！`, 'success');
+                    UI.toast(`🎯 已抵達 ${station.name}！對接中…`, 'success');
                 }
             }
-        }
-
-        // 也支援：在目標區域內（穿越後滯留）
-        if (Math.abs(rocket.y - targetY) < yTolerance && inZone) {
-            if (!rocket.targetReached) {
-                rocket.targetReached = true;
-                if (typeof UI !== 'undefined' && UI.toast) {
-                    UI.toast(`🎯 已抵達 ${station.name}！`, 'success');
-                }
-            }
+            // 自動吸附：吸附到太空站位置
+            handleDocking(station);
+            return;
         }
         rocket.lastY = rocket.y;
     }
@@ -1933,13 +1962,8 @@ function handleLanding(surfaceY, onPad) {
         rocket.phase = 'LANDED';
         rocket.hull = Math.max(0, rocket.hull - speed * 2);
 
-        // 若有任務但未抵達目標，任務失敗
-        if (GameState.currentMission && !rocket.targetReached) {
-            const station = GameState.currentMission.station;
-            triggerCrash(`未抵達目標！應抵達 ${station.name}（${Math.round(station.targetAltitude/10)}m）`);
-            return;
-        }
-
+        // v3.0：抵達目標就完成任務。若任務未抵達目標但已返回地球，視為「飛行結束」（無任務獎勵）
+        // 移除「必須 targetReached」檢查 — 自由飛行返回地球也視為成功
         StateMachine.enterSuccess({
             fuel: rocket.fuel,
             maxFuel: rocket.maxFuel,
@@ -1963,25 +1987,33 @@ function handleLanding(surfaceY, onPad) {
 }
 
 function handleDocking(station) {
-    rocket.y = WORLD_HEIGHT - station.altitude + station.height / 2 + rocket.height / 2;
+    // v3.0：吸附到太空站位置
+    rocket.y = station.targetAltitude;  // 鎖定到目標高度
+    rocket.x = WORLD_WIDTH / 2;          // 置中對接
     rocket.vx = 0;
     rocket.vy = 0;
+    rocket.angle = 0;
     rocket.phase = 'DOCKED';
     rocket.dockedStation = station;
 
-    // 如果是任務目標站，給予獎勵
-    if (GameState.currentMission && GameState.currentMission.station.id === station.id) {
-        const bonus = Math.floor(GameState.currentMission.reward * 0.5);
-        GameState.credits += bonus;
-        console.log(`對接成功！獲得 bonuses: $${bonus}`);
+    // 任務成功（在太空站完成任務）
+    if (typeof UI !== 'undefined' && UI.toast) {
+        UI.toast(`🚀 對接 ${station.name} 成功！`, 'success');
     }
 
-    StateMachine.enterSuccess({
-        fuel: rocket.fuel,
-        maxFuel: rocket.maxFuel,
-        hull: rocket.hull,
-        maxHull: rocket.maxHull
-    });
+    // 1.5 秒後才彈出成功面板（讓玩家看到吸附動畫）
+    setTimeout(() => {
+        if (typeof StateMachine !== 'undefined' && StateMachine.enterSuccess) {
+            StateMachine.enterSuccess({
+                fuel: rocket.fuel,
+                maxFuel: rocket.maxFuel,
+                hull: rocket.hull,
+                maxHull: rocket.maxHull,
+                docked: true,
+                station: station
+            });
+        }
+    }, 1500);
 }
 
 function triggerCrash(reason) {
@@ -1998,10 +2030,36 @@ function triggerCrash(reason) {
     });
 }
 
+// v3.0：相機震動（主引擎啟動時輕微抖動）
+let cameraShakeX = 0;
+let cameraShakeY = 0;
+
 function updateCamera() {
     const targetY = rocket.y - canvasHeight * 0.6;
     cameraY += (targetY - cameraY) * 0.08;
     cameraY = Math.max(0, Math.min(WORLD_HEIGHT - canvasHeight, cameraY));
+
+    // 主引擎震動：根據 rocket.thrusting 屬性判斷
+    let isThrusting = false;
+    if (typeof window !== 'undefined' && window.keys) {
+        isThrusting = window.keys.thrust || window.keys.up;
+    }
+    if (!isThrusting && rocket) {
+        isThrusting = rocket.thrusting === true;
+    }
+    if (isThrusting) {
+        cameraShakeX = (Math.random() - 0.5) * 3;
+        cameraShakeY = (Math.random() - 0.5) * 3;
+    } else {
+        cameraShakeX *= 0.85;
+        cameraShakeY *= 0.85;
+    }
+}
+
+function applyCameraShake() {
+    if (Math.abs(cameraShakeX) > 0.05 || Math.abs(cameraShakeY) > 0.05) {
+        ctx.translate(cameraShakeX, cameraShakeY);
+    }
 }
 
 // ================================================
@@ -2031,6 +2089,10 @@ function gameLoop(timestamp) {
         // 根據火箭高度動態調整天空顏色（從地面到大氣層到深空）
         drawSpaceBackground();
 
+        // v3.0：套用相機震動到世界層
+        ctx.save();
+        applyCameraShake();
+
         drawStars();
         drawEarth();
         drawDestination();
@@ -2046,6 +2108,8 @@ function gameLoop(timestamp) {
 
         drawRocket();
         updateAndDrawParticles();
+
+        ctx.restore();
     } catch (e) {
         console.warn('Game loop error:', e.message);
     }
