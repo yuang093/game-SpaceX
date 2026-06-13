@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="heavy-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e0e0e0"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#888"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0a0a1a"/>
+  <!-- 中央助推器 -->
+  <rect x="138" y="50" width="24" height="320" fill="url(#heavy-body)" stroke="#666"/>
+  <!-- 左右助推器 -->
+  <rect x="58" y="70" width="22" height="290" fill="url(#heavy-body)" stroke="#666"/>
+  <rect x="220" y="70" width="22" height="290" fill="url(#heavy-body)" stroke="#666"/>
+  <!-- 整流罩 -->
+  <path d="M 138 50 Q 150 30 162 50" fill="#aaa"/>
+  <!-- 商標 -->
+  <text x="150" y="150" text-anchor="middle" font-size="10" font-family="Arial" font-weight="bold" fill="#222">FALCON</text>
+  <text x="150" y="165" text-anchor="middle" font-size="10" font-family="Arial" font-weight="bold" fill="#222">HEAVY</text>
+  <!-- 引擎段 -->
+  <rect x="58" y="350" width="22" height="15" fill="#333"/>
+  <rect x="138" y="365" width="24" height="15" fill="#333"/>
+  <rect x="220" y="350" width="22" height="15" fill="#333"/>
+  <!-- 火焰 -->
+  <g opacity="0.8">
+    <path d="M 60 365 Q 65 390 70 400 Q 75 390 78 365 Z" fill="#ff6b35"/>
+    <path d="M 140 380 Q 145 395 150 400 Q 155 395 160 380 Z" fill="#ff6b35"/>
+    <path d="M 222 365 Q 227 390 232 400 Q 237 390 240 365 Z" fill="#ff6b35"/>
+  </g>
+</svg>

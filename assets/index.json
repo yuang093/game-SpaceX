@@ -1,0 +1,78 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-06-13",
+  "sources": {
+    "spacex_official": {
+      "name": "SpaceX 官網",
+      "url": "https://www.spacex.com/",
+      "license": "© SpaceX - All rights reserved (使用於教育/非商業展示)",
+      "attribution": "Photo: SpaceX"
+    },
+    "nasa": {
+      "name": "NASA Images",
+      "url": "https://images.nasa.gov/",
+      "license": "Public Domain (NASA 公開領域)",
+      "attribution": "NASA"
+    },
+    "wikimedia": {
+      "name": "Wikimedia Commons",
+      "url": "https://commons.wikimedia.org/",
+      "license": "CC BY-SA 4.0",
+      "attribution": "Wikimedia Commons contributors"
+    }
+  },
+  "rockets": [
+    {
+      "id": "scout",
+      "file": "rockets/scout.svg",
+      "source": "spacex_official",
+      "fallback": "SpaceX Falcon 1",
+      "license_note": "示意圖，非 SpaceX 官圖"
+    },
+    {
+      "id": "falcon",
+      "file": "rockets/falcon-9.svg",
+      "source": "spacex_official",
+      "fallback": "SpaceX Falcon 9"
+    },
+    {
+      "id": "dragon",
+      "file": "rockets/dragon.svg",
+      "source": "spacex_official",
+      "fallback": "SpaceX Dragon"
+    },
+    {
+      "id": "heavy",
+      "file": "rockets/falcon-heavy.svg",
+      "source": "spacex_official",
+      "fallback": "SpaceX Falcon Heavy"
+    },
+    {
+      "id": "starship",
+      "file": "rockets/starship.svg",
+      "source": "spacex_official",
+      "fallback": "SpaceX Starship"
+    }
+  ],
+  "stations": [
+    { "id": "leo", "file": "stations/leo.svg", "source": "nasa", "fallback": "ISS" },
+    { "id": "moon", "file": "stations/moon-base.svg", "source": "nasa", "fallback": "Lunar Gateway" },
+    { "id": "mars", "file": "stations/mars-base.svg", "source": "nasa", "fallback": "Mars Base Concept" }
+  ],
+  "planets": [
+    { "id": "earth", "file": "planets/earth.svg", "source": "nasa", "fallback": "Earth" },
+    { "id": "moon", "file": "planets/moon.svg", "source": "nasa", "fallback": "Moon" },
+    { "id": "mars", "file": "planets/mars.svg", "source": "nasa", "fallback": "Mars" }
+  ],
+  "ui": [
+    { "id": "icon-192", "file": "ui/icon-192.svg", "source": "self" },
+    { "id": "icon-512", "file": "ui/icon-512.svg", "source": "self" }
+  ],
+  "notes": [
+    "所有圖片為 SVG 風格化版本，後續可替換為真實照片。",
+    "替換真實照片時請更新對應的 source 與 license_note 欄位。",
+    "NASA 圖片為公共領域，可免費使用。",
+    "SpaceX 圖片需從官網取得授權後使用。",
+    "建議使用 WebP 格式以減少檔案大小。"
+  ]
+}

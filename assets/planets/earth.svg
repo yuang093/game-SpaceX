@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="earth-grad" cx="0.4" cy="0.4">
+      <stop offset="0" stop-color="#88ccff"/>
+      <stop offset="0.5" stop-color="#4488cc"/>
+      <stop offset="1" stop-color="#1a3355"/>
+    </radialGradient>
+    <radialGradient id="earth-glow" cx="0.5" cy="0.5">
+      <stop offset="0.8" stop-color="rgba(100,180,255,0)"/>
+      <stop offset="1" stop-color="rgba(100,180,255,0.4)"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" fill="#050510"/>
+  <circle cx="200" cy="200" r="180" fill="url(#earth-glow)"/>
+  <circle cx="200" cy="200" r="150" fill="url(#earth-grad)"/>
+  <!-- 雲層 -->
+  <g fill="#ffffff" opacity="0.4">
+    <ellipse cx="150" cy="150" rx="40" ry="10"/>
+    <ellipse cx="250" cy="180" rx="50" ry="8"/>
+    <ellipse cx="180" cy="250" rx="35" ry="7"/>
+    <ellipse cx="270" cy="230" rx="30" ry="9"/>
+  </g>
+  <!-- 大陸 -->
+  <g fill="#3a8855" opacity="0.7">
+    <path d="M 100 160 Q 130 150 160 165 Q 150 180 130 175 Q 110 170 100 160 Z"/>
+    <path d="M 200 200 Q 240 195 270 210 Q 260 230 230 225 Q 210 215 200 200 Z"/>
+    <path d="M 150 250 Q 180 245 200 260 Q 190 275 170 270 Q 155 260 150 250 Z"/>
+  </g>
+  <text x="200" y="380" text-anchor="middle" font-size="14" font-family="Arial" fill="#00d4ff">🌍 EARTH</text>
+</svg>

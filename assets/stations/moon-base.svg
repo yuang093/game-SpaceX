@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="moon-bg">
+      <stop offset="0" stop-color="#cccccc"/>
+      <stop offset="0.7" stop-color="#888888"/>
+      <stop offset="1" stop-color="#444444"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="#0a0a1a"/>
+  <!-- 月球表面 -->
+  <ellipse cx="200" cy="350" rx="350" ry="120" fill="url(#moon-bg)" opacity="0.5"/>
+  <!-- 月球坑 -->
+  <g fill="#666" opacity="0.6">
+    <circle cx="50" cy="270" r="8"/>
+    <circle cx="80" cy="280" r="5"/>
+    <circle cx="350" cy="265" r="10"/>
+    <circle cx="320" cy="275" r="6"/>
+  </g>
+  <!-- 月球基地 -->
+  <g transform="translate(200 180)">
+    <!-- 圓頂建築 -->
+    <path d="M -50 0 A 50 50 0 0 1 50 0 Z" fill="#a0a0a0" stroke="#666" stroke-width="1"/>
+    <path d="M -40 -20 A 40 40 0 0 1 40 -20 Z" fill="#6699cc" opacity="0.4" stroke="#00d4ff" stroke-width="0.5"/>
+    <!-- 連接通道 -->
+    <rect x="-60" y="0" width="120" height="8" fill="#888"/>
+    <!-- 太陽能板陣列 -->
+    <rect x="-130" y="0" width="60" height="20" fill="#1a3a6e" stroke="#00d4ff" stroke-width="0.5"/>
+    <rect x="70" y="0" width="60" height="20" fill="#1a3a6e" stroke="#00d4ff" stroke-width="0.5"/>
+    <!-- 登陸墊 -->
+    <rect x="-30" y="10" width="60" height="5" fill="#666"/>
+    <text x="0" y="17" text-anchor="middle" font-size="8" fill="#00d4ff">H</text>
+    <!-- 通訊塔 -->
+    <line x1="0" y1="-50" x2="0" y2="-80" stroke="#aaa" stroke-width="1"/>
+    <circle cx="0" cy="-82" r="3" fill="#ff4466"/>
+  </g>
+  <!-- 標籤 -->
+  <text x="200" y="60" text-anchor="middle" font-size="14" font-family="Arial" font-weight="bold" fill="#ffaa00">🌙 LUNAR BASE</text>
+  <text x="200" y="80" text-anchor="middle" font-size="10" font-family="Arial" fill="#888">月球前哨站 · 384,000 km</text>
+</svg>

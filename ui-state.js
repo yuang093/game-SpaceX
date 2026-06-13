@@ -1,0 +1,1228 @@
+/**
+ * ui-state.js - v2.0 完整版
+ * 包含任務系統、升級系統、裝備系統、科技樹、UI/UX 優化、虛擬控制整合
+ */
+
+// ================================================
+// 全域遊戲狀態
+// ================================================
+const GameState = {
+    phase: 'PREP',
+    credits: 15000,
+    research: 0,
+    reputation: 0,
+    techLevel: 1,
+    achievements: [],
+
+    stats: {
+        launches: 0,
+        successfulLandings: 0,
+        failures: 0,
+        totalDistance: 0,
+        cargoDelivered: 0,
+        crewSaved: 0
+    },
+
+    currentMission: null,
+    maxAltitude: 0,
+
+    rockets: [],
+    selectedRocketIndex: 0,
+
+    crew: [],
+    hiredCrewCount: 0,
+
+    stations: [],
+    unlockedStations: ['leo'],
+
+    availableMissions: [],
+
+    // 已解鎖的科技
+    unlockedTech: ['basic_engine', 'basic_fuel', 'basic_shield'],
+
+    // 裝備槽位
+    equipment: {
+        engine: null,
+        fuelTank: null,
+        heatShield: null,
+        cargoModule: null,
+        lifeSupport: null,
+        solarPanel: null,
+        communications: null,
+        navigation: null
+    }
+};
+
+// ================================================
+// 遊戲配置
+// ================================================
+const CONFIG = {
+
+    // 火箭類型
+    rocketTypes: {
+        scout: {
+            name: ' Scout-1  scout火箭',
+            description: '輕型偵察火箭，適合近距離任務',
+            basePrice: 0,
+            stats: { hull: 80, engine: 1, fuel: 1, shield: 1, cargo: 1 },
+            slots: { engine: 1, fuel: 1, shield: 1, cargo: 1 },
+            hasLifeSupport: false
+        },
+        falcon: {
+            name: ' Falcon-9 獵鷹火箭',
+            description: '標準中型火箭，可執行多種任務',
+            basePrice: 15000,
+            stats: { hull: 100, engine: 2, fuel: 2, shield: 2, cargo: 2 },
+            slots: { engine: 2, fuel: 2, shield: 2, cargo: 2, solar: 1 },
+            hasLifeSupport: false
+        },
+        dragon: {
+            name: ' Dragon-X 載人飛船',
+            description: '載人專用，配備完善的生命維持系統',
+            basePrice: 25000,
+            stats: { hull: 90, engine: 2, fuel: 2, shield: 3, cargo: 1 },
+            slots: { engine: 2, fuel: 2, shield: 2, cargo: 1, lifeSupport: 1, solar: 1 },
+            hasLifeSupport: true
+        },
+        heavy: {
+            name: ' Heavy-Lift 重型火箭',
+            description: '重型貨運火箭，超大載貨量',
+            basePrice: 35000,
+            stats: { hull: 150, engine: 3, fuel: 3, shield: 2, cargo: 4 },
+            slots: { engine: 3, fuel: 3, shield: 2, cargo: 4, solar: 2 },
+            hasLifeSupport: false
+        },
+        starship: {
+            name: ' Starship 星際飛船',
+            description: '旗艦級火箭，可執行深空任務',
+            basePrice: 80000,
+            stats: { hull: 200, engine: 5, fuel: 5, shield: 5, cargo: 5 },
+            slots: { engine: 5, fuel: 4, shield: 4, cargo: 5, lifeSupport: 1, solar: 2, comm: 1, nav: 1 },
+            hasLifeSupport: true
+        },
+        // v2.0 新增火箭
+        starship_v2: {
+            name: ' Starship V2 旗艦升級',
+            description: 'Starship 升級版，更大推力、更遠航程',
+            basePrice: 150000,
+            stats: { hull: 280, engine: 7, fuel: 7, shield: 6, cargo: 6 },
+            slots: { engine: 7, fuel: 6, shield: 5, cargo: 6, lifeSupport: 2, solar: 3, comm: 2, nav: 2 },
+            hasLifeSupport: true
+        },
+        super_heavy: {
+            name: ' Super Heavy 超級重型',
+            description: '史上最強運載火箭，巨型貨物專用',
+            basePrice: 250000,
+            stats: { hull: 400, engine: 8, fuel: 8, shield: 5, cargo: 10 },
+            slots: { engine: 8, fuel: 8, shield: 5, cargo: 10, solar: 4, comm: 2 },
+            hasLifeSupport: false
+        },
+        tanker: {
+            name: ' Tanker 軌道加油船',
+            description: '專為軌道加油設計，可延長任務航程',
+            basePrice: 120000,
+            stats: { hull: 180, engine: 4, fuel: 10, shield: 4, cargo: 3 },
+            slots: { engine: 4, fuel: 10, shield: 4, cargo: 3, solar: 2, comm: 1, nav: 1 },
+            hasLifeSupport: false
+        },
+        lynx: {
+            name: ' Lynx 太空旅遊船',
+            description: '亞軌道旅遊專用，舒適安全',
+            basePrice: 95000,
+            stats: { hull: 120, engine: 3, fuel: 4, shield: 4, cargo: 2 },
+            slots: { engine: 3, fuel: 4, shield: 4, cargo: 2, lifeSupport: 1, solar: 1, comm: 1 },
+            hasLifeSupport: true
+        }
+    },
+
+    // 升級系統
+    upgradeCategories: {
+        engine: {
+            name: '引擎',
+            icon: '🔧',
+            maxLevel: 10,
+            costs: [1000, 2000, 4000, 8000, 15000, 25000, 40000, 60000, 85000, 120000],
+            bonusPerLevel: [0, 10, 22, 36, 52, 70, 90, 112, 136, 162, 190]
+        },
+        fuel: {
+            name: '燃料槽',
+            icon: '⛽',
+            maxLevel: 10,
+            costs: [800, 1600, 3200, 6400, 12000, 20000, 32000, 48000, 68000, 96000],
+            bonusPerLevel: [0, 20, 45, 75, 110, 150, 195, 245, 300, 360, 425]
+        },
+        shield: {
+            name: '隔熱盾',
+            icon: '🛡️',
+            maxLevel: 10,
+            costs: [1200, 2400, 4800, 9600, 18000, 30000, 48000, 72000, 102000, 144000],
+            bonusPerLevel: [0, 40, 85, 140, 205, 280, 365, 460, 565, 680, 805]
+        },
+        cargo: {
+            name: '貨艙',
+            icon: '📦',
+            maxLevel: 10,
+            costs: [1500, 3000, 6000, 12000, 22500, 37500, 60000, 90000, 127500, 180000],
+            bonusPerLevel: [0, 15, 35, 60, 90, 125, 165, 210, 260, 315, 375]
+        }
+    },
+
+    // 裝備系統
+    equipmentItems: {
+        // 引擎
+        engine_t1: { name: '離子推進器', type: 'engine', tier: 1, price: 5000, bonus: { thrust: 15 }, desc: '+15% 推力' },
+        engine_t2: { name: '等離子引擎', type: 'engine', tier: 2, price: 15000, bonus: { thrust: 35 }, desc: '+35% 推力', requires: 'engine_t1' },
+        engine_t3: { name: '核熱火箭', type: 'engine', tier: 3, price: 40000, bonus: { thrust: 60 }, desc: '+60% 推力', requires: 'engine_t2' },
+        engine_t4: { name: '離子推進器 Mk.II', type: 'engine', tier: 4, price: 100000, bonus: { thrust: 100 }, desc: '+100% 推力', requires: 'engine_t3' },
+
+        // 燃料槽
+        fuel_t1: { name: '加大燃料槽', type: 'fuelTank', tier: 1, price: 4000, bonus: { fuelCapacity: 30 }, desc: '+30 燃料容量' },
+        fuel_t2: { name: '輕量化燃料槽', type: 'fuelTank', tier: 2, price: 12000, bonus: { fuelCapacity: 70 }, desc: '+70 燃料容量', requires: 'fuel_t1' },
+        fuel_t3: { name: '低溫燃料罐', type: 'fuelTank', tier: 3, price: 35000, bonus: { fuelCapacity: 120 }, desc: '+120 燃料容量', requires: 'fuel_t2' },
+
+        // 隔熱盾
+        shield_t1: { name: '增強隔熱瓦', type: 'heatShield', tier: 1, price: 6000, bonus: { heatResist: 50 }, desc: '+50 熱量耐受' },
+        shield_t2: { name: '碳化碳隔熱盾', type: 'heatShield', tier: 2, price: 18000, bonus: { heatResist: 120 }, desc: '+120 熱量耐受', requires: 'shield_t1' },
+        shield_t3: { name: '電漿偏轉盾', type: 'heatShield', tier: 3, price: 50000, bonus: { heatResist: 250 }, desc: '+250 熱量耐受', requires: 'shield_t2' },
+
+        // 貨艙模組
+        cargo_t1: { name: '壓縮貨艙', type: 'cargoModule', tier: 1, price: 3000, bonus: { cargoCapacity: 20 }, desc: '+20 貨艙容量' },
+        cargo_t2: { name: '真空貨艙', type: 'cargoModule', tier: 2, price: 10000, bonus: { cargoCapacity: 50 }, desc: '+50 貨艙容量', requires: 'cargo_t1' },
+        cargo_t3: { name: '軌道貨艙', type: 'cargoModule', tier: 3, price: 30000, bonus: { cargoCapacity: 100 }, desc: '+100 貨艙容量', requires: 'cargo_t2' },
+
+        // 生命維持
+        life_t1: { name: '基礎生命維持', type: 'lifeSupport', tier: 1, price: 8000, bonus: { crewCapacity: 2 }, desc: '容納 2 名太空人' },
+        life_t2: { name: ' Extended Life 支持', type: 'lifeSupport', tier: 2, price: 25000, bonus: { crewCapacity: 4 }, desc: '容納 4 名太空人', requires: 'life_t1' },
+        life_t3: { name: '星際生命艙', type: 'lifeSupport', tier: 3, price: 70000, bonus: { crewCapacity: 8 }, desc: '容納 8 名太空人', requires: 'life_t2' },
+
+        // 太陽能板
+        solar_t1: { name: '柔性太陽能板', type: 'solarPanel', tier: 1, price: 2000, bonus: { fuelEfficiency: 5 }, desc: '+5% 燃料效率' },
+        solar_t2: { name: '高效太陽能陣列', type: 'solarPanel', tier: 2, price: 8000, bonus: { fuelEfficiency: 12 }, desc: '+12% 燃料效率', requires: 'solar_t1' },
+
+        // 通訊
+        comm_t1: { name: '定向天線', type: 'communications', tier: 1, price: 1500, bonus: { missionBonus: 5 }, desc: '+5% 任務獎勵' },
+        comm_t2: { name: '量子通訊模組', type: 'communications', tier: 2, price: 12000, bonus: { missionBonus: 15 }, desc: '+15% 任務獎勵', requires: 'comm_t1' },
+
+        // 導航
+        nav_t1: { name: '慣性導航', type: 'navigation', tier: 1, price: 3000, bonus: { landingAccuracy: 10 }, desc: '+10% 著陸精度' },
+        nav_t2: { name: 'GPS 輔助系統', type: 'navigation', tier: 2, price: 15000, bonus: { landingAccuracy: 25 }, desc: '+25% 著陸精度', requires: 'nav_t1' }
+    },
+
+    // 太空站
+    stations: [
+        {
+            id: 'leo', name: '近地軌道站 LEO', altitude: 400, difficulty: 1,
+            needs: ['食物', '水', '醫療物資'], supply: ['太陽能板', '零件'],
+            reward: { base: 1000, multiplier: 1.0 },
+            unlockReputation: 0
+        },
+        {
+            id: 'polar', name: '極地觀測站', altitude: 600, difficulty: 2,
+            needs: ['科研設備', '食物'], supply: ['觀測數據'],
+            reward: { base: 1500, multiplier: 1.3 },
+            unlockReputation: 50
+        },
+        {
+            id: 'moon', name: '月球前哨站', altitude: 384000, difficulty: 5,
+            needs: ['重型設備', '食物', '人員'], supply: ['月岩樣本', '氦-3'],
+            reward: { base: 5000, multiplier: 3.0 },
+            unlockReputation: 200
+        },
+        {
+            id: 'lagrange', name: '拉格朗日點站', altitude: 1500000, difficulty: 7,
+            needs: ['科研設備', '太陽能板', '食物'], supply: ['稀有元素'],
+            reward: { base: 12000, multiplier: 5.5 },
+            unlockReputation: 500
+        },
+        {
+            id: 'mars', name: '火星基地', altitude: 225000000, difficulty: 10,
+            needs: ['重型設備', '食物', '人員', '醫療物資'], supply: ['土壤樣本', '水冰'],
+            reward: { base: 25000, multiplier: 10.0 },
+            unlockReputation: 1000
+        },
+        {
+            id: 'asteroid', name: '小行星採礦站', altitude: 450000000, difficulty: 12,
+            needs: ['採礦設備', '食物', '燃料'], supply: ['稀有金屬', '貴金屬'],
+            reward: { base: 50000, multiplier: 18.0 },
+            unlockReputation: 2000
+        },
+        {
+            id: 'jupiter', name: '木星軌道基地', altitude: 2200000000, difficulty: 15,
+            needs: ['核燃料', '高級設備', '人員'], supply: ['氦-3', '科研數據'],
+            reward: { base: 100000, multiplier: 35.0 },
+            unlockReputation: 5000
+        },
+        // v2.0 新增太空站
+        {
+            id: 'gateway', name: '月球門戶 Gateway', altitude: 384000, difficulty: 6,
+            needs: ['科研設備', '太陽能板', '氧氣', '食物'], supply: ['中繼數據', '軌道科研'],
+            reward: { base: 8000, multiplier: 4.0 },
+            unlockReputation: 300
+        },
+        {
+            id: 'phobos', name: '火衛一中繼站 Phobos', altitude: 230000000, difficulty: 8,
+            needs: ['通訊設備', '燃料', '食物'], supply: ['火星中繼數據', '礦石樣本'],
+            reward: { base: 15000, multiplier: 6.5 },
+            unlockReputation: 800
+        },
+        {
+            id: 'europa', name: '歐羅巴冰下基地', altitude: 628000000, difficulty: 11,
+            needs: ['核燃料', '高級科研設備', '潛水器'], supply: ['冰下樣本', '外星微生物證據'],
+            reward: { base: 35000, multiplier: 12.0 },
+            unlockReputation: 1500
+        },
+        {
+            id: 'saturn_ring', name: '土星環採礦站', altitude: 1400000000, difficulty: 13,
+            needs: ['採礦設備', '燃料', '食物', '零件'], supply: ['稀有金屬', '水冰', '貴金屬'],
+            reward: { base: 60000, multiplier: 22.0 },
+            unlockReputation: 3000
+        },
+        {
+            id: 'solar_satellite', name: '太陽能衛星矩陣', altitude: 1500000, difficulty: 4,
+            needs: ['太陽能板', '維修零件', '通訊設備'], supply: ['清潔能源', '軌道數據'],
+            reward: { base: 5000, multiplier: 3.5 },
+            unlockReputation: 150
+        }
+    ],
+
+    // 任務類型
+    missionTypes: {
+        supply: { name: '補給任務', icon: '📦', color: '#66aaff', baseReward: 1.0 },
+        crew: { name: '載人任務', icon: '👨‍🚀', color: '#00ff88', baseReward: 1.5 },
+        rescue: { name: '救援任務', icon: '🚑', color: '#ff4466', baseReward: 2.0 },
+        construction: { name: '建設任務', icon: '🏗️', color: '#ffaa00', baseReward: 1.8 },
+        mining: { name: '採礦任務', icon: '💎', color: '#aa66ff', baseReward: 2.5 },
+        scientific: { name: '科研任務', icon: '🔬', color: '#00d4ff', baseReward: 2.2 },
+        military: { name: '軍事任務', icon: '🛡️', color: '#ff6600', baseReward: 3.0 },
+        exploration: { name: '探索任務', icon: '🌟', color: '#ffdd00', baseReward: 4.0 },
+        // v2.0 新增任務
+        satellite_deploy: { name: '衛星部署', icon: '🛰️', color: '#88ddff', baseReward: 1.3 },
+        space_tourism: { name: '太空旅遊', icon: '🎒', color: '#ff88cc', baseReward: 1.6 },
+        repair: { name: '太空維修', icon: '🔧', color: '#ffcc66', baseReward: 1.4 },
+        comet_sample: { name: '彗星採樣', icon: '☄️', color: '#cc88ff', baseReward: 3.5 }
+    },
+
+    // 乘員職銜
+    crewRanks: ['見習', '初級', '中級', '高級', '資深', '專家', '指挥官'],
+    crewNames: [
+        '張明', '王芳', '李偉', '陳曉', '劉洋', '黃美', '周杰', '吳欣',
+        '鄭強', '孫麗', '林濤', '黃雲', '楊帆', '趙敏', '孫悟空', '周杰倫'
+    ],
+
+    // 科技樹
+    techTree: {
+        propulsion: {
+            name: '推進技術',
+            icon: '🔬',
+            tiers: [
+                { name: '化學火箭', cost: 0, unlocks: ['engine_t1'] },
+                { name: '離子推進', cost: 5000, requires: 100 },
+                { name: '核熱火箭', cost: 20000, requires: 500 },
+                { name: '電漿推進', cost: 80000, requires: 2000 }
+            ]
+        },
+        materials: {
+            name: '材料學',
+            icon: '⚗️',
+            tiers: [
+                { name: '鈦合金', cost: 0, unlocks: ['shield_t1'] },
+                { name: '碳化碳', cost: 8000, requires: 200 },
+                { name: '超級合金', cost: 35000, requires: 800 },
+                { name: '力場材料', cost: 150000, requires: 5000 }
+            ]
+        },
+        life_support: {
+            name: '生命保障',
+            icon: '🌱',
+            tiers: [
+                { name: '基礎生命支持', cost: 0, unlocks: ['life_t1'] },
+                { name: ' Extended Life', cost: 15000, requires: 300 },
+                { name: ' Closed 生態系統', cost: 60000, requires: 1500 }
+            ]
+        },
+        cargo: {
+            name: '貨運技術',
+            icon: '📦',
+            tiers: [
+                { name: '標準貨艙', cost: 0, unlocks: ['cargo_t1'] },
+                { name: '真空壓縮', cost: 10000, requires: 250 },
+                { name: '軌道轉運', cost: 45000, requires: 1200 }
+            ]
+        }
+    }
+};
+
+// ================================================
+// 初始化遊戲
+// ================================================
+function initGame() {
+    // 創建初始火箭
+    GameState.rockets.push(createRocket('scout'));
+
+    // 初始化太空站
+    GameState.stations = CONFIG.stations.map(s => ({ ...s }));
+
+    // 初始化乘員
+    GameState.crew.push(createCrewMember());
+
+    // 生成初始任務
+    generateMissions(4);
+
+    // 更新 UI
+    UI.updateAll();
+
+    // 設定事件監聽
+    setupEventListeners();
+
+    console.log('🚀 SpaceX 完整版初始化完成！');
+}
+
+// ================================================
+// 創建火箭
+// ================================================
+function createRocket(type) {
+    const template = CONFIG.rocketTypes[type];
+    return {
+        id: Date.now() + Math.random(),
+        type: type,
+        name: template.name,
+        hull: template.stats.hull,
+        maxHull: template.stats.hull,
+        engine: template.stats.engine,
+        fuel: template.stats.fuel,
+        shield: template.stats.shield,
+        cargo: template.stats.cargo,
+        slots: { ...template.slots },
+        hasLifeSupport: template.hasLifeSupport,
+        status: 'ready',
+        equipment: {}
+    };
+}
+
+// ================================================
+// 創建乘員
+// ================================================
+function createCrewMember() {
+    const name = CONFIG.crewNames[Math.floor(Math.random() * CONFIG.crewNames.length)];
+    return {
+        id: Date.now() + Math.random(),
+        name: name,
+        rank: CONFIG.crewRanks[0],
+        command: Math.floor(Math.random() * 20) + 15,
+        engineering: Math.floor(Math.random() * 20) + 15,
+        piloting: Math.floor(Math.random() * 20) + 15,
+        experience: 0
+    };
+}
+
+// ================================================
+// 生成任務
+// ================================================
+function generateMissions(count) {
+    GameState.availableMissions = [];
+    for (let i = 0; i < count; i++) {
+        GameState.availableMissions.push(generateSingleMission());
+    }
+}
+
+function generateSingleMission() {
+    // 過濾可用的太空站
+    const availableStations = GameState.stations.filter(
+        s => GameState.reputation >= s.unlockReputation
+    );
+
+    if (availableStations.length === 0) {
+        availableStations.push(GameState.stations[0]);
+    }
+
+    const station = availableStations[Math.floor(Math.random() * availableStations.length)];
+
+    // 選擇任務類型
+    const typeKeys = Object.keys(CONFIG.missionTypes);
+    const type = typeKeys[Math.floor(Math.random() * typeKeys.length)];
+    const typeInfo = CONFIG.missionTypes[type];
+
+    // 計算難度
+    const difficulty = Math.min(10, Math.max(1, station.difficulty + Math.floor(Math.random() * 3) - 1));
+
+    // 生成貨物需求
+    const cargo = generateCargo(type, station, difficulty);
+
+    // 計算獎勵
+    const baseReward = Math.floor(station.reward.base * station.reward.multiplier * typeInfo.baseReward * (1 + difficulty * 0.2));
+
+    return {
+        id: Date.now() + Math.random(),
+        type: type,
+        station: station,
+        difficulty: difficulty,
+        cargo: cargo,
+        reward: baseReward,
+        requirements: getMissionRequirements(type, difficulty)
+    };
+}
+
+function generateCargo(type, station, difficulty) {
+    const items = [];
+    let capacity = 0;
+
+    const needCount = Math.min(station.needs.length, Math.floor(difficulty / 2) + 1);
+    const selectedNeeds = station.needs.slice(0, needCount + Math.floor(Math.random() * 2));
+
+    selectedNeeds.forEach(need => {
+        const quantity = Math.floor((10 + difficulty * 10) * (0.8 + Math.random() * 0.4));
+        items.push({ name: need, quantity: quantity });
+        capacity += quantity;
+    });
+
+    if (type === 'crew') {
+        items.push({ name: '太空人', quantity: Math.floor(1 + difficulty / 3) });
+        capacity += items[items.length - 1].quantity;
+    }
+
+    return { items, capacity };
+}
+
+function getMissionRequirements(type, difficulty) {
+    return {
+        minEngine: Math.ceil(difficulty / 3),
+        minFuel: Math.ceil(difficulty / 3),
+        minShield: Math.ceil(difficulty / 4),
+        minCargo: Math.ceil(difficulty / 2),
+        needsLifeSupport: type === 'crew',
+        minCrew: type === 'crew' ? 1 : 0
+    };
+}
+
+// ================================================
+// DOM 元素快取
+// ================================================
+const DOM = {};
+
+function cacheDOM() {
+    // 貨幣
+    DOM.credits = document.getElementById('credits-value');
+    DOM.research = document.getElementById('research-value');
+    DOM.reputation = document.getElementById('reputation-value');
+
+    // 分頁
+    DOM.tabs = document.querySelectorAll('.tab-btn');
+    DOM.tabPanels = document.querySelectorAll('.tab-panel');
+
+    // 火箭
+    DOM.rocketsList = document.getElementById('rockets-list');
+    DOM.rocketStats = document.getElementById('rocket-stats');
+    DOM.upgradeButtons = document.getElementById('upgrade-buttons');
+    DOM.btnBuyRocket = document.getElementById('btn-buy-rocket');
+
+    // 升級面板
+    DOM.upgradesList = document.getElementById('upgrades-list');
+
+    // 裝備面板
+    DOM.equipmentList = document.getElementById('equipment-list');
+    DOM.equipmentShop = document.getElementById('equipment-shop');
+
+    // 任務
+    DOM.missionsList = document.getElementById('missions-list');
+    DOM.missionDetails = document.getElementById('mission-details');
+    DOM.missionInfo = document.getElementById('mission-info');
+    DOM.btnAcceptMission = document.getElementById('btn-accept-mission');
+    DOM.btnCancelMission = document.getElementById('btn-cancel-mission');
+    DOM.currentMissionInfo = document.getElementById('current-mission-info');
+    DOM.currentMissionName = document.getElementById('current-mission-name');
+
+    // 太空站
+    DOM.stationsList = document.getElementById('stations-list');
+
+    // 乘員
+    DOM.crewList = document.getElementById('crew-list');
+
+    // 統計
+    DOM.statLaunches = document.getElementById('stat-launches');
+    DOM.statSuccess = document.getElementById('stat-success');
+    DOM.statFailures = document.getElementById('stat-failures');
+    DOM.statDistance = document.getElementById('stat-distance');
+    DOM.statCargo = document.getElementById('stat-cargo');
+
+    // 按鈕
+    DOM.btnLaunch = document.getElementById('btn-launch');
+    DOM.launchHint = document.getElementById('launch-hint');
+    DOM.controlsHint = document.getElementById('controls-hint');
+    DOM.btnContinue = document.getElementById('btn-continue');
+
+    // HUD
+    DOM.hud = document.getElementById('hud');
+    DOM.hudAltitude = document.getElementById('hud-altitude');
+    DOM.hudSpeed = document.getElementById('hud-speed');
+    DOM.hudFuel = document.getElementById('hud-fuel');
+    DOM.hudAngle = document.getElementById('hud-angle');
+    DOM.hudHealth = document.getElementById('hud-health');
+    DOM.hudHeat = document.getElementById('hud-heat');
+    DOM.missionObjective = document.getElementById('mission-objective');
+
+    // 疊加
+    DOM.overlay = document.getElementById('overlay');
+    DOM.overlayContent = document.getElementById('overlay-content');
+    DOM.resultPanel = document.getElementById('result-panel');
+    DOM.resultContent = document.getElementById('result-content');
+    DOM.resultTitle = document.getElementById('result-title');
+    DOM.resultMission = document.getElementById('result-mission');
+    DOM.resultStats = document.getElementById('result-stats');
+    DOM.resultRewards = document.getElementById('result-rewards');
+
+    // 彈窗
+    DOM.modalBuyRocket = document.getElementById('modal-buy-rocket');
+    DOM.rocketShop = document.getElementById('rocket-shop');
+    DOM.modalHireCrew = document.getElementById('modal-hire-crew');
+    DOM.availableCrew = document.getElementById('available-crew');
+    DOM.modalEquipment = document.getElementById('modal-equipment');
+}
+
+// ================================================
+// UI 更新函式
+// ================================================
+const UI = {
+    updateAll() {
+        this.updateCurrency();
+        this.updateStats();
+        this.updateRocketList();
+        this.updateRocketStats();
+        this.updateUpgradeList();
+        this.updateMissionList();
+        this.updateStationList();
+        this.updateCrewList();
+        this.updateMissionInfo();
+    },
+
+    updateCurrency() {
+        DOM.credits.textContent = GameState.credits.toLocaleString();
+        DOM.research.textContent = GameState.research.toLocaleString();
+        const stars = Math.min(10, Math.floor(GameState.reputation / 50) + 1);
+        DOM.reputation.textContent = '⭐'.repeat(Math.min(stars, 5)) + (stars > 5 ? `+${stars - 5}` : '');
+    },
+
+    updateStats() {
+        DOM.statLaunches.textContent = GameState.stats.launches;
+        DOM.statSuccess.textContent = GameState.stats.successfulLandings;
+        DOM.statFailures.textContent = GameState.stats.failures;
+        DOM.statDistance.textContent = (GameState.stats.totalDistance / 1000).toFixed(1) + 'k km';
+        DOM.statCargo.textContent = GameState.stats.cargoDelivered;
+    },
+
+    // 火箭列表
+    updateRocketList() {
+        DOM.rocketsList.innerHTML = '';
+        GameState.rockets.forEach((rocket, index) => {
+            const card = document.createElement('div');
+            card.className = 'rocket-card' + (index === GameState.selectedRocketIndex ? ' selected' : '');
+            const healthPercent = Math.round((rocket.hull / rocket.maxHull) * 100);
+            let healthClass = healthPercent < 30 ? 'critical' : (healthPercent < 60 ? 'damaged' : '');
+
+            card.innerHTML = `
+                <div class="rocket-card-header">
+                    <span class="rocket-name">${rocket.name}</span>
+                    <span class="rocket-type">${rocket.type}</span>
+                </div>
+                <div class="rocket-health ${healthClass}">
+                    結構: ${healthPercent}% ${healthClass === 'critical' ? '⚠️' : ''}
+                </div>
+            `;
+            card.addEventListener('click', () => {
+                GameState.selectedRocketIndex = index;
+                this.updateRocketList();
+                this.updateRocketStats();
+                this.updateUpgradeList();
+            });
+            DOM.rocketsList.appendChild(card);
+        });
+    },
+
+    // 火箭屬性
+    updateRocketStats() {
+        const rocket = GameState.rockets[GameState.selectedRocketIndex];
+        if (!rocket) return;
+
+        document.getElementById('stat-hull').style.width = Math.round(rocket.hull / rocket.maxHull * 100) + '%';
+        document.getElementById('stat-hull-val').textContent = Math.round(rocket.hull / rocket.maxHull * 100) + '%';
+        document.getElementById('stat-engine').style.width = rocket.engine / 10 * 100 + '%';
+        document.getElementById('stat-engine-val').textContent = 'Lv.' + rocket.engine;
+        document.getElementById('stat-fuel').style.width = rocket.fuel / 10 * 100 + '%';
+        document.getElementById('stat-fuel-val').textContent = 'Lv.' + rocket.fuel;
+        document.getElementById('stat-shield').style.width = rocket.shield / 10 * 100 + '%';
+        document.getElementById('stat-shield-val').textContent = 'Lv.' + rocket.shield;
+        document.getElementById('stat-cargo').style.width = rocket.cargo / 10 * 100 + '%';
+        document.getElementById('stat-cargo-val').textContent = 'Lv.' + rocket.cargo;
+    },
+
+    // 升級列表
+    updateUpgradeList() {
+        const rocket = GameState.rockets[GameState.selectedRocketIndex];
+        if (!rocket) return;
+
+        DOM.upgradesList.innerHTML = '';
+        const categories = ['engine', 'fuel', 'shield', 'cargo'];
+
+        categories.forEach(cat => {
+            const config = CONFIG.upgradeCategories[cat];
+            const currentLevel = rocket[cat];
+            const nextCost = currentLevel < config.maxLevel ? config.costs[currentLevel] : null;
+            const isMaxed = currentLevel >= config.maxLevel;
+            const canAfford = nextCost && GameState.credits >= nextCost;
+
+            const card = document.createElement('div');
+            card.className = 'upgrade-card';
+            card.innerHTML = `
+                <div class="upgrade-header">
+                    <span class="upgrade-icon">${config.icon}</span>
+                    <span class="upgrade-name">${config.name}</span>
+                    <span class="upgrade-level">Lv.${currentLevel}</span>
+                </div>
+                <div class="upgrade-bar-container">
+                    <div class="upgrade-bar" style="width: ${currentLevel / config.maxLevel * 100}%"></div>
+                </div>
+                <div class="upgrade-effect">下一級: +${config.bonusPerLevel[currentLevel + 1] || 0}</div>
+                <div class="upgrade-cost">${isMaxed ? '已滿級' : '$' + (nextCost?.toLocaleString() || '')}</div>
+                <button class="btn-upgrade-full" data-upgrade="${cat}" ${isMaxed || !canAfford ? 'disabled' : ''}>
+                    ${isMaxed ? '已滿級' : '升級'}
+                </button>
+            `;
+
+            card.querySelector('button').addEventListener('click', () => UpgradeSystem.upgrade(cat));
+            DOM.upgradesList.appendChild(card);
+        });
+    },
+
+    // 任務列表
+    updateMissionList() {
+        DOM.missionsList.innerHTML = '';
+        GameState.availableMissions.forEach((mission, index) => {
+            const typeInfo = CONFIG.missionTypes[mission.type];
+            const card = document.createElement('div');
+            card.className = 'mission-card';
+            card.innerHTML = `
+                <div class="mission-header">
+                    <span class="mission-name">${typeInfo.icon} ${typeInfo.name}</span>
+                    <span class="mission-reward">$${mission.reward.toLocaleString()}</span>
+                </div>
+                <div class="mission-info-row">
+                    <span class="mission-type">${mission.station.name}</span>
+                    <span>難度: ${'⭐'.repeat(mission.difficulty)}</span>
+                </div>
+            `;
+            card.addEventListener('click', () => showMissionDetails(index));
+            DOM.missionsList.appendChild(card);
+        });
+    },
+
+    updateMissionInfo() {
+        if (GameState.currentMission) {
+            const m = GameState.currentMission;
+            const typeInfo = CONFIG.missionTypes[m.type];
+            DOM.currentMissionInfo.classList.remove('hidden');
+            DOM.currentMissionName.textContent = `${typeInfo.icon} ${m.station.name}`;
+            DOM.btnLaunch.disabled = false;
+            DOM.launchHint.textContent = '準備就緒！';
+        } else {
+            DOM.currentMissionInfo.classList.add('hidden');
+            DOM.btnLaunch.disabled = true;
+            DOM.launchHint.textContent = '選擇任務後點擊發射';
+        }
+    },
+
+    // 太空站列表
+    updateStationList() {
+        DOM.stationsList.innerHTML = '';
+        GameState.stations.forEach(station => {
+            const locked = GameState.reputation < station.unlockReputation;
+            const card = document.createElement('div');
+            card.className = 'station-card' + (locked ? ' locked' : '');
+            card.innerHTML = `
+                <div class="station-header">
+                    <span class="station-name">🏭 ${station.name}</span>
+                    <span class="station-altitude">${(station.altitude / 1000).toFixed(0)}k km</span>
+                </div>
+                ${locked ? `<div class="station-locked">需要 ${station.unlockReputation} 聲譽</div>` :
+                    `<div class="station-needs">需求: ${station.needs.slice(0, 2).join(', ')}</div>`}
+            `;
+            DOM.stationsList.appendChild(card);
+        });
+    },
+
+    // 乘員列表
+    updateCrewList() {
+        DOM.crewList.innerHTML = '';
+        if (GameState.crew.length === 0) {
+            DOM.crewList.innerHTML = '<p style="color: var(--color-text-dim)">目前沒有太空人</p>';
+        }
+        GameState.crew.forEach(member => {
+            const card = document.createElement('div');
+            card.className = 'crew-card';
+            card.innerHTML = `
+                <div class="crew-avatar">👨‍🚀</div>
+                <div class="crew-info">
+                    <div class="crew-name">${member.name}</div>
+                    <div class="crew-rank">${member.rank}</div>
+                    <div class="crew-skills">
+                        <span class="skill">指揮 ${member.command}</span>
+                        <span class="skill">工程 ${member.engineering}</span>
+                        <span class="skill">駕駛 ${member.piloting}</span>
+                    </div>
+                </div>
+            `;
+            DOM.crewList.appendChild(card);
+        });
+    },
+
+    // HUD 更新
+    updateHUD(rocket) {
+        if (!rocket) return;
+        const altitude = Math.max(0, Math.round(rocket.y / 10));
+        const speed = Math.round(Math.sqrt(rocket.vx ** 2 + rocket.vy ** 2) * 10);
+        const fuelPercent = Math.round((rocket.fuel / rocket.maxFuel) * 100);
+        const angleDeg = Math.round((rocket.angle * 180) / Math.PI);
+        const healthPercent = Math.round((rocket.hull / rocket.maxHull) * 100);
+
+        DOM.hudAltitude.textContent = altitude;
+        DOM.hudSpeed.textContent = speed;
+        DOM.hudFuel.textContent = fuelPercent;
+        DOM.hudAngle.textContent = angleDeg;
+        DOM.hudHealth.textContent = healthPercent + '%';
+        DOM.hudHeat.textContent = Math.round(rocket.heat);
+
+        if (altitude > GameState.maxAltitude) GameState.maxAltitude = altitude;
+
+        if (GameState.currentMission) {
+            const target = GameState.currentMission.station.altitude / 10;
+            if (altitude < target * 0.8) {
+                DOM.missionObjective.textContent = `📍 前往 ${GameState.currentMission.station.name}`;
+            } else if (altitude >= target * 0.8 && altitude <= target * 1.2) {
+                DOM.missionObjective.textContent = `🎯 到達目標高度`;
+            } else {
+                DOM.missionObjective.textContent = `🏠 準備著陸`;
+            }
+        }
+    },
+
+    // 結算面板
+    showResult(success, data) {
+        if (this._resultShown) return;
+        this._resultShown = true;
+
+        DOM.resultPanel.classList.remove('hidden');
+
+        if (success) {
+            DOM.resultTitle.textContent = '🎉 任務成功！';
+            DOM.resultTitle.className = 'success';
+
+            const m = GameState.currentMission;
+            const base = m ? m.reward : 1000;
+            const altitudeBonus = Math.floor(GameState.maxAltitude / 100) * 20;
+            const fuelBonus = Math.floor((data.fuel / data.maxFuel) * 150);
+            const healthBonus = Math.floor((data.hull / data.maxHull) * 200);
+            const crewBonus = GameState.crew.reduce((sum, c) => sum + Math.floor(c.command / 10) * 30, 0);
+            const total = base + altitudeBonus + fuelBonus + healthBonus + crewBonus;
+
+            GameState.credits += total;
+            GameState.research += Math.floor(total * 0.15);
+            GameState.reputation += m ? m.difficulty * 5 : 10;
+            GameState.stats.successfulLandings++;
+            GameState.stats.cargoDelivered += m?.cargo?.capacity || 0;
+            GameState.stats.totalDistance += GameState.maxAltitude * 2;
+
+            DOM.resultMission.innerHTML = m ? `${CONFIG.missionTypes[m.type].icon} ${m.station.name}` : '自由飛行';
+            DOM.resultStats.innerHTML = `
+                <div class="result-row"><span>最高高度</span><span>${GameState.maxAltitude} m</span></div>
+                <div class="result-row"><span>燃料</span><span>${Math.round(data.fuel / data.maxFuel * 100)}%</span></div>
+                <div class="result-row"><span>結構</span><span>${Math.round(data.hull / data.maxHull * 100)}%</span></div>
+            `;
+            DOM.resultRewards.innerHTML = `
+                <div class="reward-row"><span>基本獎勵</span><span>+$${base.toLocaleString()}</span></div>
+                <div class="reward-row"><span>高度加成</span><span>+$${altitudeBonus.toLocaleString()}</span></div>
+                <div class="reward-row"><span>燃料獎勵</span><span>+$${fuelBonus.toLocaleString()}</span></div>
+                <div class="reward-row"><span>結構獎勵</span><span>+$${healthBonus.toLocaleString()}</span></div>
+                ${crewBonus > 0 ? `<div class="reward-row"><span>乘員加成</span><span>+$${crewBonus.toLocaleString()}</span></div>` : ''}
+                <div class="reward-row"><span>總計</span><span>+$${total.toLocaleString()}</span></div>
+            `;
+
+            GameState.crew.forEach(c => {
+                c.experience += 15;
+                if (c.experience >= 100) {
+                    c.experience = 0;
+                    const idx = CONFIG.crewRanks.indexOf(c.rank);
+                    if (idx < CONFIG.crewRanks.length - 1) c.rank = CONFIG.crewRanks[idx + 1];
+                }
+            });
+
+            // 生成新任務填補列表
+            const newMissions = Math.max(1, 4 - GameState.availableMissions.length);
+            for (let i = 0; i < newMissions; i++) {
+                GameState.availableMissions.push(generateSingleMission());
+            }
+        } else {
+            DOM.resultTitle.textContent = '💥 ' + (data.reason || '任務失敗');
+            DOM.resultTitle.className = 'failure';
+            GameState.stats.failures++;
+            DOM.resultStats.innerHTML = `<div class="result-row"><span>原因</span><span>${data.reason}</span></div>`;
+            DOM.resultRewards.innerHTML = '<div class="reward-row"><span>獎勵</span><span>+$0</span></div>';
+            // 失敗也生成新任務填補
+            const failNew = Math.max(1, 4 - GameState.availableMissions.length);
+            for (let i = 0; i < failNew; i++) {
+                GameState.availableMissions.push(generateSingleMission());
+            }
+        }
+
+        this.updateAll();
+    },
+
+    showOverlay(title, message, duration = 1000) {
+        return new Promise(resolve => {
+            DOM.overlay.classList.remove('hidden');
+            DOM.overlayContent.innerHTML = `<div id="overlay-title">${title}</div><div id="overlay-message">${message}</div>`;
+            setTimeout(() => {
+                DOM.overlay.classList.add('hidden');
+                resolve();
+            }, duration);
+        });
+    },
+
+    /**
+     * Toast 通知（用於解鎖、升級、錯誤提示）
+     */
+    toast(message, type = 'info', duration = 2500) {
+        const existing = document.querySelectorAll('.toast');
+        existing.forEach(t => t.remove());
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    },
+
+    setPrepUI() {
+        DOM.btnLaunch.classList.remove('hidden');
+        DOM.launchHint.classList.remove('hidden');
+        DOM.controlsHint.classList.add('hidden');
+        DOM.hud.classList.add('hidden');
+        DOM.resultPanel.classList.add('hidden');
+        // 隱藏虛擬控制按鈕
+        if (typeof Physics !== 'undefined' && Physics.showVirtualControls) {
+            Physics.showVirtualControls(false);
+        }
+        this._resultShown = false;
+    },
+
+    setGameUI() {
+        DOM.btnLaunch.classList.add('hidden');
+        DOM.launchHint.classList.add('hidden');
+        DOM.controlsHint.classList.remove('hidden');
+        DOM.hud.classList.remove('hidden');
+        // 顯示虛擬控制按鈕（手機）
+        if (typeof Physics !== 'undefined' && Physics.showVirtualControls) {
+            Physics.showVirtualControls(true);
+        }
+    }
+};
+
+// ================================================
+// 任務詳情
+// ================================================
+function showMissionDetails(index) {
+    const mission = GameState.availableMissions[index];
+    if (!mission) return;
+
+    document.querySelectorAll('.mission-card').forEach((c, i) => c.classList.toggle('selected', i === index));
+
+    const typeInfo = CONFIG.missionTypes[mission.type];
+    const rocket = GameState.rockets[GameState.selectedRocketIndex];
+    const reqs = mission.requirements;
+
+    let canAccept = true;
+    let reasons = [];
+    if (rocket.engine < reqs.minEngine) { canAccept = false; reasons.push(`引擎 Lv.${reqs.minEngine}`); }
+    if (rocket.fuel < reqs.minFuel) { canAccept = false; reasons.push(`燃料 Lv.${reqs.minFuel}`); }
+    if (rocket.shield < reqs.minShield) { canAccept = false; reasons.push(`隔熱 Lv.${reqs.minShield}`); }
+    if (rocket.cargo < reqs.minCargo) { canAccept = false; reasons.push(`貨艙 Lv.${reqs.minCargo}`); }
+    if (reqs.needsLifeSupport && !rocket.hasLifeSupport) { canAccept = false; reasons.push('需要生命維持'); }
+    if (reqs.minCrew > GameState.crew.length) { canAccept = false; reasons.push(`需要 ${reqs.minCrew} 名太空人`); }
+
+    DOM.missionInfo.innerHTML = `
+        <p><strong>類型:</strong> <span style="color:${typeInfo.color}">${typeInfo.icon} ${typeInfo.name}</span></p>
+        <p><strong>目的地:</strong> ${mission.station.name}</p>
+        <p><strong>高度:</strong> ${(mission.station.altitude / 1000).toFixed(0)}k km</p>
+        <p><strong>難度:</strong> ${'⭐'.repeat(mission.difficulty)}</p>
+        <p><strong>獎勵:</strong> <span style="color:#00ff88">$${mission.reward.toLocaleString()}</span></p>
+        <p><strong>貨物:</strong> ${mission.cargo.items.map(i => `${i.name} x${i.quantity}`).join(', ') || '無'}</p>
+        <hr style="margin:10px 0;border-color:var(--color-border)">
+        ${canAccept ? '<p style="color:#00ff88">✅ 可接受</p>' :
+            '<p style="color:#ff4466">⚠️ ' + reasons.join(', ') + '</p>'}
+    `;
+
+    DOM.missionDetails.classList.remove('hidden');
+    DOM.btnAcceptMission.onclick = () => { GameState.currentMission = mission; GameState.availableMissions.splice(index, 1); DOM.missionDetails.classList.add('hidden'); UI.updateMissionList(); UI.updateMissionInfo(); };
+    DOM.btnCancelMission.onclick = () => { DOM.missionDetails.classList.add('hidden'); document.querySelectorAll('.mission-card').forEach(c => c.classList.remove('selected')); };
+}
+
+// ================================================
+// 升級系統
+// ================================================
+const UpgradeSystem = {
+    upgrade(type) {
+        const rocket = GameState.rockets[GameState.selectedRocketIndex];
+        if (!rocket) return false;
+
+        const config = CONFIG.upgradeCategories[type];
+        if (rocket[type] >= config.maxLevel) return false;
+
+        const cost = config.costs[rocket[type]];
+        if (GameState.credits < cost) return false;
+
+        GameState.credits -= cost;
+        rocket[type]++;
+        UI.updateAll();
+        SaveSystem.save();
+        return true;
+    }
+};
+
+// ================================================
+// 購買火箭
+// ================================================
+function showBuyRocketModal() {
+    DOM.rocketShop.innerHTML = '';
+    Object.entries(CONFIG.rocketTypes).forEach(([key, r]) => {
+        if (key === 'scout') return;
+        const owned = GameState.rockets.some(rock => rock.type === key);
+        const canBuy = GameState.credits >= r.basePrice;
+
+        const item = document.createElement('div');
+        item.className = 'shop-item';
+        item.innerHTML = `
+            <div class="shop-info">
+                <div class="shop-name">${r.name}</div>
+                <div class="shop-desc">${r.description}</div>
+            </div>
+            <div>
+                ${owned ? '<span style="color:#888">已擁有</span>' :
+                    `<span class="shop-price">$${r.basePrice.toLocaleString()}</span>
+                     <button class="btn-buy" data-type="${key}" ${!canBuy ? 'disabled' : ''}>購買</button>`}
+            </div>
+        `;
+
+        if (!owned) {
+            const btn = item.querySelector('.btn-buy');
+            if (btn) btn.onclick = () => buyRocket(key);
+        }
+
+        DOM.rocketShop.appendChild(item);
+    });
+    DOM.modalBuyRocket.classList.remove('hidden');
+}
+
+function buyRocket(type) {
+    const template = CONFIG.rocketTypes[type];
+    if (GameState.credits < template.basePrice) return;
+    GameState.credits -= template.basePrice;
+    const rocket = createRocket(type);
+    GameState.rockets.push(rocket);
+    GameState.selectedRocketIndex = GameState.rockets.length - 1;
+    UI.updateAll();
+    DOM.modalBuyRocket.classList.add('hidden');
+}
+
+// ================================================
+// 僱用乘員
+// ================================================
+function showHireCrewModal() {
+    DOM.availableCrew.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+        const candidate = createCrewMember();
+        const cost = 3000 + Math.floor(Math.random() * 5000);
+        const item = document.createElement('div');
+        item.className = 'hire-item';
+        item.innerHTML = `
+            <div class="hire-info">
+                <div class="hire-name">${candidate.name}</div>
+                <div class="crew-skills">
+                    <span class="skill">指揮 ${candidate.command}</span>
+                    <span class="skill">工程 ${candidate.engineering}</span>
+                    <span class="skill">駕駛 ${candidate.piloting}</span>
+                </div>
+            </div>
+            <div>
+                <span class="hire-price">$${cost.toLocaleString()}</span>
+                <button class="btn-hire" data-cost="${cost}">僱用</button>
+            </div>
+        `;
+        const btn = item.querySelector('.btn-hire');
+        btn.disabled = GameState.credits < cost;
+        btn.onclick = () => hireCrew(candidate, cost);
+        DOM.availableCrew.appendChild(item);
+    }
+    DOM.modalHireCrew.classList.remove('hidden');
+}
+
+function hireCrew(candidate, cost) {
+    if (GameState.credits < cost) return;
+    GameState.credits -= cost;
+    GameState.crew.push(candidate);
+    UI.updateAll();
+    DOM.modalHireCrew.classList.add('hidden');
+}
+
+// ================================================
+// 存檔系統
+// ================================================
+const SaveSystem = {
+    SAVE_KEY: 'spacex_full_save',
+
+    save() {
+        const data = {
+            credits: GameState.credits,
+            research: GameState.research,
+            reputation: GameState.reputation,
+            stats: GameState.stats,
+            rockets: GameState.rockets,
+            selectedRocketIndex: GameState.selectedRocketIndex,
+            crew: GameState.crew,
+            unlockedStations: GameState.unlockedStations,
+            completedMissions: GameState.stats.successfulLandings
+        };
+        try { localStorage.setItem(this.SAVE_KEY, JSON.stringify(data)); } catch (e) {}
+    },
+
+    load() {
+        try {
+            const saved = localStorage.getItem(this.SAVE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.assign(GameState, {
+                    credits: data.credits ?? 15000,
+                    research: data.research ?? 0,
+                    reputation: data.reputation ?? 0,
+                    stats: { ...GameState.stats, ...data.stats },
+                    rockets: data.rockets?.length ? data.rockets : [createRocket('scout')],
+                    selectedRocketIndex: Math.min(data.selectedRocketIndex || 0, (data.rockets?.length || 1) - 1),
+                    crew: data.crew ?? [],
+                    unlockedStations: data.unlockedStations ?? ['leo']
+                });
+                console.log('存檔載入成功');
+                return true;
+            }
+        } catch (e) { console.warn('讀檔失敗'); }
+        return false;
+    }
+};
+
+// ================================================
+// 狀態機
+// ================================================
+const StateMachine = {
+    transition(newPhase, data = {}) {
+        const prev = GameState.phase;
+        GameState.phase = newPhase;
+        console.log(`狀態: ${prev} → ${newPhase}`);
+
+        switch (newPhase) {
+            case 'PREP': this.enterPrep(); break;
+            case 'LAUNCH': this.enterLaunch(); break;
+            case 'FLIGHT': this.enterFlight(); break;
+            case 'SUCCESS': this.enterSuccess(data); break;
+            case 'CRASH': this.enterCrash(data); break;
+        }
+
+        document.getElementById('phase-label').textContent = {
+            'PREP': '準備階段', 'LAUNCH': '發射中', 'FLIGHT': '飛行中',
+            'SUCCESS': '任務成功', 'CRASH': '任務失敗'
+        }[newPhase] || newPhase;
+    },
+
+    enterPrep() {
+        UI.setPrepUI();
+        GameState.maxAltitude = 0;
+        GameState.currentMission = null;
+        Physics.stopLoop();
+        Physics.reset();
+    },
+
+    enterLaunch() {
+        UI.setGameUI();
+        GameState.stats.launches++;
+        UI.showOverlay('🚀', '3', 800).then(() =>
+            UI.showOverlay('🚀', '2', 800).then(() =>
+                UI.showOverlay('🚀', '1', 800).then(() =>
+                    UI.showOverlay('🚀', '發射!', 500).then(() => {
+                        Physics.initRocket();
+                        this.transition('FLIGHT');
+                    })
+                )
+            )
+        );
+    },
+
+    enterFlight() { Physics.startLoop(); },
+
+    enterSuccess(data) {
+        Physics.stopLoop();
+        setTimeout(() => UI.showResult(true, data), 1000);
+    },
+
+    enterCrash(data) {
+        Physics.stopLoop();
+        Physics.showExplosion();
+        setTimeout(() => UI.showResult(false, data), 2000);
+    }
+};
+
+// ================================================
+// 事件監聽
+// ================================================
+function setupEventListeners() {
+    // 分頁
+    DOM.tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            DOM.tabs.forEach(t => t.classList.remove('active'));
+            DOM.tabPanels.forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    DOM.btnBuyRocket.addEventListener('click', showBuyRocketModal);
+    document.getElementById('btn-close-buy').addEventListener('click', () => DOM.modalBuyRocket.classList.add('hidden'));
+    document.getElementById('btn-hire-crew').addEventListener('click', showHireCrewModal);
+    document.getElementById('btn-close-hire').addEventListener('click', () => DOM.modalHireCrew.classList.add('hidden'));
+
+    DOM.btnLaunch.addEventListener('click', () => { if (GameState.phase === 'PREP' && GameState.currentMission) StateMachine.transition('LAUNCH'); });
+    DOM.btnContinue.addEventListener('click', () => StateMachine.transition('PREP'));
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            if (GameState.phase !== 'PREP' && confirm('放棄任務？')) StateMachine.transition('PREP');
+            DOM.modalBuyRocket.classList.add('hidden');
+            DOM.modalHireCrew.classList.add('hidden');
+        }
+        if (GameState.phase !== 'PREP') {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+        }
+    });
+}
+
+// ================================================
+// 初始化
+// ================================================
+document.addEventListener('DOMContentLoaded', () => {
+    cacheDOM();
+    SaveSystem.load();
+    initGame();
+    Physics.init();
+});
+
+window.GameState = GameState;
+window.UI = UI;
+window.StateMachine = StateMachine;

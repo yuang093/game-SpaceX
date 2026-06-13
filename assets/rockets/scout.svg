@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e8e8e8"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#a0a0a0"/>
+    </linearGradient>
+    <linearGradient id="nose" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff4466"/>
+      <stop offset="1" stop-color="#aa2244"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="400" fill="#0a0a1a"/>
+  <!-- 箭體 -->
+  <path d="M 100 40 L 130 130 L 130 320 L 70 320 L 70 130 Z" fill="url(#body)" stroke="#666" stroke-width="1"/>
+  <!-- 頭錐 -->
+  <path d="M 100 40 L 130 130 L 70 130 Z" fill="url(#nose)"/>
+  <!-- 太空船標誌 -->
+  <rect x="78" y="150" width="44" height="6" fill="#00aaff" rx="2"/>
+  <text x="100" y="200" text-anchor="middle" font-size="14" font-family="Arial" fill="#666">SCOUT-1</text>
+  <!-- 引擎段 -->
+  <rect x="78" y="320" width="44" height="20" fill="#444"/>
+  <!-- 鰭片 -->
+  <path d="M 70 240 L 50 320 L 70 320 Z" fill="#888"/>
+  <path d="M 130 240 L 150 320 L 130 320 Z" fill="#888"/>
+  <!-- 火焰 -->
+  <path d="M 85 340 Q 90 380 100 400 Q 110 380 115 340 Z" fill="#ff6b35" opacity="0.8"/>
+  <path d="M 90 340 Q 95 370 100 385 Q 105 370 110 340 Z" fill="#ffcc00" opacity="0.9"/>
+</svg>

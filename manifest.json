@@ -1,0 +1,36 @@
+{
+  "name": "SpaceX 任務：發射與回收",
+  "short_name": "SpaceX 任務",
+  "description": "RPG 基地管理 + 物理模擬著陸的太空遊戲",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#050510",
+  "theme_color": "#00d4ff",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "categories": ["games", "entertainment", "education"],
+  "icons": [
+    {
+      "src": "./assets/ui/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/ui/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "🚀 發射",
+      "short_name": "發射",
+      "url": "./?action=launch",
+      "icons": [{ "src": "./assets/ui/icon-192.svg", "sizes": "192x192" }]
+    }
+  ]
+}

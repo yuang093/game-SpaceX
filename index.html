@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="description" content="SpaceX 任務：發射與回收 - 結合 RPG 基地管理與物理模擬著陸的太空遊戲">
+    <meta name="theme-color" content="#050510">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SpaceX 任務">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>SpaceX 任務：發射與回收</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="assets/ui/icon-192.svg">
+    <link rel="apple-touch-icon" href="assets/ui/icon-192.svg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 左側面板 -->
+        <aside id="sidebar">
+            <header id="sidebar-header">
+                <h1>🚀 SpaceX</h1>
+                <p id="phase-label">準備階段</p>
+            </header>
+
+            <!-- 貨幣 -->
+            <section id="currency-section">
+                <div class="currency-row">
+                    <span class="currency-icon">💰</span>
+                    <span class="currency-label">信用點</span>
+                    <span id="credits-value" class="currency-value">15,000</span>
+                </div>
+                <div class="currency-row">
+                    <span class="currency-icon">🔬</span>
+                    <span class="currency-label">研究點</span>
+                    <span id="research-value" class="currency-value">0</span>
+                </div>
+                <div class="currency-row">
+                    <span class="currency-icon">⭐</span>
+                    <span class="currency-label">聲譽</span>
+                    <span id="reputation-value" class="currency-value">⭐</span>
+                </div>
+            </section>
+
+            <!-- 分頁導航 -->
+            <nav id="tabs">
+                <button class="tab-btn active" data-tab="rockets">🚀 火箭</button>
+                <button class="tab-btn" data-tab="missions">📜 任務</button>
+                <button class="tab-btn" data-tab="stations">🏭 站點</button>
+                <button class="tab-btn" data-tab="crew">👥 乘員</button>
+            </nav>
+
+            <!-- 火箭面板 -->
+            <section id="panel-rockets" class="tab-panel active">
+                <h2>我的火箭</h2>
+                <div id="rockets-list"></div>
+                <button id="btn-buy-rocket" class="btn-secondary">🛒 購買火箭</button>
+
+                <h3>火箭屬性</h3>
+                <div id="rocket-stats">
+                    <div class="stat-bar"><span>結構</span><div class="bar-container"><div class="bar health-bar" id="stat-hull" style="width:100%"></div></div><span id="stat-hull-val">100%</span></div>
+                    <div class="stat-bar"><span>引擎</span><div class="bar-container"><div class="bar engine-bar" id="stat-engine" style="width:10%"></div></div><span id="stat-engine-val">Lv.1</span></div>
+                    <div class="stat-bar"><span>燃料</span><div class="bar-container"><div class="bar fuel-bar" id="stat-fuel" style="width:10%"></div></div><span id="stat-fuel-val">Lv.1</span></div>
+                    <div class="stat-bar"><span>隔熱</span><div class="bar-container"><div class="bar shield-bar" id="stat-shield" style="width:10%"></div></div><span id="stat-shield-val">Lv.1</span></div>
+                    <div class="stat-bar"><span>貨艙</span><div class="bar-container"><div class="bar cargo-bar" id="stat-cargo" style="width:10%"></div></div><span id="stat-cargo-val">Lv.1</span></div>
+                </div>
+
+                <h3>升級</h3>
+                <div id="upgrades-list"></div>
+            </section>
+
+            <!-- 任務面板 -->
+            <section id="panel-missions" class="tab-panel">
+                <h2>可用任務</h2>
+                <div id="missions-list"></div>
+                <div id="mission-details" class="hidden">
+                    <h3>任務詳情</h3>
+                    <div id="mission-info"></div>
+                    <button id="btn-accept-mission" class="btn-primary">接受任務</button>
+                    <button id="btn-cancel-mission" class="btn-secondary">取消</button>
+                </div>
+            </section>
+
+            <!-- 太空站面板 -->
+            <section id="panel-stations" class="tab-panel">
+                <h2>軌道站點</h2>
+                <div id="stations-list"></div>
+            </section>
+
+            <!-- 乘員面板 -->
+            <section id="panel-crew" class="tab-panel">
+                <h2>太空人團隊</h2>
+                <div id="crew-list"></div>
+                <button id="btn-hire-crew" class="btn-secondary">👤 招募太空人</button>
+            </section>
+
+            <!-- 發射 -->
+            <section id="launch-section">
+                <div id="current-mission-info" class="hidden">
+                    <span id="current-mission-name">未選擇</span>
+                </div>
+                <button id="btn-launch" class="btn-launch" disabled>🚀 發射</button>
+                <p id="launch-hint">選擇任務</p>
+            </section>
+
+            <!-- 控制 -->
+            <section id="controls-hint" class="hidden">
+                <h3>🎮 控制</h3>
+                <div class="control-item"><span class="key">↑</span>/<span class="key">W</span> 引擎</div>
+                <div class="control-item"><span class="key">←</span>/<span class="key">→</span> 旋轉</div>
+                <div class="control-item"><span class="key">空白</span> 制動</div>
+                <div class="control-item"><span class="key">ESC</span> 返回</div>
+            </section>
+
+            <!-- 虛擬控制按鈕（手機專用） -->
+            <div id="virtual-controls" class="hidden" aria-label="虛擬控制按鈕">
+                <button class="vc-btn vc-btn-abort" data-action="abort" aria-label="放棄任務">✕</button>
+                <button class="vc-btn vc-btn-up" data-action="thrust" aria-label="主引擎">▲</button>
+                <button class="vc-btn vc-btn-left" data-action="left" aria-label="左旋轉">◀</button>
+                <button class="vc-btn vc-btn-right" data-action="right" aria-label="右旋轉">▶</button>
+                <button class="vc-btn vc-btn-brake" data-action="brake" aria-label="制動">■</button>
+            </div>
+
+            <!-- 統計 -->
+            <section id="stats-section">
+                <div class="stat-row"><span>🚀</span><span id="stat-launches">0</span></div>
+                <div class="stat-row"><span>✅</span><span id="stat-success">0</span></div>
+                <div class="stat-row"><span>💥</span><span id="stat-failures">0</span></div>
+            </section>
+            <div id="extra-stats">
+                <div><span>距離:</span><span id="stat-distance">0</span></div>
+                <div><span>貨物:</span><span id="stat-cargo">0</span></div>
+            </div>
+        </aside>
+
+        <!-- 遊戲區 -->
+        <main id="game-area">
+            <canvas id="game-canvas"></canvas>
+
+            <!-- HUD -->
+            <div id="hud" class="hidden">
+                <div class="hud-left">
+                    <div class="hud-item"><span>高度</span><span id="hud-altitude">0</span>m</div>
+                    <div class="hud-item"><span>速度</span><span id="hud-speed">0</span></div>
+                    <div class="hud-item"><span>燃料</span><span id="hud-fuel">100</span>%</div>
+                </div>
+                <div class="hud-center">
+                    <div id="mission-objective">待命中</div>
+                </div>
+                <div class="hud-right">
+                    <div class="hud-item"><span>姿態</span><span id="hud-angle">0</span>°</div>
+                    <div class="hud-item"><span>結構</span><span id="hud-health">100</span>%</div>
+                    <div class="hud-item"><span>熱量</span><span id="hud-heat">0</span></div>
+                </div>
+            </div>
+
+            <!-- 疊加 -->
+            <div id="overlay" class="hidden"><div id="overlay-content"></div></div>
+
+            <!-- 結算 -->
+            <div id="result-panel" class="hidden">
+                <div id="result-content">
+                    <h2 id="result-title">結果</h2>
+                    <div id="result-mission"></div>
+                    <div id="result-stats"></div>
+                    <div id="result-rewards"></div>
+                    <button id="btn-continue" class="btn-primary">返回</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 購買火箭 -->
+    <div id="modal-buy-rocket" class="modal hidden">
+        <div class="modal-content">
+            <h2>🛒 購買火箭</h2>
+            <div id="rocket-shop"></div>
+            <button id="btn-close-buy" class="btn-secondary">關閉</button>
+        </div>
+    </div>
+
+    <!-- 僱用乘員 -->
+    <div id="modal-hire-crew" class="modal hidden">
+        <div class="modal-content">
+            <h2>👤 招募太空人</h2>
+            <div id="available-crew"></div>
+            <button id="btn-close-hire" class="btn-secondary">關閉</button>
+        </div>
+    </div>
+
+    <!-- 裝備商店 -->
+    <div id="modal-equipment" class="modal hidden">
+        <div class="modal-content">
+            <h2>🔧 裝備商店</h2>
+            <div id="equipment-shop"></div>
+            <button id="btn-close-equipment" class="btn-secondary">關閉</button>
+        </div>
+    </div>
+
+    <script src="ui-state.js"></script>
+    <script src="physics.js"></script>
+    <script>
+        // 註冊 Service Worker（PWA 離線支援）
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('[SW] 註冊成功:', reg.scope))
+                    .catch(err => console.warn('[SW] 註冊失敗:', err));
+            });
+        }
+
+        // 防止雙擊放大
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+    </script>
+</body>
+</html>

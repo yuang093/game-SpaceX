@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1530"/>
+      <stop offset="1" stop-color="#1a2555"/>
+    </linearGradient>
+    <linearGradient id="rocket-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff4466"/>
+      <stop offset="0.3" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#888888"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#bg-grad)"/>
+  <g fill="#ffffff" opacity="0.6">
+    <circle cx="80" cy="80" r="3"/>
+    <circle cx="430" cy="100" r="2"/>
+    <circle cx="130" cy="400" r="2.5"/>
+    <circle cx="450" cy="320" r="3"/>
+    <circle cx="60" cy="270" r="2"/>
+    <circle cx="380" cy="450" r="2"/>
+    <circle cx="200" cy="60" r="1.5"/>
+  </g>
+  <g transform="translate(256 256)">
+    <path d="M -42 -120 L 42 -120 L 48 80 L -48 80 Z" fill="url(#rocket-grad)"/>
+    <path d="M -42 -120 Q 0 -170 42 -120 Z" fill="#ff4466"/>
+    <circle cx="0" cy="-40" r="14" fill="#00d4ff" stroke="#fff" stroke-width="2"/>
+    <path d="M -42 12 L -76 80 L -42 80 Z" fill="#888"/>
+    <path d="M 42 12 L 76 80 L 42 80 Z" fill="#888"/>
+    <path d="M -28 80 Q -22 120 -14 160 Q 0 130 14 160 Q 22 120 28 80 Z" fill="#ff6b35"/>
+    <path d="M -14 80 Q -8 105 0 130 Q 8 105 14 80 Z" fill="#ffcc00"/>
+  </g>
+  <text x="256" y="450" text-anchor="middle" font-size="32" font-family="Arial" font-weight="bold" fill="#00d4ff">SPACEX</text>
+</svg>

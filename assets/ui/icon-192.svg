@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1530"/>
+      <stop offset="1" stop-color="#1a2555"/>
+    </linearGradient>
+    <linearGradient id="rocket-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff4466"/>
+      <stop offset="0.3" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#888888"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="32" fill="url(#bg-grad)"/>
+  <!-- 星空背景 -->
+  <g fill="#ffffff" opacity="0.6">
+    <circle cx="30" cy="30" r="1.5"/>
+    <circle cx="160" cy="40" r="1"/>
+    <circle cx="50" cy="150" r="1"/>
+    <circle cx="170" cy="120" r="1.5"/>
+    <circle cx="20" cy="100" r="1"/>
+  </g>
+  <!-- 火箭主體 -->
+  <g transform="translate(96 96)">
+    <!-- 箭體 -->
+    <path d="M -16 -45 L 16 -45 L 18 30 L -18 30 Z" fill="url(#rocket-grad)"/>
+    <!-- 頭錐 -->
+    <path d="M -16 -45 Q 0 -65 16 -45 Z" fill="#ff4466"/>
+    <!-- 窗戶 -->
+    <circle cx="0" cy="-15" r="5" fill="#00d4ff" stroke="#fff" stroke-width="1"/>
+    <!-- 鰭片 -->
+    <path d="M -16 5 L -28 30 L -16 30 Z" fill="#888"/>
+    <path d="M 16 5 L 28 30 L 16 30 Z" fill="#888"/>
+    <!-- 火焰 -->
+    <path d="M -10 30 Q -8 45 -5 60 Q 0 50 5 60 Q 8 45 10 30 Z" fill="#ff6b35"/>
+    <path d="M -5 30 Q -3 40 0 50 Q 3 40 5 30 Z" fill="#ffcc00"/>
+  </g>
+  <!-- SpaceX 標誌風格 -->
+  <text x="96" y="170" text-anchor="middle" font-size="12" font-family="Arial" font-weight="bold" fill="#00d4ff">SPACEX</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="moon-grad" cx="0.4" cy="0.4">
+      <stop offset="0" stop-color="#dddddd"/>
+      <stop offset="0.7" stop-color="#888888"/>
+      <stop offset="1" stop-color="#333333"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" fill="#050510"/>
+  <circle cx="200" cy="200" r="150" fill="url(#moon-grad)"/>
+  <!-- 月球坑 -->
+  <g fill="#555" opacity="0.6">
+    <circle cx="150" cy="160" r="20"/>
+    <circle cx="155" cy="155" r="5" fill="#aaa"/>
+    <circle cx="240" cy="180" r="15"/>
+    <circle cx="170" cy="230" r="12"/>
+    <circle cx="220" cy="250" r="18"/>
+    <circle cx="225" cy="247" r="4" fill="#aaa"/>
+    <circle cx="120" cy="200" r="8"/>
+    <circle cx="270" cy="230" r="10"/>
+  </g>
+  <text x="200" y="380" text-anchor="middle" font-size="14" font-family="Arial" fill="#ffaa00">🌙 MOON</text>
+</svg>
