@@ -2532,11 +2532,26 @@ function handleLanding(surfaceY, onPad) {
         else if (speed > safeSpeed) reason = `速度過快！（${Math.round(speed)} > ${safeSpeed}）`;
         else if (angleDeg > safeAngle) reason = `傾斜過度！（${Math.round(angleDeg)}° > ${safeAngle}°）`;
 
-        // 結構損傷
-        rocket.hull -= (speed - safeSpeed) * 5;
+        // 結構損傷（速度超出安全值越多損傷越重）
+        const overSpeed = Math.max(0, speed - safeSpeed);
+        const angleOver = Math.max(0, angleDeg - safeAngle);
+        rocket.hull -= overSpeed * 5 + angleOver * 3;
+
+        // 修 #1+#5：區分「受損但活著」vs「結構歸零爆炸」
+        // 之前兩個分支都呼叫 triggerCrash，導致任何沒完美著陸都 100% 爆炸
         if (rocket.hull <= 0) {
             triggerCrash(reason);
+        } else if (onPad) {
+            // 在著陸墊上、還有結構 → 視為勉強生還的硬著陸
+            rocket.phase = 'LANDED';
+            StateMachine.enterSuccess({
+                fuel: rocket.fuel,
+                maxFuel: rocket.maxFuel,
+                hull: rocket.hull,
+                maxHull: rocket.maxHull
+            });
         } else {
+            // 偏離著陸點但還有結構 → 仍算墜毀（沒對準 pad）
             triggerCrash(reason);
         }
     }
