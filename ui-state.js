@@ -542,24 +542,25 @@ const CONFIG = {
     // 等級 0→1: 100 XP, 1→2: 180, 2→3: 270, ... 6→7: 1840
     rankUpXP: [100, 180, 270, 405, 610, 915, 1370, 1840],
 
-    // 火箭圖片對照表（type → SVG 檔案）
+    // 火箭圖片對照表（type → 真實火箭照片 PNG）
+    // v3.6 火箭照片化：使用 Wikimedia 真實照片取代 SVG 簡筆畫
     rocketImages: {
-        scout: 'assets/rockets/scout.svg',
-        falcon: 'assets/rockets/falcon-9.svg',
-        dragon: 'assets/rockets/dragon.svg',
-        heavy: 'assets/rockets/falcon-heavy.svg',
-        starship: 'assets/rockets/starship.svg',
-        starship_v2: 'assets/rockets/starship-v2.svg',
-        super_heavy: 'assets/rockets/super-heavy.svg',
-        tanker: 'assets/rockets/tanker.svg',
-        lynx: 'assets/rockets/lynx.svg',
+        scout: 'assets/rockets/rocket_scout.png',
+        falcon: 'assets/rockets/rocket_falcon.png',
+        dragon: 'assets/rockets/rocket_dragon.png',
+        heavy: 'assets/rockets/rocket_heavy.png',
+        starship: 'assets/rockets/rocket_starship.png',
+        starship_v2: 'assets/rockets/rocket_starship_v2.png',
+        super_heavy: 'assets/rockets/rocket_super_heavy.png',
+        tanker: 'assets/rockets/rocket_tanker.png',
+        lynx: 'assets/rockets/rocket_lynx.png',
         // Starship 全系列
-        starship_block1: 'assets/rockets/starship-block1.svg',
-        starship_block2: 'assets/rockets/starship-block2.svg',
-        starship_block3: 'assets/rockets/starship-block3.svg',
-        starship_block4: 'assets/rockets/starship-block4.svg',
-        starship_hls: 'assets/rockets/starship-hls.svg',
-        starship_mars: 'assets/rockets/starship-mars.svg'
+        starship_block1: 'assets/rockets/rocket_starship_block1.png',
+        starship_block2: 'assets/rockets/rocket_starship_block2.png',
+        starship_block3: 'assets/rockets/rocket_starship_block3.png',
+        starship_block4: 'assets/rockets/rocket_starship_block4.png',
+        starship_hls: 'assets/rockets/rocket_starship_hls.png',
+        starship_mars: 'assets/rockets/rocket_starship_mars.png'
     },
 
     // 太空人頭像（依姓名 hash 對應固定 SVG）

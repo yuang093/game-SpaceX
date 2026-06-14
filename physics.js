@@ -123,33 +123,21 @@ function preloadPlanetImages() {
 }
 
 /**
- * 預先載入所有火箭 SVG 圖片
+ * 預先載入所有火箭圖片（v3.6 真實火箭照片 PNG）
  * 使用與 CONFIG.rocketImages 一致的 key（底線命名）
  */
 function preloadRocketImages() {
-    // key 對應 GameState.rockets[].type，fileName 對應 SVG 檔名
-    const mapping = [
-        { key: 'scout', fileName: 'scout' },
-        { key: 'falcon', fileName: 'falcon-9' },
-        { key: 'dragon', fileName: 'dragon' },
-        { key: 'heavy', fileName: 'falcon-heavy' },
-        { key: 'starship', fileName: 'starship' },
-        { key: 'starship_v2', fileName: 'starship-v2' },
-        { key: 'super_heavy', fileName: 'super-heavy' },
-        { key: 'tanker', fileName: 'tanker' },
-        { key: 'lynx', fileName: 'lynx' },
-        // Starship 全系列
-        { key: 'starship_block1', fileName: 'starship-block1' },
-        { key: 'starship_block2', fileName: 'starship-block2' },
-        { key: 'starship_block3', fileName: 'starship-block3' },
-        { key: 'starship_block4', fileName: 'starship-block4' },
-        { key: 'starship_hls', fileName: 'starship-hls' },
-        { key: 'starship_mars', fileName: 'starship-mars' }
+    // v3.6：所有火箭統一用 rocket_{key}.png 命名規則
+    const keys = [
+        'scout', 'falcon', 'dragon', 'heavy', 'starship',
+        'starship_v2', 'super_heavy', 'tanker', 'lynx',
+        'starship_block1', 'starship_block2', 'starship_block3',
+        'starship_block4', 'starship_hls', 'starship_mars'
     ];
-    mapping.forEach(({ key, fileName }) => {
+    keys.forEach((key) => {
         const img = new Image();
-        img.src = ROCKET_IMAGE_BASE + fileName + '.svg';
-        img.onerror = () => console.warn(`火箭圖片載入失敗: ${fileName}`);
+        img.src = ROCKET_IMAGE_BASE + 'rocket_' + key + '.png';
+        img.onerror = () => console.warn(`火箭圖片載入失敗: rocket_${key}.png`);
         rocketImageCache[key] = img;
     });
 }

@@ -49,6 +49,8 @@ temp/
 
 # 圖片下載暫存（保留最終 assets）
 downloads/
+# 火箭照片原始下載（已用 PIL 處理為 processed/）
+assets/rockets/raw/
 
 # 本地存檔（不影響開發者）
 saves/
