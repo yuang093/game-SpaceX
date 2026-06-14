@@ -974,17 +974,17 @@ function computeWaypoints(originId, targetId) {
 }
 
 // ================================================
-// 生成任務（v3.0：單一起點、限制數量 10 個）
+// 生成任務（v3.0：單一起點、限制數量 6 個）
 // ================================================
 
-const MISSION_TARGET_COUNT = 10;  // 任務數量上限
+const MISSION_TARGET_COUNT = 6;  // 任務數量上限
 
 /**
- * 動態產生 10 個任務
+ * 動態產生 6 個任務
  * - 起點：GameState.currentLocation（地球或太空站）
  * - 終點：已解鎖的太空站（不可等於起點）
  * - 為每個目標站配 1-2 個任務類型
- * - 補足到剛好 10 個；超過則隨機取 10
+ * - 補足到剛好 6 個；超過則隨機取 6
  */
 function generateAllAvailableMissions() {
     GameState.availableMissions = [];
@@ -2085,7 +2085,7 @@ const UI = {
             if (data?.station && GameState.currentMission) {
                 GameState.currentLocation = GameState.currentMission.station.id;
             }
-            // 生成新任務填補列表（v3.0：依新位置生成 10 個）
+            // 生成新任務填補列表（v3.0：依新位置生成 6 個）
             generateAllAvailableMissions();
         } else {
             // 失敗：重置連勝
