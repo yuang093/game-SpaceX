@@ -2134,16 +2134,8 @@ function drawStationByType(station, worldY) {
             break;
         case 'jupiter_station':
         case 'saturn_station':
-            // v3.7.6 軌道站縮為小型（避免擋住天體照片）
-            // 太空站本體（中央小圓頂）
-            ctx.fillStyle = '#d0d0d0';
-            ctx.fillRect(-8 * size, -4 * size, 16 * size, 8 * size);
-            ctx.fillStyle = color;
-            ctx.fillRect(-6 * size, -2 * size, 12 * size, 4 * size);
-            // 小型太陽能板（左右各一個）
-            ctx.fillStyle = '#1a3a6e';
-            ctx.fillRect(-18 * size, -2 * size, 8 * size, 4 * size);
-            ctx.fillRect(10 * size, -2 * size, 8 * size, 4 * size);
+            // v3.7.7 完全不繪製太空站結構（避免擋住天體照片）
+            // 大型天體（木星/土星）由 photoEntry 渲染，結構會破壞真實感
             break;
     }
     ctx.restore();
