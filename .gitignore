@@ -55,3 +55,8 @@ assets/rockets/raw/
 # 本地存檔（不影響開發者）
 saves/
 local-data.json
+
+# 原始下載圖片（不進版控）
+assets/rockets/raw/
+assets/cards_raw/
+__pycache__/

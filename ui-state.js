@@ -679,27 +679,27 @@ const CONFIG = {
         { id: 'jose_hernandez', name: '荷西·赫南德茲',       rarity: 'N',   category: 'person', image: 'assets/cards/person_jose_hernandez.jpg', desc: '墨裔美籍太空人，勵志典範' },
         { id: 'tim_peake',      name: '提姆·皮克',           rarity: 'N',   category: 'person', image: 'assets/cards/person_tim_peake.jpg',      desc: '英國 ESA 太空人，2015-2016 駐站' },
 
-        // 公司/品牌 (8 張)
-        { id: 'spacex_logo',    name: 'SpaceX',               rarity: 'SSR', category: 'company', image: 'assets/cards/spacex.svg',    desc: '可重複使用火箭的革命先驅' },
-        { id: 'tesla_logo',     name: 'TESLA 特斯拉',         rarity: 'SR',  category: 'company', image: 'assets/cards/tesla.svg',     desc: '電動車與能源革命的領導者' },
-        { id: 'xai_logo',       name: 'xAI',                  rarity: 'SR',  category: 'company', image: 'assets/cards/xai.svg',       desc: '馬斯克創辦的人工智慧公司' },
-        { id: 'neuralink_logo', name: 'Neuralink',            rarity: 'SR',  category: 'company', image: 'assets/cards/neuralink.svg', desc: '腦機介面先驅' },
-        { id: 'spcx_logo',      name: 'SPCX 太空指數',        rarity: 'UR',  category: 'company', image: 'assets/cards/spcx.svg',      desc: '太空探索指數，真實上市公司股票' },
-        { id: 'nasa_logo',      name: 'NASA',                 rarity: 'SR',  category: 'company', image: 'assets/cards/nasa.svg',      desc: '美國國家航空暨太空總署' },
-        { id: 'esa_logo',       name: 'ESA 歐洲太空總署',      rarity: 'N',   category: 'company', image: 'assets/cards/esa.svg',       desc: '歐洲多國合作的太空機構' },
-        { id: 'cnsa_logo',      name: 'CNSA 中國國家航天局',   rarity: 'N',   category: 'company', image: 'assets/cards/cnsa.svg',      desc: '中國載人航天的幕後推手' },
+        // 公司/品牌 (8 張) — v3.7：全部用 Wikimedia 官方 logo PNG
+        { id: 'spacex_logo',    name: 'SpaceX',               rarity: 'SSR', category: 'company', image: 'assets/cards/card_spacex.png',    desc: '可重複使用火箭的革命先驅' },
+        { id: 'tesla_logo',     name: 'TESLA 特斯拉',         rarity: 'SR',  category: 'company', image: 'assets/cards/card_tesla.png',     desc: '電動車與能源革命的領導者' },
+        { id: 'xai_logo',       name: 'xAI',                  rarity: 'SR',  category: 'company', image: 'assets/cards/card_xai.png',       desc: '馬斯克創辦的人工智慧公司' },
+        { id: 'neuralink_logo', name: 'Neuralink',            rarity: 'SR',  category: 'company', image: 'assets/cards/card_neuralink.png', desc: '腦機介面先驅' },
+        { id: 'spcx_logo',      name: 'SPCX 太空指數',        rarity: 'UR',  category: 'company', image: 'assets/cards/spcx.svg',           desc: '太空探索指數，真實上市公司股票' },
+        { id: 'nasa_logo',      name: 'NASA',                 rarity: 'SR',  category: 'company', image: 'assets/cards/card_nasa.png',      desc: '美國國家航空暨太空總署' },
+        { id: 'esa_logo',       name: 'ESA 歐洲太空總署',      rarity: 'N',   category: 'company', image: 'assets/cards/card_esa.png',       desc: '歐洲多國合作的太空機構' },
+        { id: 'cnsa_logo',      name: 'CNSA 中國國家航天局',   rarity: 'N',   category: 'company', image: 'assets/cards/card_cnsa.png',      desc: '中國載人航天的幕後推手' },
 
-        // 火箭 (10 張)
+        // 火箭 (10 張) — v3.7：falcon9/falcon_heavy/electron 改真實照片
         { id: 'falcon1',        name: '🚀 Falcon 1',          rarity: 'R',   category: 'rocket',   image: 'assets/cards/rocket_falcon1.jpg',  desc: 'SpaceX 處女作，獵鷹系列起點' },
-        { id: 'falcon9',        name: '🚀 Falcon 9',          rarity: 'SR',  category: 'rocket',   image: 'assets/cards/rocket_falcon9.svg',  desc: '可重複使用的中型運載火箭' },
-        { id: 'falcon_heavy',   name: '🚀 Falcon Heavy',      rarity: 'SR',  category: 'rocket',   image: 'assets/cards/rocket_fh.svg',       desc: '現役最強運載火箭之一' },
+        { id: 'falcon9',        name: '🚀 Falcon 9',          rarity: 'SR',  category: 'rocket',   image: 'assets/cards/card_falcon9.png',    desc: '可重複使用的中型運載火箭' },
+        { id: 'falcon_heavy',   name: '🚀 Falcon Heavy',      rarity: 'SR',  category: 'rocket',   image: 'assets/cards/card_falcon_heavy.png', desc: '現役最強運載火箭之一' },
         { id: 'starship',       name: '🚀 Starship',          rarity: 'SSR', category: 'rocket',   image: 'assets/cards/rocket_starship.jpg', desc: '史上最大火箭，目標火星' },
         { id: 'starship_hls',   name: '🌙 Starship HLS',      rarity: 'SSR', category: 'rocket',   image: 'assets/cards/rocket_hls.jpg',      desc: 'Artemis 計畫月球著陸器' },
         { id: 'dragon',         name: '🐉 Dragon',            rarity: 'R',   category: 'rocket',   image: 'assets/cards/rocket_dragon.jpg',   desc: '首艘商業載人太空船' },
         { id: 'sls',            name: '🚀 SLS',               rarity: 'R',   category: 'rocket',   image: 'assets/cards/rocket_sls.jpg',      desc: 'NASA 太空發射系統' },
         { id: 'soyuz',          name: '🚀 Soyuz 聯合號',       rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_soyuz.jpg',    desc: '蘇聯傳奇載人火箭系列' },
         { id: 'ariane',         name: '🚀 Ariane 5',          rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_ariane.jpg',   desc: '歐洲主力運載火箭' },
-        { id: 'electron',       name: '🚀 Electron',          rarity: 'N',   category: 'rocket',   image: 'assets/cards/rocket_electron.svg', desc: 'Rocket Lab 小型發射服務' },
+        { id: 'electron',       name: '🚀 Electron',          rarity: 'N',   category: 'rocket',   image: 'assets/cards/card_electron.png',   desc: 'Rocket Lab 小型發射服務' },
 
         // 星球/天體 (12 張) — v3.5 階段 0：複用 assets/planets/ 真實照片（天王星暫保留 SVG，待後續抓圖）
         { id: 'sun',            name: '☀️ 太陽',               rarity: 'SSR', category: 'planet',   image: 'assets/planets/sun_real.png',      desc: '太陽系中心，地球的能量源' },
@@ -710,7 +710,7 @@ const CONFIG = {
         { id: 'mars',           name: '🔴 火星',              rarity: 'SSR', category: 'planet',   image: 'assets/planets/mars_real.jpg',     desc: '人類下一個登陸目標' },
         { id: 'jupiter',        name: '♃ 木星',              rarity: 'SR',  category: 'planet',   image: 'assets/planets/jupiter_real.png',  desc: '太陽系最大行星' },
         { id: 'saturn',         name: '🪐 土星',              rarity: 'SR',  category: 'planet',   image: 'assets/planets/saturn_real.png',   desc: '以壯麗光環聞名' },
-        { id: 'uranus',         name: '⛢ 天王星',            rarity: 'N',   category: 'planet',   image: 'assets/cards/planet_uranus.svg',   desc: '側躺旋轉的冰巨星' },
+        { id: 'uranus',         name: '⛢ 天王星',            rarity: 'N',   category: 'planet',   image: 'assets/cards/card_uranus.png',     desc: '側躺旋轉的冰巨星（Voyager 2 1986 實拍）' },
         { id: 'neptune',        name: '♆ 海王星',            rarity: 'R',   category: 'planet',   image: 'assets/planets/neptune_real.png',  desc: '風速最快的行星' },
         { id: 'pluto',          name: '♇ 冥王星',            rarity: 'N',   category: 'planet',   image: 'assets/planets/pluto_real.png',    desc: '矮行星，神秘的古柏帶' },
         { id: 'titan',          name: '🌫 土衛六 Titan',      rarity: 'N',   category: 'planet',   image: 'assets/planets/titan_real.png',    desc: '土星最大衛星，有甲烷湖' },
