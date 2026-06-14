@@ -2134,19 +2134,16 @@ function drawStationByType(station, worldY) {
             break;
         case 'jupiter_station':
         case 'saturn_station':
-            // 軌道站（圓頂 + 多模組）
+            // v3.7.6 軌道站縮為小型（避免擋住天體照片）
+            // 太空站本體（中央小圓頂）
             ctx.fillStyle = '#d0d0d0';
-            ctx.fillRect(-20 * size, -10 * size, 40 * size, 20 * size);
+            ctx.fillRect(-8 * size, -4 * size, 16 * size, 8 * size);
             ctx.fillStyle = color;
-            ctx.fillRect(-15 * size, -6 * size, 30 * size, 12 * size);
-            // 多個對接模組
-            ctx.fillStyle = '#888';
-            ctx.fillRect(-35 * size, -5 * size, 10 * size, 10 * size);
-            ctx.fillRect(25 * size, -5 * size, 10 * size, 10 * size);
-            // 大型太陽能板
+            ctx.fillRect(-6 * size, -2 * size, 12 * size, 4 * size);
+            // 小型太陽能板（左右各一個）
             ctx.fillStyle = '#1a3a6e';
-            ctx.fillRect(-70 * size, -15 * size, 30 * size, 30 * size);
-            ctx.fillRect(40 * size, -15 * size, 30 * size, 30 * size);
+            ctx.fillRect(-18 * size, -2 * size, 8 * size, 4 * size);
+            ctx.fillRect(10 * size, -2 * size, 8 * size, 4 * size);
             break;
     }
     ctx.restore();
