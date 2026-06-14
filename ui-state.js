@@ -980,6 +980,22 @@ function computeWaypoints(originId, targetId) {
 const MISSION_TARGET_COUNT = 6;  // 任務數量上限
 
 /**
+ * 修 #11：Fisher-Yates 洗牌（均勻分布）
+ * 原本用 array.sort(() => Math.random() - 0.5) 是經典反模式，
+ * 對 n > 3 會產生顯著偏差（部分排列出現機率遠高於其他）。
+ * 這裡用 O(n) in-place shuffle 確保每種排列出現機率相等 (1/n!)。
+ * 不修改原陣列，回傳新陣列。
+ */
+function shuffle(arr) {
+    const result = arr.slice();
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+/**
  * 動態產生 6 個任務
  * - 起點：GameState.currentLocation（地球或太空站）
  * - 終點：已解鎖的太空站（不可等於起點）
@@ -1009,7 +1025,7 @@ function generateAllAvailableMissions() {
     // 為每個目標站配 1-2 個任務類型
     targetStations.forEach(target => {
         const count = Math.random() < 0.6 ? 2 : 1;  // 60% 機率 2 個
-        const shuffled = typeKeys.slice().sort(() => Math.random() - 0.5);
+        const shuffled = shuffle(typeKeys);
         shuffled.slice(0, count).forEach(type => {
             GameState.availableMissions.push(
                 generateMissionByOriginAndTarget(originStation, target, type)
@@ -1028,9 +1044,7 @@ function generateAllAvailableMissions() {
 
     // 超過則隨機取 10
     if (GameState.availableMissions.length > MISSION_TARGET_COUNT) {
-        GameState.availableMissions = GameState.availableMissions
-            .sort(() => Math.random() - 0.5)
-            .slice(0, MISSION_TARGET_COUNT);
+        GameState.availableMissions = shuffle(GameState.availableMissions).slice(0, MISSION_TARGET_COUNT);
     }
 }
 
