@@ -664,19 +664,19 @@ const CONFIG = {
 
     // 卡片池（55 張）
     cards: [
-        // 人物 (12 張)
-        { id: 'elon_musk',     name: '伊隆·馬斯克',          rarity: 'UR',  category: 'person', image: 'assets/cards/person_elon_musk.svg',     desc: 'SpaceX、Tesla、xAI 創辦人，推動人類成為多行星物種' },
-        { id: 'neil_armstrong', name: '尼爾·阿姆斯壯',       rarity: 'SSR', category: 'person', image: 'assets/cards/person_neil_armstrong.svg', desc: '1969 年首位登月太空人「個人一小步，人類一大步」' },
-        { id: 'yuri_gagarin',   name: '尤里·加加林',         rarity: 'SSR', category: 'person', image: 'assets/cards/person_yuri_gagarin.svg',   desc: '1961 年首位進入太空的人類' },
-        { id: 'buzz_aldrin',    name: '巴茲·奧爾德林',       rarity: 'SR',  category: 'person', image: 'assets/cards/person_buzz_aldrin.svg',    desc: '阿波羅 11 號登月艙駕駛員' },
-        { id: 'sally_ride',     name: '薩利·賴德',           rarity: 'SR',  category: 'person', image: 'assets/cards/person_sally_ride.svg',     desc: '美國首位進入太空的女性' },
-        { id: 'valentina',      name: '瓦倫京娜·捷列什科娃',  rarity: 'SR',  category: 'person', image: 'assets/cards/person_valentina.svg',      desc: '1963 年首位進入太空的女性' },
-        { id: 'john_glenn',     name: '約翰·葛倫',           rarity: 'R',   category: 'person', image: 'assets/cards/person_john_glenn.svg',     desc: '美國首位環繞地球的太空人' },
-        { id: 'chris_hadfield', name: '克里斯·哈德菲爾德',   rarity: 'R',   category: 'person', image: 'assets/cards/person_chris_hadfield.svg', desc: '加拿大首位太空站指揮官，太空吉他手' },
-        { id: 'wang_yaping',    name: '王亞平',              rarity: 'R',   category: 'person', image: 'assets/cards/person_wang_yaping.svg',    desc: '中國首位太空授課女太空人' },
-        { id: 'mae_jemison',    name: '梅·傑米森',           rarity: 'R',   category: 'person', image: 'assets/cards/person_mae_jemison.svg',    desc: '首位進入太空的非裔美國女性' },
-        { id: 'jose_hernandez', name: '荷西·赫南德茲',       rarity: 'N',   category: 'person', image: 'assets/cards/person_jose_hernandez.svg', desc: '墨裔美籍太空人，勵志典範' },
-        { id: 'tim_peake',      name: '提姆·皮克',           rarity: 'N',   category: 'person', image: 'assets/cards/person_tim_peake.svg',      desc: '英國 ESA 太空人，2015-2016 駐站' },
+        // 人物 (12 張) — v3.5 階段 2：從 Wikipedia 抓 NASA/官方肖像（均為 PD）
+        { id: 'elon_musk',     name: '伊隆·馬斯克',          rarity: 'UR',  category: 'person', image: 'assets/cards/person_elon_musk.jpg',     desc: 'SpaceX、Tesla、xAI 創辦人，推動人類成為多行星物種' },
+        { id: 'neil_armstrong', name: '尼爾·阿姆斯壯',       rarity: 'SSR', category: 'person', image: 'assets/cards/person_neil_armstrong.jpg', desc: '1969 年首位登月太空人「個人一小步，人類一大步」' },
+        { id: 'yuri_gagarin',   name: '尤里·加加林',         rarity: 'SSR', category: 'person', image: 'assets/cards/person_yuri_gagarin.jpg',   desc: '1961 年首位進入太空的人類' },
+        { id: 'buzz_aldrin',    name: '巴茲·奧爾德林',       rarity: 'SR',  category: 'person', image: 'assets/cards/person_buzz_aldrin.jpg',    desc: '阿波羅 11 號登月艙駕駛員' },
+        { id: 'sally_ride',     name: '薩利·賴德',           rarity: 'SR',  category: 'person', image: 'assets/cards/person_sally_ride.jpg',     desc: '美國首位進入太空的女性' },
+        { id: 'valentina',      name: '瓦倫京娜·捷列什科娃',  rarity: 'SR',  category: 'person', image: 'assets/cards/person_valentina.jpg',      desc: '1963 年首位進入太空的女性' },
+        { id: 'john_glenn',     name: '約翰·葛倫',           rarity: 'R',   category: 'person', image: 'assets/cards/person_john_glenn.jpg',     desc: '美國首位環繞地球的太空人' },
+        { id: 'chris_hadfield', name: '克里斯·哈德菲爾德',   rarity: 'R',   category: 'person', image: 'assets/cards/person_chris_hadfield.jpg', desc: '加拿大首位太空站指揮官，太空吉他手' },
+        { id: 'wang_yaping',    name: '王亞平',              rarity: 'R',   category: 'person', image: 'assets/cards/person_wang_yaping.jpg',    desc: '中國首位太空授課女太空人' },
+        { id: 'mae_jemison',    name: '梅·傑米森',           rarity: 'R',   category: 'person', image: 'assets/cards/person_mae_jemison.jpg',    desc: '首位進入太空的非裔美國女性' },
+        { id: 'jose_hernandez', name: '荷西·赫南德茲',       rarity: 'N',   category: 'person', image: 'assets/cards/person_jose_hernandez.jpg', desc: '墨裔美籍太空人，勵志典範' },
+        { id: 'tim_peake',      name: '提姆·皮克',           rarity: 'N',   category: 'person', image: 'assets/cards/person_tim_peake.jpg',      desc: '英國 ESA 太空人，2015-2016 駐站' },
 
         // 公司/品牌 (8 張)
         { id: 'spacex_logo',    name: 'SpaceX',               rarity: 'SSR', category: 'company', image: 'assets/cards/spacex.svg',    desc: '可重複使用火箭的革命先驅' },
