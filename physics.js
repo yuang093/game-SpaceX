@@ -2202,14 +2202,15 @@ function drawRocket() {
 
     // 取得當前火箭圖片
     const img = getCurrentRocketImage();
+    let drawW = w, drawH = h;
     if (img && img.complete && img.naturalWidth > 0) {
         // v3.6 真實火箭照片（PNG 600x1200）
         // 火箭物理尺寸 24x70，計算縮放比例
         // 以寬度為基準，確保圖片符合 rocket.width
-        // v3.6 縮放：1.5x → 3x（照片細節多，加大更顯眼）
-        const scale = (w * 3) / img.naturalWidth; // 3x 讓照片版火箭更顯眼
-        const drawW = img.naturalWidth * scale;
-        const drawH = img.naturalHeight * scale;
+        // v3.6 優化：3x → 5x（誇張放大，飛行時更壯觀）
+        const scale = (w * 5) / img.naturalWidth; // 5x 讓照片版火箭超顯眼
+        drawW = img.naturalWidth * scale;
+        drawH = img.naturalHeight * scale;
         // 繪製在 (-drawW/2, -drawH/2) 為左上角
         ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
     } else {
@@ -2221,7 +2222,7 @@ function drawRocket() {
     if (rocket.heat > 0) {
         const heatRatio = Math.min(rocket.heat / rocket.maxHeat, 1);
         ctx.fillStyle = `rgba(255, ${Math.round(100 * (1 - heatRatio))}, 0, ${0.2 + heatRatio * 0.5})`;
-        ctx.fillRect(-w / 2, -h / 2, w, h);
+        ctx.fillRect(-drawW / 2, -drawH / 2, drawW, drawH);
     }
 
     // 損傷效果
@@ -2230,8 +2231,8 @@ function drawRocket() {
         ctx.fillStyle = `rgba(0, 0, 0, ${damageRatio * 0.5})`;
         const seed = Math.floor(rocket.y);
         for (let i = 0; i < 5; i++) {
-            const dx = ((seed * (i + 1) * 7) % w) - w / 2;
-            const dy = ((seed * (i + 1) * 13) % h) - h / 2;
+            const dx = ((seed * (i + 1) * 7) % drawW) - drawW / 2;
+            const dy = ((seed * (i + 1) * 13) % drawH) - drawH / 2;
             ctx.beginPath();
             ctx.arc(dx, dy, 2 + damageRatio * 3, 0, Math.PI * 2);
             ctx.fill();
