@@ -2583,8 +2583,12 @@ const CardSystem = {
             r -= weights[i];
             if (r <= 0) { pick = pool[i]; break; }
         }
-        // 加入收藏
-        GameState.cardCollection.push(pick.id);
+        // 修 #3：加入收藏前先檢查是否已存在，避免重複 ID 污染相簿
+        // 影響：早期 100% 收集後，unowned.length === 0 → 從完整卡池重抽
+        //      若不擋，cardCollection 會累積大量重複項目，相簿顯示與數量統計錯亂
+        if (!ownedIds.has(pick.id)) {
+            GameState.cardCollection.push(pick.id);
+        }
         GameState.cardStats.totalPulls++;
         GameState.cardStats.lastPull = pick.id;
         GameState.cardStats.lastPullTime = Date.now();
