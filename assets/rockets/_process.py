@@ -25,11 +25,11 @@ MAPPING = {
     'tanker':        'starship_tanker.png',
     'lynx':          'lynx.png',
     'starship_block1': 'starship_sn8.jpg',
-    'starship_block2': 'starship_sn15.jpg',
+    'starship_block2': 'starship_on_tower.png',  # v3.6 優化：完整 Starship+Super Heavy 整合照
     'starship_block3': 'starship_ift5.jpg',   # 重用
     'starship_block4': 'starship_launch.png',
     'starship_hls':    'hls_rendering.png',
-    'starship_mars':   'starship_ift2.jpg',   # 重用
+    'starship_mars':   'starship_ift2.jpg',   # 重用（無 Mars 概念圖）
 }
 
 # 目標尺寸

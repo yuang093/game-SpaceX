@@ -2203,10 +2203,11 @@ function drawRocket() {
     // 取得當前火箭圖片
     const img = getCurrentRocketImage();
     if (img && img.complete && img.naturalWidth > 0) {
-        // SVG 圖片：viewBox 200x400 或 300x400
+        // v3.6 真實火箭照片（PNG 600x1200）
         // 火箭物理尺寸 24x70，計算縮放比例
         // 以寬度為基準，確保圖片符合 rocket.width
-        const scale = (w * 1.5) / img.naturalWidth; // 1.5x 讓圖片更顯眼
+        // v3.6 縮放：1.5x → 3x（照片細節多，加大更顯眼）
+        const scale = (w * 3) / img.naturalWidth; // 3x 讓照片版火箭更顯眼
         const drawW = img.naturalWidth * scale;
         const drawH = img.naturalHeight * scale;
         // 繪製在 (-drawW/2, -drawH/2) 為左上角
