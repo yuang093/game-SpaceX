@@ -112,7 +112,9 @@ function preloadPlanetImages() {
         { key: 'enceladus',  fileName: 'enceladus_real.png'},
         { key: 'phobos',     fileName: 'phobos_real.png'   },
         { key: 'europa',     fileName: 'europa_real.png'   },
-        { key: 'ceres',      fileName: 'ceres_real.png'    }
+        { key: 'ceres',      fileName: 'ceres_real.png'    },
+        // v3.7.5 發射台真實照片（NASA SpaceX SLC-40）
+        { key: 'launchpad',  fileName: 'launchpad_real.png'}
     ];
     planetFiles.forEach(({ key, fileName }) => {
         const img = new Image();
@@ -996,6 +998,7 @@ function drawPluto(worldY, scale = 1) {
  * 繪製穀神星（小行星帶最大天體）
  */
 function drawCeres(worldY, scale = 1) {
+    if (!isFinite(worldY) || !isFinite(cameraY)) return;
     const screenY = worldY - cameraY;
     const cx = WORLD_WIDTH / 2;
     const radius = 120 * scale;
@@ -1567,25 +1570,35 @@ function drawLandingPad() {
 
     if (padY < -50 || padY > canvasHeight + 50) return;
 
-    // 混凝土基座
-    ctx.fillStyle = '#2a2a40';
-    ctx.fillRect(padX - 20, padY, LANDING_PAD.width + 40, LANDING_PAD.height + 5);
+    // v3.7.5 優先使用真實發射台照片（NASA SpaceX SLC-40 發射台景觀）
+    const launchImg = planetImages['launchpad'];
+    if (launchImg && launchImg.complete && launchImg.naturalWidth > 0) {
+        const targetW = LANDING_PAD.width * 1.5;  // 比 H 標記略寬
+        const targetH = targetW * (launchImg.naturalHeight / launchImg.naturalWidth);
+        const imgX = LANDING_PAD.x - targetW / 2;
+        const imgY = padY - targetH;
+        ctx.drawImage(launchImg, imgX, imgY, targetW, targetH);
+    } else {
+        // Fallback：混凝土基座
+        ctx.fillStyle = '#2a2a40';
+        ctx.fillRect(padX - 20, padY, LANDING_PAD.width + 40, LANDING_PAD.height + 5);
 
-    // 排焰/散熱槽格柵
-    ctx.fillStyle = '#1a1a30';
-    ctx.fillRect(padX - 10, padY, LANDING_PAD.width + 20, 8);
-    ctx.strokeStyle = '#3a3a55';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 16; i++) {
-        ctx.beginPath();
-        ctx.moveTo(padX - 10 + i * 10, padY);
-        ctx.lineTo(padX - 10 + i * 10, padY + 8);
-        ctx.stroke();
+        // 排焰/散熱槽格柵
+        ctx.fillStyle = '#1a1a30';
+        ctx.fillRect(padX - 10, padY, LANDING_PAD.width + 20, 8);
+        ctx.strokeStyle = '#3a3a55';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 16; i++) {
+            ctx.beginPath();
+            ctx.moveTo(padX - 10 + i * 10, padY);
+            ctx.lineTo(padX - 10 + i * 10, padY + 8);
+            ctx.stroke();
+        }
+
+        // 著陸墊表面（深灰）
+        ctx.fillStyle = '#3a3a55';
+        ctx.fillRect(padX, padY + 8, LANDING_PAD.width, 10);
     }
-
-    // 著陸墊表面（深灰）
-    ctx.fillStyle = '#3a3a55';
-    ctx.fillRect(padX, padY + 8, LANDING_PAD.width, 10);
 
     // H 白色外框
     ctx.fillStyle = '#ffffff';
@@ -2589,9 +2602,19 @@ let cameraShakeX = 0;
 let cameraShakeY = 0;
 
 function updateCamera() {
+    // v3.7.5 guard：若 canvasHeight/rocket.y/cameraY 非有限，跳過本幀避免 NaN 傳播
+    if (!isFinite(canvasHeight) || !isFinite(rocket.y)) {
+        // 等待 canvas resize 完成
+        return;
+    }
+    if (!isFinite(cameraY)) {
+        cameraY = WORLD_HEIGHT - canvasHeight;
+    }
     const targetY = rocket.y - canvasHeight * 0.6;
     cameraY += (targetY - cameraY) * 0.08;
-    cameraY = Math.max(0, Math.min(WORLD_HEIGHT - canvasHeight, cameraY));
+    // clamp（用 if 而非 Math.max 避免 NaN 污染）
+    if (cameraY < 0) cameraY = 0;
+    if (cameraY > WORLD_HEIGHT - canvasHeight) cameraY = WORLD_HEIGHT - canvasHeight;
 
     // 主引擎震動：根據 rocket.thrusting 屬性判斷
     let isThrusting = false;
@@ -2795,6 +2818,8 @@ const Physics = {
     },
 
     drawInitialScene() {
+        // v3.7.5 guard：canvasHeight 還沒 resize 時跳過，避免 cameraY = NaN
+        if (!isFinite(canvasHeight) || !isFinite(canvasWidth)) return;
         cameraY = WORLD_HEIGHT - canvasHeight;
 
         ctx.fillStyle = '#050510';
