@@ -714,11 +714,11 @@ const CONFIG = {
         { id: 'pluto',          name: '♇ 冥王星',            rarity: 'N',   category: 'planet',   image: 'assets/planets/pluto_real.png',    desc: '矮行星，神秘的古柏帶' },
         { id: 'titan',          name: '🌫 土衛六 Titan',      rarity: 'N',   category: 'planet',   image: 'assets/planets/titan_real.png',    desc: '土星最大衛星，有甲烷湖' },
 
-        // 星系/天體 (4 張)
-        { id: 'milky_way',      name: '🌌 銀河系',            rarity: 'SSR', category: 'galaxy',   image: 'assets/cards/galaxy_mw.svg',       desc: '我們所在的棒旋星系' },
-        { id: 'andromeda',      name: '🌌 仙女座星系',        rarity: 'R',   category: 'galaxy',   image: 'assets/cards/galaxy_and.svg',      desc: '離銀河系最近的大星系' },
-        { id: 'black_hole',     name: '🕳 黑洞',              rarity: 'SSR', category: 'galaxy',   image: 'assets/cards/blackhole.svg',       desc: '時空扭曲的極端天體' },
-        { id: 'nebula',         name: '💫 蟹狀星雲',          rarity: 'R',   category: 'galaxy',   image: 'assets/cards/nebula.svg',          desc: '1054 年超新星爆炸的殘骸' },
+        // 星系/天體 (4 張) — v3.5 階段 4：從 Wikimedia Commons 抓 NASA/ESA 真實影像
+        { id: 'milky_way',      name: '🌌 銀河系',            rarity: 'SSR', category: 'galaxy',   image: 'assets/cards/galaxy_mw.jpg',       desc: '我們所在的棒旋星系（ESO VLT 雷射導星影像）' },
+        { id: 'andromeda',      name: '🌌 仙女座星系',        rarity: 'R',   category: 'galaxy',   image: 'assets/cards/galaxy_and.jpg',      desc: '離銀河系最近的大星系（2025 真實影像）' },
+        { id: 'black_hole',     name: '🕳 黑洞',              rarity: 'SSR', category: 'galaxy',   image: 'assets/cards/blackhole.jpg',       desc: '時空扭曲的極端天體（M87* EHT 2019 實拍）' },
+        { id: 'nebula',         name: '💫 蟹狀星雲',          rarity: 'R',   category: 'galaxy',   image: 'assets/cards/nebula.jpg',          desc: '1054 年超新星爆炸的殘骸（JWST MIRI/NIRCam）' },
 
         // 太空船/探測器 (6 張)
         { id: 'voyager1',       name: '🛸 Voyager 1',         rarity: 'SSR', category: 'spacecraft', image: 'assets/cards/voyager1.svg',      desc: '1977 年發射，目前最遠人造物體' },
