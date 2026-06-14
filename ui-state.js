@@ -2057,11 +2057,16 @@ const UI = {
                 }
 
                 // 升級聲譽獎勵
+                // 修 #6：原本寫 repSrc.crewRankUp(c.rankIndex) — 但 c.rankIndex
+                // 是「升級後」的最終等級，不是「升到的那一級」。當乘員一次跳多級
+                // （crewLevelUps 內含 2 個同 c.name 的項目），會重複用最終等級
+                // 計算聲譽，且 repBreakdown 內會出現兩筆相同數值的獎勵。
+                // 修法：用 up.rankIndex 對應「升到的那一級」。
                 crewLevelUps.forEach(up => {
                     if (up.name === c.name) {
-                        const rankRep = repSrc.crewRankUp(c.rankIndex);
+                        const rankRep = repSrc.crewRankUp(up.rankIndex);
                         GameState.reputation += rankRep;
-                        repBreakdown.push({ label: `🎖️ ${c.name} 升至 ${c.rank}`, value: rankRep });
+                        repBreakdown.push({ label: `🎖️ ${c.name} 升至 ${up.rank}`, value: rankRep });
                     }
                 });
             });
