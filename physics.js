@@ -13,7 +13,7 @@ let canvasWidth, canvasHeight;
 
 // 世界座標
 const WORLD_WIDTH = 800;
-const WORLD_HEIGHT = 10000; // 更大的世界
+const WORLD_HEIGHT = 50000; // v3.7.3 放大 5x：旅程時間更長
 
 let cameraY = 0;
 const GROUND_Y = WORLD_HEIGHT - 50;
@@ -71,7 +71,7 @@ const PHYSICS = {
     ROTATION_SPEED: 0.05,
     THROTTLE: 0.18,
     SIDE_THRUST: 0.04,
-    FUEL_CONSUMPTION: 0.12,
+    FUEL_CONSUMPTION: 0.024,  // v3.7.3 配合 5x 世界：每 pixel 燃料消耗降為 1/5
     HEAT_RATE: 0.02,
     HEAT_SPEED_THRESHOLD: 10,
     BRAKE_FORCE: 0.18,          // 加強制動（0.15→0.18）

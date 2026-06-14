@@ -877,17 +877,17 @@ const STATION_REAL_DATA = {
     comet:      { realDistance: 5000,   parentBody: null,    orbitalRadius: 0 }
 };
 
-// 將真實距離（百萬公里）映射到世界座標 Y（9950 地面 → 100 頂端）
+// 將真實距離（百萬公里）映射到世界座標 Y（49950 地面 → 100 頂端，v3.7.3 5x）
 // LEO 區用線性（避免 log10 過度擠壓），其他用對數+線性混合
 function distanceToTargetY(distanceMk) {
     if (distanceMk < 0.001) {
-        // LEO 區：0.0001 km → 9900，0.0008 km → 9650（仍在月球下方）
-        return Math.round(9950 - distanceMk * 3750000);
+        // LEO 區：0.0001 km → 49900，0.0008 km → 49650（仍在月球下方）
+        return Math.round(49950 - distanceMk * 18750000);
     }
     // 對數映射：log10(0.384)=-0.42, log10(6000)=3.78
     const logD = Math.log10(distanceMk);
     const t = (logD + 0.42) / (3.78 + 0.42); // 0~1
-    return Math.round(9700 - t * 9500);
+    return Math.round(49700 - t * 49500);
 }
 
 // 重力助推資格：飛越大天體時可獲得燃料效率加成
