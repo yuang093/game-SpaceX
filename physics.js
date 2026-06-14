@@ -1748,12 +1748,25 @@ function drawCelestialBodyInner(station, worldY, screenY, cx, size, omitLabel) {
         const img = planetImages[photoEntry.key];
         if (img && img.complete && img.naturalWidth > 0) {
             // 統一照片繪製：圓形剪裁 + 微光
+            // v3.7.2 土星特殊處理：橢圓 clip 容納光環（比例匹配圖片 968:696）
+            const isSaturn = photoEntry.key === 'saturn';
             const radius = size;
+            // 土星橢圓：rx 1.4, ry 1.0（寬高比 1.4 匹配圖片）
+            const saturnRx = radius * 1.4;
+            const saturnRy = radius;
             ctx.save();
             ctx.beginPath();
-            ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+            if (isSaturn) {
+                ctx.ellipse(cx, screenY, saturnRx, saturnRy, 0, 0, Math.PI * 2);
+            } else {
+                ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+            }
             ctx.clip();
-            ctx.drawImage(img, cx - radius, screenY - radius, radius * 2, radius * 2);
+            if (isSaturn) {
+                ctx.drawImage(img, cx - saturnRx, screenY - saturnRy, saturnRx * 2, saturnRy * 2);
+            } else {
+                ctx.drawImage(img, cx - radius, screenY - radius, radius * 2, radius * 2);
+            }
             ctx.restore();
             // 大氣微光（依體型）
             if (size > 30) {
