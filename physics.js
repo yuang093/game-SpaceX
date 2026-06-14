@@ -86,7 +86,7 @@ const MAX_PARTICLES = 300;
 
 // 火箭圖片快取（type → HTMLImageElement）
 const rocketImageCache = {};
-const ROCKET_IMAGE_BASE = 'assets/rockets/';
+const ROCKET_IMAGE_BASE = 'assets/rockets/processed/';
 
 // 行星/天體影像快取
 const planetImages = {};

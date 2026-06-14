@@ -545,22 +545,22 @@ const CONFIG = {
     // 火箭圖片對照表（type → 真實火箭照片 PNG）
     // v3.6 火箭照片化：使用 Wikimedia 真實照片取代 SVG 簡筆畫
     rocketImages: {
-        scout: 'assets/rockets/rocket_scout.png',
-        falcon: 'assets/rockets/rocket_falcon.png',
-        dragon: 'assets/rockets/rocket_dragon.png',
-        heavy: 'assets/rockets/rocket_heavy.png',
-        starship: 'assets/rockets/rocket_starship.png',
-        starship_v2: 'assets/rockets/rocket_starship_v2.png',
-        super_heavy: 'assets/rockets/rocket_super_heavy.png',
-        tanker: 'assets/rockets/rocket_tanker.png',
-        lynx: 'assets/rockets/rocket_lynx.png',
+        scout: 'assets/rockets/processed/rocket_scout.png',
+        falcon: 'assets/rockets/processed/rocket_falcon.png',
+        dragon: 'assets/rockets/processed/rocket_dragon.png',
+        heavy: 'assets/rockets/processed/rocket_heavy.png',
+        starship: 'assets/rockets/processed/rocket_starship.png',
+        starship_v2: 'assets/rockets/processed/rocket_starship_v2.png',
+        super_heavy: 'assets/rockets/processed/rocket_super_heavy.png',
+        tanker: 'assets/rockets/processed/rocket_tanker.png',
+        lynx: 'assets/rockets/processed/rocket_lynx.png',
         // Starship 全系列
-        starship_block1: 'assets/rockets/rocket_starship_block1.png',
-        starship_block2: 'assets/rockets/rocket_starship_block2.png',
-        starship_block3: 'assets/rockets/rocket_starship_block3.png',
-        starship_block4: 'assets/rockets/rocket_starship_block4.png',
-        starship_hls: 'assets/rockets/rocket_starship_hls.png',
-        starship_mars: 'assets/rockets/rocket_starship_mars.png'
+        starship_block1: 'assets/rockets/processed/rocket_starship_block1.png',
+        starship_block2: 'assets/rockets/processed/rocket_starship_block2.png',
+        starship_block3: 'assets/rockets/processed/rocket_starship_block3.png',
+        starship_block4: 'assets/rockets/processed/rocket_starship_block4.png',
+        starship_hls: 'assets/rockets/processed/rocket_starship_hls.png',
+        starship_mars: 'assets/rockets/processed/rocket_starship_mars.png'
     },
 
     // 太空人頭像（依姓名 hash 對應固定 SVG）
@@ -1523,7 +1523,7 @@ const UI = {
             const healthPercent = Math.round((rocket.hull / rocket.maxHull) * 100);
             let healthClass = healthPercent < 30 ? 'critical' : (healthPercent < 60 ? 'damaged' : '');
 
-            const imgSrc = CONFIG.rocketImages[rocket.type] || 'assets/rockets/scout.svg';
+            const imgSrc = CONFIG.rocketImages[rocket.type] || 'assets/rockets/processed/rocket_scout.png';
             const canDelete = GameState.rockets.length > 1;
 
             card.innerHTML = `
@@ -2339,7 +2339,7 @@ function showBuyRocketModal() {
         if (key === 'scout') return;
         const owned = GameState.rockets.some(rock => rock.type === key);
         const canBuy = GameState.credits >= r.basePrice;
-        const imgSrc = CONFIG.rocketImages[key] || 'assets/rockets/scout.svg';
+        const imgSrc = CONFIG.rocketImages[key] || 'assets/rockets/processed/rocket_scout.png';
 
         const item = document.createElement('div');
         item.className = 'shop-item';
