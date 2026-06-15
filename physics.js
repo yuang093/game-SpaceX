@@ -125,6 +125,51 @@ function preloadPlanetImages() {
 }
 
 /**
+ * v3.7.8 統一天體照片渲染（圓形/橢圓 clip）
+ * - 土星特殊處理：橢圓 clip 容納光環（比例 1.4:1 匹配 saturn_real.png）
+ * - 其他天體：圓形 clip
+ * @returns {boolean} true=已用照片繪製, false=無照片（呼叫端需 fallback SVG）
+ */
+function drawBodyPhoto(key, cx, screenY, radius) {
+    const img = planetImages[key];
+    if (!img || !img.complete || img.naturalWidth === 0) return false;
+    const isSaturn = key === 'saturn';
+    const saturnRx = radius * 1.4;
+    const saturnRy = radius;
+    ctx.save();
+    ctx.beginPath();
+    if (isSaturn) {
+        ctx.ellipse(cx, screenY, saturnRx, saturnRy, 0, 0, Math.PI * 2);
+    } else {
+        ctx.arc(cx, screenY, radius, 0, Math.PI * 2);
+    }
+    ctx.clip();
+    if (isSaturn) {
+        ctx.drawImage(img, cx - saturnRx, screenY - saturnRy, saturnRx * 2, saturnRy * 2);
+    } else {
+        ctx.drawImage(img, cx - radius, screenY - radius, radius * 2, radius * 2);
+    }
+    ctx.restore();
+    return true;
+}
+
+/**
+ * v3.7.8 大氣微光（依半徑大小自動調整）
+ */
+function drawAtmosphereGlow(cx, screenY, radius, rgbColor = '150,200,255', intensity = 0.18) {
+    ctx.save();
+    ctx.globalAlpha = intensity;
+    const glow = ctx.createRadialGradient(cx, screenY, radius, cx, screenY, radius + radius * 0.4);
+    glow.addColorStop(0, `rgba(${rgbColor},0.4)`);
+    glow.addColorStop(1, `rgba(${rgbColor},0)`);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, screenY, radius + radius * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+/**
  * 預先載入所有火箭圖片（v3.6 真實火箭照片 PNG）
  * 使用與 CONFIG.rocketImages 一致的 key（底線命名）
  */
@@ -570,29 +615,35 @@ function drawStartingBody() {
     // === 太陽能衛星矩陣（顯示太陽 + 矩陣）===
     if (loc === 'solar_satellite') {
         const screenY = displayY - cameraY;
-        // 太陽（小型）
-        const sunGrad = ctx.createRadialGradient(cx - 200, screenY - 100, 30, cx - 200, screenY - 100, 80);
-        sunGrad.addColorStop(0, '#ffffff');
-        sunGrad.addColorStop(0.3, '#ffee88');
-        sunGrad.addColorStop(0.7, '#ffcc44');
-        sunGrad.addColorStop(1, '#ff8800');
-        ctx.fillStyle = sunGrad;
-        ctx.beginPath();
-        ctx.arc(cx - 200, screenY - 100, 80, 0, Math.PI * 2);
-        ctx.fill();
-        // 太陽光芒
-        ctx.save();
-        ctx.globalAlpha = 0.3;
-        ctx.strokeStyle = '#ffdd66';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 16; i++) {
-            const angle = (i / 16) * Math.PI * 2;
+        // v3.7.8 太陽用真實照片（左上）
+        const sunX = cx - 200;
+        const sunY = screenY - 100;
+        if (drawBodyPhoto('sun', sunX, sunY, 80)) {
+            // 太陽光芒（疊加在照片上）
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            ctx.strokeStyle = '#ffdd66';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(sunX + Math.cos(angle) * 85, sunY + Math.sin(angle) * 85);
+                ctx.lineTo(sunX + Math.cos(angle) * 110, sunY + Math.sin(angle) * 110);
+                ctx.stroke();
+            }
+            ctx.restore();
+        } else {
+            // Fallback：漸層太陽
+            const sunGrad = ctx.createRadialGradient(sunX, sunY, 30, sunX, sunY, 80);
+            sunGrad.addColorStop(0, '#ffffff');
+            sunGrad.addColorStop(0.3, '#ffee88');
+            sunGrad.addColorStop(0.7, '#ffcc44');
+            sunGrad.addColorStop(1, '#ff8800');
+            ctx.fillStyle = sunGrad;
             ctx.beginPath();
-            ctx.moveTo(cx - 200 + Math.cos(angle) * 85, screenY - 100 + Math.sin(angle) * 85);
-            ctx.lineTo(cx - 200 + Math.cos(angle) * 110, screenY - 100 + Math.sin(angle) * 110);
-            ctx.stroke();
+            ctx.arc(sunX, sunY, 80, 0, Math.PI * 2);
+            ctx.fill();
         }
-        ctx.restore();
         // 太陽能板陣列
         ctx.fillStyle = '#1a3a6e';
         for (let i = -2; i <= 2; i++) {
@@ -647,6 +698,11 @@ function drawStartingBody() {
     if (loc === 'jupiter') {
         const screenY = displayY - cameraY;
         const radius = 220;
+        // v3.7.8 優先用真實照片（木星條紋 + 大紅斑自然呈現）
+        if (drawBodyPhoto('jupiter', cx, screenY, radius)) {
+            drawAtmosphereGlow(cx, screenY, radius, '220,180,120', 0.3);
+            return;
+        }
         const jupGrad = ctx.createRadialGradient(cx - 50, screenY - 30, 30, cx, screenY, radius);
         jupGrad.addColorStop(0, '#ffcc88');
         jupGrad.addColorStop(0.6, '#cc8855');
@@ -672,7 +728,12 @@ function drawStartingBody() {
     // === 土星（環）===
     if (loc === 'saturn_ring' || loc === 'titan' || loc === 'enceladus') {
         const screenY = displayY - cameraY;
-        const radius = 180;
+        const radius = 220; // v3.7.8 加大容納光環
+        // v3.7.8 優先用真實照片（土星橢圓 clip 容納光環）
+        if (drawBodyPhoto('saturn', cx, screenY, radius)) {
+            drawAtmosphereGlow(cx, screenY, radius * 1.4, '255,220,160', 0.18);
+            return;
+        }
         // 環
         ctx.strokeStyle = '#ddaa77';
         ctx.lineWidth = 8;
@@ -699,6 +760,11 @@ function drawStartingBody() {
     if (loc === 'europa') {
         const screenY = displayY - cameraY;
         const radius = 160;
+        // v3.7.8 優先用真實照片（歐羅巴冰殼）
+        if (drawBodyPhoto('europa', cx, screenY, radius)) {
+            drawAtmosphereGlow(cx, screenY, radius, '180,210,240', 0.18);
+            return;
+        }
         const grad = ctx.createRadialGradient(cx - 30, screenY - 30, 20, cx + 150, screenY, radius);
         grad.addColorStop(0, '#ccddee');
         grad.addColorStop(0.7, '#88aacc');
@@ -830,7 +896,13 @@ function drawVenus(worldY, scale = 1) {
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
 
-    // 金星厚重雲層
+    // v3.7.8 優先用真實照片（金星厚重大氣）
+    if (drawBodyPhoto('venus', cx, screenY, radius)) {
+        drawAtmosphereGlow(cx, screenY, radius, '255,200,100', 0.22);
+        return;
+    }
+
+    // Fallback：金星厚重雲層
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
     grad.addColorStop(0, '#ffeecc');
     grad.addColorStop(0.4, '#ddaa66');
@@ -875,6 +947,12 @@ function drawMercury(worldY, scale = 1) {
     const radius = 140 * scale;
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // v3.7.8 優先用真實照片（水星隕石坑表面）
+    if (drawBodyPhoto('mercury', cx, screenY, radius)) {
+        drawAtmosphereGlow(cx, screenY, radius, '200,200,200', 0.15);
+        return;
+    }
 
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
     grad.addColorStop(0, '#bbbbbb');
@@ -921,6 +999,12 @@ function drawNeptune(worldY, scale = 1) {
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
 
+    // v3.7.8 優先用真實照片（海王星冰巨星）
+    if (drawBodyPhoto('neptune', cx, screenY, radius)) {
+        drawAtmosphereGlow(cx, screenY, radius, '100,140,255', 0.25);
+        return;
+    }
+
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
     grad.addColorStop(0, '#6688ff');
     grad.addColorStop(0.5, '#3355cc');
@@ -966,6 +1050,12 @@ function drawPluto(worldY, scale = 1) {
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
 
+    // v3.7.8 優先用真實照片（冥王星冰矮星）
+    if (drawBodyPhoto('pluto', cx, screenY, radius)) {
+        drawAtmosphereGlow(cx, screenY, radius, '180,160,140', 0.12);
+        return;
+    }
+
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
     grad.addColorStop(0, '#ddccaa');
     grad.addColorStop(0.5, '#aa8866');
@@ -1005,6 +1095,12 @@ function drawCeres(worldY, scale = 1) {
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
 
+    // v3.7.8 優先用真實照片（穀神星）
+    if (drawBodyPhoto('ceres', cx, screenY, radius)) {
+        drawAtmosphereGlow(cx, screenY, radius, '180,170,150', 0.12);
+        return;
+    }
+
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
     grad.addColorStop(0, '#aaaaaa');
     grad.addColorStop(1, '#555555');
@@ -1042,6 +1138,12 @@ function drawTitan(worldY, scale = 1) {
     const radius = 180 * scale;
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // v3.7.8 優先用真實照片（土衛六泰坦）
+    if (drawBodyPhoto('titan', cx, screenY, radius)) {
+        drawAtmosphereGlow(cx, screenY, radius, '220,160,80', 0.3);
+        return;
+    }
 
     // 土衛六本體（橙褐色厚重大氣）
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
@@ -1088,6 +1190,28 @@ function drawEnceladus(worldY, scale = 1) {
     const radius = 130 * scale;
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // v3.7.8 優先用真實照片（土衛二）
+    if (drawBodyPhoto('enceladus', cx, screenY, radius)) {
+        // 保留水噴射柱（動畫）疊加在照片上
+        const time = Date.now() * 0.002;
+        const jetHeight = 40 + Math.sin(time) * 10;
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        const jetGrad = ctx.createLinearGradient(cx, screenY - radius, cx, screenY - radius - jetHeight);
+        jetGrad.addColorStop(0, 'rgba(200, 230, 255, 0.8)');
+        jetGrad.addColorStop(1, 'rgba(200, 230, 255, 0)');
+        ctx.fillStyle = jetGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx - 5, screenY - radius);
+        ctx.lineTo(cx - 15, screenY - radius - jetHeight);
+        ctx.lineTo(cx + 15, screenY - radius - jetHeight);
+        ctx.lineTo(cx + 5, screenY - radius);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        return;
+    }
 
     // 土衛二本體（冰白色）
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
@@ -1138,6 +1262,33 @@ function drawKuiper(worldY, scale = 1) {
     const radius = 150 * scale;
 
     if (screenY + radius < -100 || screenY - radius > canvasHeight + 100) return;
+
+    // v3.7.8 優先用真實照片（古柏帶天體，用冥王星代表）
+    if (drawBodyPhoto('pluto', cx, screenY, radius)) {
+        drawAtmosphereGlow(cx, screenY, radius, '180,160,140', 0.12);
+        // 周圍小岩石（保留古柏帶氛圍）
+        const rocks = [[-100, -60, 15], [110, -40, 12], [-80, 70, 10], [90, 60, 8]];
+        ctx.fillStyle = 'rgba(120, 100, 140, 0.7)';
+        rocks.forEach(([rx, ry, rr]) => {
+            ctx.beginPath();
+            ctx.arc(cx + rx, screenY + ry, rr, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        // 深空星光背景
+        ctx.save();
+        const time = Date.now() * 0.001;
+        const kStars = [[-200, -100], [250, -50], [-180, 150], [220, 180], [-100, 250]];
+        kStars.forEach(([sx, sy], i) => {
+            const twinkle = Math.sin(time * 2 + i) * 0.3 + 0.5;
+            ctx.globalAlpha = twinkle;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(cx + sx, screenY + sy, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.restore();
+        return;
+    }
 
     // 古柏帶天體本體
     const grad = ctx.createRadialGradient(cx - radius * 0.3, screenY - radius * 0.3, 0, cx, screenY, radius);
